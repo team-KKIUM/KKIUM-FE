@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${nanumSquare.variable} h-full antialiased`}>
+    <html lang="ko" className={`${nanumSquare.className} h-full antialiased`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

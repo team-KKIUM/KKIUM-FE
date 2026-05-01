@@ -8,7 +8,7 @@ const preview: Preview = {
     (Story) =>
       React.createElement(
         'div',
-        { className: `${nanumSquare.variable} h-full antialiased` },
+        { className: `${nanumSquare.className} h-full antialiased` },
         React.createElement(Story),
       ),
   ],
