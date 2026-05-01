@@ -1,33 +1,6 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
+import { nanumSquare } from './fonts';
 import './globals.css';
-
-const nanumSquare = localFont({
-  src: [
-    {
-      path: '../assets/fonts/NanumSquareL.ttf',
-      weight: '300',
-      style: 'normal',
-    },
-    {
-      path: '../assets/fonts/NanumSquareR.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../assets/fonts/NanumSquareB.ttf',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: '../assets/fonts/NanumSquareEB.ttf',
-      weight: '800',
-      style: 'normal',
-    },
-  ],
-  display: 'swap',
-  variable: '--font-nanum-square',
-});
 
 export const metadata: Metadata = {
   title: 'Create Next App',
