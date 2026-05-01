@@ -139,6 +139,13 @@
   --color-shadow-weak: #2121211a;
   --color-shadow-medium: #2121212e;
   --color-shadow-tiny: #2121211a;
+  --shadow-2xs: 0px 1px 0px 0px #00000000;
+  --shadow-xs: 0px 1px 2px 0px #00000000;
+  --shadow-sm: 0px 1px 3px 0px #0000001a, 0px 1px 2px -1px #0000001a;
+  --shadow-md: 0px 4px 6px -1px #0000001a, 0px 2px 4px -2px #0000001a;
+  --shadow-lg: 0px 10px 15px -3px #0000001a, 0px 4px 6px -4px #0000001a;
+  --shadow-xl: 0px 20px 25px -5px #0000001a, 0px 8px 10px -6px #0000001a;
+  --shadow-2xl: 0px 25px 50px -12px #0000001a;
 
   /* Text */
   --color-text-strong: var(--color-gray-900);
