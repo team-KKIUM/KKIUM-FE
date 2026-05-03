@@ -99,11 +99,13 @@ export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProp
         </nav>
       </div>
 
-      <SidebarNavItem
-        item={defaultSettingsItem}
-        collapsed={collapsed}
-        active={isSidebarItemActive(defaultSettingsItem, pathname)}
-      />
+      <nav aria-label="설정">
+        <SidebarNavItem
+          item={defaultSettingsItem}
+          collapsed={collapsed}
+          active={isSidebarItemActive(defaultSettingsItem, pathname)}
+        />
+      </nav>
     </aside>
   );
 }
