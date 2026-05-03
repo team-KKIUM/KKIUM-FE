@@ -1,6 +1,17 @@
+import React from 'react';
 import type { Preview } from '@storybook/nextjs-vite';
+import { nanumSquare } from '../src/app/fonts';
+import '../src/app/globals.css';
 
 const preview: Preview = {
+  decorators: [
+    (Story) =>
+      React.createElement(
+        'div',
+        { className: `${nanumSquare.className} h-full antialiased` },
+        React.createElement(Story),
+      ),
+  ],
   parameters: {
     controls: {
       matchers: {
