@@ -17,15 +17,19 @@ export function SearchBar({
   defaultValue,
   onChange,
   onClear,
+  onFocus,
+  onBlur,
   placeholder = '경험을 검색해주세요',
   disabled,
   readOnly,
   ...props
 }: SearchBarProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = React.useState(false);
   const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue?.toString() ?? '');
   const currentValue = value?.toString() ?? uncontrolledValue;
   const hasValue = currentValue.length > 0;
+  const showSearchIcon = !hasValue && !focused;
   const canClear = hasValue && !disabled && !readOnly;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -34,6 +38,16 @@ export function SearchBar({
     }
 
     onChange?.(event);
+  }
+
+  function handleFocus(event: React.FocusEvent<HTMLInputElement>) {
+    setFocused(true);
+    onFocus?.(event);
+  }
+
+  function handleBlur(event: React.FocusEvent<HTMLInputElement>) {
+    setFocused(false);
+    onBlur?.(event);
   }
 
   function handleClear() {
@@ -56,12 +70,14 @@ export function SearchBar({
         className,
       )}
     >
-      {!hasValue && <SearchIcon className="size-8 shrink-0 p-1 text-tertiary" />}
+      {showSearchIcon && <SearchIcon className="size-8 shrink-0 p-1 text-tertiary" />}
       <input
         ref={inputRef}
         type="text"
         value={currentValue}
         onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         placeholder={placeholder}
         disabled={disabled}
         readOnly={readOnly}
