@@ -6,7 +6,7 @@ import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export interface ExperiencePageHeaderProps extends React.ComponentProps<'section'> {
+export interface ExperiencePageHeaderProps extends React.ComponentProps<'header'> {
   selectedCategory: ExperienceCategory;
   onCategoryChange?: (category: ExperienceCategory) => void;
   onAddExperience?: React.MouseEventHandler<HTMLButtonElement>;
