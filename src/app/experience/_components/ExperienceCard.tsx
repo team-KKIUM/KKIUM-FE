@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 import type { ExperienceCategory } from './ExperienceCategoryTab';
 
 const experienceCardVariants = cva(
-  'flex flex-col gap-2 justify-between overflow-hidden rounded-xl border border-border-default bg-background-w px-[18px] py-5 transition-shadow hover:shadow-lg focus-visible:shadow-focus-ring focus-visible:outline-none',
+  'flex w-full flex-col justify-between gap-2 overflow-hidden rounded-xl border border-border-default bg-background-w px-[18px] py-5 transition-shadow hover:shadow-lg focus-visible:shadow-focus-ring focus-visible:outline-none',
   {
     variants: {
       size: {
-        small: 'w-[336px]',
-        default: 'w-[494px]',
-        large: 'w-[644px]',
+        small: 'max-w-[336px]',
+        default: 'max-w-[494px]',
+        large: 'max-w-[644px]',
       },
       selected: {
         true: 'shadow-[0_0_0_3px_var(--color-mint-main)]',
