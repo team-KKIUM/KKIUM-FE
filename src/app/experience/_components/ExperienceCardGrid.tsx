@@ -16,13 +16,13 @@ export interface ExperienceItem {
 export interface ExperienceCardGridProps extends React.ComponentProps<'div'> {
   experiences: ExperienceItem[];
   selectedExperienceId?: string;
-  //  onExperienceClick?: (experience: ExperienceItem) => void;
+  onExperienceClick?: (experience: ExperienceItem) => void;
 }
 
 export function ExperienceCardGrid({
   experiences,
   selectedExperienceId,
-  // onExperienceClick,
+  onExperienceClick,
   className,
   ...props
 }: ExperienceCardGridProps) {
@@ -42,7 +42,7 @@ export function ExperienceCardGrid({
           competencyTags={experience.competencyTags}
           selected={selectedExperienceId === experience.id}
           className="max-w-none"
-          //  onClick={() => onExperienceClick?.(experience)}
+          onClick={() => onExperienceClick?.(experience)}
         />
       ))}
     </div>
