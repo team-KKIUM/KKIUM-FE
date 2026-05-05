@@ -107,8 +107,8 @@ function TagRow({
 
   return (
     <div className="flex items-center gap-1">
-      {tags.map((tag) => (
-        <Tag key={tag} tone={tone}>
+      {tags.map((tag, index) => (
+        <Tag key={`${tag}-${index}`} tone={tone}>
           {tag}
         </Tag>
       ))}
