@@ -29,7 +29,7 @@ export function ExperienceCardGrid({
   return (
     <div
       data-slot="experience-card-grid"
-      className={cn('grid w-full grid-cols-3 gap-x-4 gap-y-5', className)}
+      className={cn('grid w-full grid-cols-2 gap-x-4 gap-y-5 min-[1720px]:grid-cols-3', className)}
       {...props}
     >
       {experiences.map((experience) => (
