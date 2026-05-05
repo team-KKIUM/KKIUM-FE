@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import type { ExperienceCategory } from './ExperienceCategoryTab';
 
 const experienceCardVariants = cva(
-  'flex w-full flex-col justify-between gap-2 overflow-hidden rounded-xl border border-border-default bg-background-w px-[18px] py-5 transition-shadow hover:shadow-lg focus-visible:shadow-focus-ring focus-visible:outline-none',
+  'flex w-full cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded-xl border border-border-default bg-background-w px-[18px] py-5 transition-shadow hover:shadow-lg focus-visible:shadow-focus-ring focus-visible:outline-none',
   {
     variants: {
       size: {
