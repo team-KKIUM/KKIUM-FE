@@ -13,7 +13,7 @@ export function ExperienceTopBar({ className, ...props }: ExperienceTopBarProps)
       {...props}
     >
       <SearchBar
-        className="w-[551px]"
+        className="w-full max-w-[551px]"
         placeholder="경험 제목, 기술 태그, 역량 태그를 검색해주세요"
       />
       <button
