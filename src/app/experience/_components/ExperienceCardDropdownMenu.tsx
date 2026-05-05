@@ -20,13 +20,14 @@ export interface ExperienceCardDropdownMenuProps extends React.ComponentProps<ty
 }
 
 export function ExperienceCardDropdownMenu({
+  modal = false,
   onEditTitle,
   onDelete,
   triggerClassName,
   ...props
 }: ExperienceCardDropdownMenuProps) {
   return (
-    <DropdownMenu {...props}>
+    <DropdownMenu modal={modal} {...props}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
