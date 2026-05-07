@@ -46,7 +46,7 @@ const defaultSecondaryItems: SidebarItem[] = [
   {
     label: '경험 관리',
     icon: ExperienceIcon,
-    href: '#',
+    href: '/experience',
   },
   {
     label: '지원 관리',
@@ -91,11 +91,7 @@ export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProp
             pathname={pathname}
             withBorder
           />
-          <SidebarSection
-            collapsed={collapsed}
-            items={defaultSecondaryItems}
-            pathname={pathname}
-          />
+          <SidebarSection collapsed={collapsed} items={defaultSecondaryItems} pathname={pathname} />
         </nav>
       </div>
 

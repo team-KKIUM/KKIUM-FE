@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       <Sidebar collapsed={collapsed} />
       <main
-        className={cn('min-h-[calc(100vh-32px)] min-w-0', collapsed ? 'ml-[89px]' : 'ml-[268px]')}
+        className={cn('min-h-[calc(100vh-32px)] min-w-0', collapsed ? 'ml-[73px]' : 'ml-[252px]')}
       >
         {children}
       </main>
