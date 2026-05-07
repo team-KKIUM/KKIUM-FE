@@ -55,11 +55,28 @@ export function ExperienceDetailPanel({
   experience,
   onClose,
   className,
+  onKeyDown,
   ...props
 }: ExperienceDetailPanelProps) {
   const category = categoryMap[experience.type];
+  const titleId = React.useId();
   const [detail, setDetail] = React.useState(experience.detail);
+  const panelRef = React.useRef<HTMLElement>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const previousExperienceIdRef = React.useRef(experience.id);
+
+  React.useEffect(() => {
+    const previousFocusedElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    closeButtonRef.current?.focus();
+
+    return () => {
+      if (previousFocusedElement?.isConnected) {
+        previousFocusedElement.focus();
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     // 같은 경험을 편집 중일 때 부모 렌더로 입력값이 초기화되지 않도록 id 변경만 추적
@@ -94,20 +111,72 @@ export function ExperienceDetailPanel({
       }));
     };
 
+  const handlePanelKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
+    onKeyDown?.(event);
+
+    if (event.defaultPrevented || event.key !== 'Tab') {
+      return;
+    }
+
+    const panel = panelRef.current;
+
+    if (!panel) {
+      return;
+    }
+
+    const focusableElements = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      panel.focus();
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    const activeElement = document.activeElement;
+
+    if (event.shiftKey) {
+      if (activeElement === firstElement || !panel.contains(activeElement)) {
+        event.preventDefault();
+        lastElement.focus();
+      }
+
+      return;
+    }
+
+    if (activeElement === lastElement || !panel.contains(activeElement)) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  };
+
   return (
     <aside
+      ref={panelRef}
       data-slot="experience-detail-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      tabIndex={-1}
       className={cn(
         'fixed top-0 right-0 z-40 flex h-screen w-full max-w-[500px] flex-col bg-background-w px-6 pt-8 shadow-2xl',
         className,
       )}
+      onKeyDown={handlePanelKeyDown}
       {...props}
     >
       <div className="flex flex-col gap-4 border-b border-gray-300 pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-5">
             <div className="flex min-w-0 flex-col gap-1">
-              <h2 className="truncate heading-2-bold text-strong">{experience.title}</h2>
+              <h2 id={titleId} className="truncate heading-2-bold text-strong">
+                {experience.title}
+              </h2>
               <p className="truncate body-3-regular text-quaternary">{experience.description}</p>
             </div>
 
@@ -129,6 +198,7 @@ export function ExperienceDetailPanel({
           </div>
 
           <button
+            ref={closeButtonRef}
             type="button"
             aria-label="경험 상세 패널 닫기"
             className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-gray-100 text-tertiary"
