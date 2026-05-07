@@ -64,6 +64,20 @@ export function ExperienceDetailPanel({
     setDetail(experience.detail);
   }, [experience]);
 
+  React.useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapeKey);
+
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [onClose]);
+
   const handleDetailChange =
     (key: keyof ExperienceItem['detail']): React.ChangeEventHandler<HTMLTextAreaElement> =>
     (event) => {
