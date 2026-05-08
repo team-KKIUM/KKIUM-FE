@@ -25,7 +25,7 @@ function Modal({ children, contentClassName, showCloseButton = false, ...props }
       <DialogContent
         className={cn(
           'flex w-[calc(100vw-var(--app-content-left,0px)-32px)] max-w-[864px] flex-col items-end justify-end gap-6 overflow-hidden rounded-xl border border-border-default bg-background-w px-[30px] py-5 text-strong ring-0 sm:max-w-[864px]',
-          'left-[calc(var(--app-content-left,0px)+(100vw-var(--app-content-left,0px))/2)]',
+          'left-[calc((var(--app-content-left,0px)+100vw)/2)]',
           contentClassName,
         )}
       >
