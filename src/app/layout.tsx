@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${nanumSquare.className} h-full antialiased`}>
-      <body className="min-h-full p-4">
+      <body className="min-h-full">
         <AppShell>{children}</AppShell>
       </body>
     </html>
