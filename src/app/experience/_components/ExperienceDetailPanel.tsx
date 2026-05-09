@@ -48,11 +48,13 @@ export interface ExperienceDetailPanelProps extends Omit<
   'children'
 > {
   experience: ExperienceItem;
+  open: boolean;
   onClose: () => void;
 }
 
 export function ExperienceDetailPanel({
   experience,
+  open,
   onClose,
   className,
   onKeyDown,
@@ -64,19 +66,35 @@ export function ExperienceDetailPanel({
   const panelRef = React.useRef<HTMLElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const previousExperienceIdRef = React.useRef(experience.id);
+  const [entered, setEntered] = React.useState(false);
+
+  React.useEffect(() => {
+    if (open) {
+      setEntered(false);
+      const id = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setEntered(true));
+      });
+
+      return () => cancelAnimationFrame(id);
+    }
+
+    setEntered(false);
+  }, [open]);
 
   React.useEffect(() => {
     const previousFocusedElement =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-    closeButtonRef.current?.focus();
+    if (open) {
+      closeButtonRef.current?.focus();
+    }
 
     return () => {
       if (previousFocusedElement?.isConnected) {
         previousFocusedElement.focus();
       }
     };
-  }, []);
+  }, [open]);
 
   React.useEffect(() => {
     // 같은 경험을 편집 중일 때 부모 렌더로 입력값이 초기화되지 않도록 id 변경만 추적
@@ -95,12 +113,14 @@ export function ExperienceDetailPanel({
       }
     };
 
-    window.addEventListener('keydown', handleEscapeKey);
+    if (open) {
+      window.addEventListener('keydown', handleEscapeKey);
+    }
 
     return () => {
       window.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [onClose]);
+  }, [onClose, open]);
 
   const handleDetailChange =
     (key: keyof ExperienceItem['detail']): React.ChangeEventHandler<HTMLTextAreaElement> =>
@@ -165,6 +185,8 @@ export function ExperienceDetailPanel({
       tabIndex={-1}
       className={cn(
         'fixed top-0 right-0 z-40 flex h-dvh w-full max-w-[500px] flex-col bg-background-w px-6 pt-8 shadow-2xl',
+        'transition-transform duration-300 ease-out will-change-transform',
+        open && entered ? 'translate-x-0' : 'translate-x-full',
         className,
       )}
       onKeyDown={handlePanelKeyDown}

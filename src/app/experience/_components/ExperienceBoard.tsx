@@ -19,6 +19,16 @@ export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
 export function ExperienceBoard({ experiences, className, ...props }: ExperienceBoardProps) {
   const [selectedCategory, setSelectedCategory] = React.useState<ExperienceCategory>('all');
   const [selectedExperienceId, setSelectedExperienceId] = React.useState<string>();
+  const [panelOpen, setPanelOpen] = React.useState(false);
+  const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const filteredExperiences =
     selectedCategory === 'all'
@@ -30,8 +40,36 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
   );
 
   const handleCategoryChange = (category: ExperienceCategory) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
     setSelectedCategory(category);
     setSelectedExperienceId(undefined);
+    setPanelOpen(false);
+  };
+
+  const handleExperienceSelect = (experience: ExperienceItem) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setSelectedExperienceId(experience.id);
+    setPanelOpen(true);
+  };
+
+  const handlePanelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
+    setPanelOpen(false);
+    closeTimerRef.current = setTimeout(() => {
+      setSelectedExperienceId(undefined);
+      closeTimerRef.current = null;
+    }, 300);
   };
 
   return (
@@ -48,7 +86,7 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
         <ExperienceCardGrid
           experiences={filteredExperiences}
           selectedExperienceId={selectedExperienceId}
-          onExperienceClick={(experience) => setSelectedExperienceId(experience.id)}
+          onExperienceClick={handleExperienceSelect}
         />
       ) : (
         <div className="flex flex-1 items-center justify-center">
@@ -62,7 +100,8 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
       {selectedExperience && (
         <ExperienceDetailPanel
           experience={selectedExperience}
-          onClose={() => setSelectedExperienceId(undefined)}
+          open={panelOpen}
+          onClose={handlePanelClose}
         />
       )}
     </section>
