@@ -1,4 +1,4 @@
-import { ApplyCard } from './_components/ApplyCard';
+import { ApplyListSection } from './_components/ApplyListSection';
 import { NullList } from './_components/NullList';
 import { applyListMockData } from './_constants/applyListMockData';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
@@ -26,18 +26,7 @@ export default function ApplyListPage() {
         </div>
 
         {hasCards ? (
-          <div className="grid grid-cols-2 gap-5">
-            {applyListMockData.map((card) => (
-              <ApplyCard
-                key={card.id}
-                applyTitle={card.title}
-                companyName={card.companyName}
-                jobField={card.jobField}
-                period={card.period}
-                className="max-w-none"
-              />
-            ))}
-          </div>
+          <ApplyListSection cards={applyListMockData} />
         ) : (
           <NullList />
         )}

@@ -12,6 +12,8 @@ export interface ApplyCardProps extends React.ComponentProps<'article'> {
   jobField: string;
   period: string;
   actionLabel?: string;
+  selected?: boolean;
+  onMenuClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export function ApplyCard({
@@ -20,14 +22,19 @@ export function ApplyCard({
   jobField,
   period,
   actionLabel = '지원서 작성하기',
+  selected = false,
+  onMenuClick,
   className,
   ...props
 }: ApplyCardProps) {
   return (
     <article
       data-slot="apply-card"
+      data-state={selected ? 'selected' : 'default'}
       className={cn(
         'flex h-60 w-full max-w-[494px] flex-col justify-between gap-7 overflow-hidden rounded-xl border border-border-default bg-background-w px-5 py-7',
+        selected &&
+          'shadow-[0px_0px_0px_3px_rgba(114,224,206,1.00)] outline-1 outline-offset-[-1px] outline-border-default',
         className,
       )}
       {...props}
@@ -71,6 +78,10 @@ export function ApplyCard({
             type="button"
             aria-label="카드 메뉴"
             className="flex size-8 shrink-0 items-center justify-center rounded bg-background-w text-gray-main"
+            onClick={(event) => {
+              event.stopPropagation();
+              onMenuClick?.(event);
+            }}
           >
             <MoreVerticalIcon className="size-6" />
           </button>
