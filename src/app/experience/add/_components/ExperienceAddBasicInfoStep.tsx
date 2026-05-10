@@ -3,91 +3,17 @@
 import { type ReactNode, useState } from 'react';
 
 import { ExperienceTypeOptionCard } from '@/app/experience/add/_components/ExperienceTypeOptionCard';
+import {
+  EXPERIENCE_TYPE_FIELD_GROUPS,
+  EXPERIENCE_TYPE_OPTIONS,
+  type ExperienceType,
+} from '@/app/experience/add/_constants/experienceTypeOptions';
 import { TextField } from '@/components/common/TextField';
-
-const EXPERIENCE_TYPE_OPTIONS = [
-  {
-    value: 'activity',
-    label: '학내외활동',
-    defaultIconSrc: '/activity-default.svg',
-    selectedIconSrc: '/activity-selected.svg',
-  },
-  {
-    value: 'career',
-    label: '인턴/직무경력',
-    defaultIconSrc: '/career-default.svg',
-    selectedIconSrc: '/career-selected.svg',
-  },
-  {
-    value: 'education',
-    label: '수강/교육',
-    defaultIconSrc: '/education-default.svg',
-    selectedIconSrc: '/education-selected.svg',
-  },
-  {
-    value: 'etc',
-    label: '기타',
-    defaultIconSrc: '/etc-default.svg',
-    selectedIconSrc: '/etc-selected.svg',
-  },
-] as const;
-
-type ExperienceType = (typeof EXPERIENCE_TYPE_OPTIONS)[number]['value'];
-
-const EXPERIENCE_TYPE_FIELD_SECTIONS: Record<ExperienceType, ReactNode> = {
-  activity: (
-    <>
-      <QuestionField number="02." label="제목" placeholder="제목을 작성해주세요." />
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField number="03." label="팀원 수" placeholder="예시 : 5" />
-        <QuestionFieldGroup number="04." label="내 역할 및 기여도">
-          <div className="grid w-full grid-cols-2 gap-2.5">
-            <TextField placeholder="기획자" description={false} />
-            <TextField placeholder="20%" description={false} />
-          </div>
-        </QuestionFieldGroup>
-      </div>
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField number="05." label="시작 날짜" variant="date" />
-        <QuestionField number="06." label="종료 날짜" variant="date" />
-      </div>
-    </>
-  ),
-  career: (
-    <>
-      <QuestionField number="02." label="제목" placeholder="제목을 작성해주세요." />
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField
-          number="03."
-          label="회사/기관/단체명"
-          placeholder="회사/기관/단체명을 입력해주세요."
-        />
-        <QuestionField number="04." label="고용 형태" placeholder="고용 형태를 선택해주세요" />
-      </div>
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField number="05." label="시작 날짜" variant="date" />
-        <QuestionField number="06." label="종료 날짜" variant="date" />
-      </div>
-    </>
-  ),
-  education: (
-    <>
-      <QuestionField number="02." label="제목" placeholder="제목을 작성해주세요." />
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField number="03." label="기관명" placeholder="교육기관명을 입력해주세요." />
-        <QuestionField number="04." label="수강명" placeholder="수강명을 입력해주세요." />
-      </div>
-      <div className="grid w-full grid-cols-2 gap-4">
-        <QuestionField number="05." label="시작 날짜" variant="date" />
-        <QuestionField number="06." label="종료 날짜" variant="date" />
-      </div>
-    </>
-  ),
-  etc: null,
-};
+import { cn } from '@/lib/utils';
 
 export function ExperienceAddBasicInfoStep() {
   const [selectedType, setSelectedType] = useState<ExperienceType | null>(null);
+  const selectedFieldGroups = selectedType ? EXPERIENCE_TYPE_FIELD_GROUPS[selectedType] : [];
 
   return (
     <section
@@ -125,42 +51,54 @@ export function ExperienceAddBasicInfoStep() {
         </div>
       </div>
 
-      {selectedType && EXPERIENCE_TYPE_FIELD_SECTIONS[selectedType] && (
-        <div className="flex w-full flex-col gap-7">{EXPERIENCE_TYPE_FIELD_SECTIONS[selectedType]}</div>
+      {selectedFieldGroups.length > 0 && (
+        <div className="grid w-full grid-cols-2 gap-x-4 gap-y-7">
+          {selectedFieldGroups.map((fieldGroup) => (
+            <QuestionFieldGroup
+              key={fieldGroup.number}
+              number={fieldGroup.number}
+              label={fieldGroup.label}
+              className={fieldGroup.number === '02.' ? 'col-span-2' : undefined}
+            >
+              {fieldGroup.fields.length > 1 ? (
+                <div className="grid w-full grid-cols-2 gap-2.5">
+                  {fieldGroup.fields.map((field, index) => (
+                    <TextField
+                      key={`${fieldGroup.number}-${index}`}
+                      variant={field.variant}
+                      placeholder={field.placeholder}
+                      description={false}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <TextField
+                  variant={fieldGroup.fields[0]?.variant}
+                  placeholder={fieldGroup.fields[0]?.placeholder}
+                  description={false}
+                />
+              )}
+            </QuestionFieldGroup>
+          ))}
+        </div>
       )}
     </section>
-  );
-}
-
-function QuestionField({
-  number,
-  label,
-  placeholder,
-  variant,
-}: {
-  number: string;
-  label: string;
-  placeholder?: string;
-  variant?: 'input' | 'date';
-}) {
-  return (
-    <QuestionFieldGroup number={number} label={label}>
-      <TextField variant={variant} placeholder={placeholder} description={false} />
-    </QuestionFieldGroup>
   );
 }
 
 function QuestionFieldGroup({
   number,
   label,
+  className,
   children,
 }: {
   number: string;
   label: string;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className={cn('flex w-full flex-col gap-4', className)}>
       <div className="flex items-start gap-0.5 title-2-bold">
         <span className="text-mint-300">{number}</span>
         <span className="text-strong">{label}</span>
