@@ -1,3 +1,4 @@
+import { ExperienceAddUploadStep } from '@/app/experience/add/_components/ExperienceAddUploadStep';
 import { EXPERIENCE_ADD_STEPS } from '@/app/experience/add/_constants/experienceAddSteps';
 
 interface ExperienceAddStepContentProps {
@@ -6,6 +7,10 @@ interface ExperienceAddStepContentProps {
 
 export function ExperienceAddStepContent({ currentStepIndex }: ExperienceAddStepContentProps) {
   const currentStep = EXPERIENCE_ADD_STEPS[currentStepIndex] ?? EXPERIENCE_ADD_STEPS[0];
+
+  if (currentStepIndex === 0) {
+    return <ExperienceAddUploadStep />;
+  }
 
   return (
     <section
