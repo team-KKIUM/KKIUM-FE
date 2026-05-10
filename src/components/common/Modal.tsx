@@ -17,7 +17,7 @@ export interface ModalProps extends Omit<React.ComponentProps<typeof Dialog>, 'c
   children: React.ReactNode;
   contentClassName?: string;
   showCloseButton?: boolean;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }
 
 function Modal({
