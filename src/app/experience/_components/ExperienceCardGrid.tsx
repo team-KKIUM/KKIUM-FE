@@ -8,9 +8,21 @@ export interface ExperienceItem {
   id: string;
   type: Exclude<ExperienceCategory, 'all'>;
   title: string;
+  description: string;
   period: string;
+  detailInfo: {
+    label: string;
+    value: string;
+  }[];
   skillTags: string[];
   competencyTags: string[];
+  detail: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+    taken: string;
+  };
 }
 
 export interface ExperienceCardGridProps extends React.ComponentProps<'div'> {

@@ -8,6 +8,7 @@ import {
 } from '@/app/experience/_components/ExperienceCardGrid';
 import type { ExperienceCategory } from '@/app/experience/_components/ExperienceCategoryTab';
 import { ExperienceCategoryTabs } from '@/app/experience/_components/ExperienceCategoryTabs';
+import { ExperienceDetailPanel } from '@/app/experience/_components/ExperienceDetailPanel';
 import { EmptyState } from '@/components/common/EmptyState';
 import { cn } from '@/lib/utils';
 
@@ -17,11 +18,59 @@ export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
 
 export function ExperienceBoard({ experiences, className, ...props }: ExperienceBoardProps) {
   const [selectedCategory, setSelectedCategory] = React.useState<ExperienceCategory>('all');
+  const [selectedExperienceId, setSelectedExperienceId] = React.useState<string>();
+  const [panelOpen, setPanelOpen] = React.useState(false);
+  const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const filteredExperiences =
     selectedCategory === 'all'
       ? experiences
       : experiences.filter((experience) => experience.type === selectedCategory);
+
+  const selectedExperience = filteredExperiences.find(
+    (experience) => experience.id === selectedExperienceId,
+  );
+
+  const handleCategoryChange = (category: ExperienceCategory) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setSelectedCategory(category);
+    setSelectedExperienceId(undefined);
+    setPanelOpen(false);
+  };
+
+  const handleExperienceSelect = (experience: ExperienceItem) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setSelectedExperienceId(experience.id);
+    setPanelOpen(true);
+  };
+
+  const handlePanelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
+    setPanelOpen(false);
+    closeTimerRef.current = setTimeout(() => {
+      setSelectedExperienceId(undefined);
+      closeTimerRef.current = null;
+    }, 300);
+  };
 
   return (
     <section
@@ -31,10 +80,14 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
     >
       <ExperienceCategoryTabs
         selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
+        onCategoryChange={handleCategoryChange}
       />
       {filteredExperiences.length > 0 ? (
-        <ExperienceCardGrid experiences={filteredExperiences} />
+        <ExperienceCardGrid
+          experiences={filteredExperiences}
+          selectedExperienceId={selectedExperienceId}
+          onExperienceClick={handleExperienceSelect}
+        />
       ) : (
         <div className="flex flex-1 items-center justify-center">
           <EmptyState
@@ -43,6 +96,13 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
             illustrationLabel="등록된 경험이 없습니다"
           />
         </div>
+      )}
+      {selectedExperience && (
+        <ExperienceDetailPanel
+          experience={selectedExperience}
+          open={panelOpen}
+          onClose={handlePanelClose}
+        />
       )}
     </section>
   );

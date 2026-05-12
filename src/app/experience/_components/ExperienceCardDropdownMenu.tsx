@@ -36,6 +36,8 @@ export function ExperienceCardDropdownMenu({
             'flex size-8 cursor-pointer items-center justify-center text-gray-main',
             triggerClassName,
           )}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
         >
           <MoreVerticalIcon className="size-6" />
         </button>
