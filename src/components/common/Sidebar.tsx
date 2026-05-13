@@ -110,7 +110,9 @@ function SidebarSection({
   }
 
   return (
-    <div className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-gray-300')}>
+    <div
+      className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-border-bold')}
+    >
       {items.map((item) => (
         <SidebarNavItem
           key={item.label}
