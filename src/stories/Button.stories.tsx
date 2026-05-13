@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'line'],
+      options: ['default', 'secondary', 'fill', 'line'],
     },
     size: {
       control: 'select',
@@ -38,7 +38,7 @@ export const StateMatrix: Story = {
     <div className="flex flex-col gap-8 p-6">
       <ButtonRow title="Default">
         <Button leftIcon={<PlusIcon />}>경험 추가</Button>
-        <Button className="bg-mint-main text-strong shadow-sm" leftIcon={<PlusIcon />}>
+        <Button className="bg-gray-800 shadow-sm" leftIcon={<PlusIcon />}>
           경험 추가
         </Button>
         <Button className="bg-background-b text-on-fill shadow-focus-ring" leftIcon={<PlusIcon />}>
@@ -97,6 +97,21 @@ export const StateMatrix: Story = {
           경험 추가
         </Button>
         <Button variant="line" disabled leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+      </ButtonRow>
+
+      <ButtonRow title="Fill">
+        <Button variant="fill" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="fill" className="bg-mint-100 shadow-sm" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="fill" className="bg-mint-50 shadow-focus-ring" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="fill" disabled leftIcon={<PlusIcon />}>
           경험 추가
         </Button>
       </ButtonRow>
