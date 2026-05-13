@@ -51,6 +51,15 @@ export const StateMatrix: Story = {
       </div>
 
       <div className="flex items-center gap-2">
+        <Tag tone="skill" removable>
+          기술
+        </Tag>
+        <Tag tone="competency" removable>
+          역량
+        </Tag>
+      </div>
+
+      <div className="flex items-center gap-2">
         <Tag tone="skill" size="large">
           기술
         </Tag>
