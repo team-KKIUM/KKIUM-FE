@@ -64,7 +64,7 @@ export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProp
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 flex h-dvh flex-col justify-between overflow-x-hidden overflow-y-auto border-r border-border-default bg-background-w py-[26px]',
+        'fixed top-0 left-0 flex h-dvh flex-col justify-between overflow-hidden border-r border-border-default bg-background-w py-[26px]',
         collapsed ? 'w-[73px] px-3' : 'w-[252px] px-6',
       )}
     >
@@ -110,9 +110,7 @@ function SidebarSection({
   }
 
   return (
-    <div
-      className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-border-bold')}
-    >
+    <div className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-gray-300')}>
       {items.map((item) => (
         <SidebarNavItem
           key={item.label}
