@@ -7,8 +7,8 @@ import { CoverLetterIcon } from '@/components/common/icons/CoverLetterIcon';
 import { ExperienceIcon } from '@/components/common/icons/ExperienceIcon';
 import { HomeIcon } from '@/components/common/icons/HomeIcon';
 import { JobAnalysisIcon } from '@/components/common/icons/JobAnalysisIcon';
-import { SettingsIcon } from '@/components/common/icons/SettingsIcon';
 import { SidebarMenuItem, type SidebarMenuItemIcon } from '@/components/common/SidebarMenuItem';
+import { SidebarProfile } from '@/components/common/SidebarProfile';
 
 import { cn } from '@/lib/utils';
 
@@ -55,12 +55,6 @@ const defaultSecondaryItems: SidebarItem[] = [
   },
 ];
 
-const defaultSettingsItem: SidebarItem = {
-  label: '설정',
-  icon: SettingsIcon,
-  href: '#',
-};
-
 export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const primaryItems = variant === 'fullMenu' ? defaultPrimaryItems : [];
@@ -95,13 +89,7 @@ export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProp
         </nav>
       </div>
 
-      <nav aria-label="설정">
-        <SidebarNavItem
-          item={defaultSettingsItem}
-          collapsed={collapsed}
-          active={isSidebarItemActive(defaultSettingsItem, pathname)}
-        />
-      </nav>
+      <SidebarProfile collapsed={collapsed} />
     </aside>
   );
 }
