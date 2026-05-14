@@ -7,8 +7,8 @@ import { CoverLetterIcon } from '@/components/common/icons/CoverLetterIcon';
 import { ExperienceIcon } from '@/components/common/icons/ExperienceIcon';
 import { HomeIcon } from '@/components/common/icons/HomeIcon';
 import { JobAnalysisIcon } from '@/components/common/icons/JobAnalysisIcon';
-import { SettingsIcon } from '@/components/common/icons/SettingsIcon';
 import { SidebarMenuItem, type SidebarMenuItemIcon } from '@/components/common/SidebarMenuItem';
+import { SidebarProfile } from '@/components/common/SidebarProfile';
 
 import { cn } from '@/lib/utils';
 
@@ -55,23 +55,17 @@ const defaultSecondaryItems: SidebarItem[] = [
   },
 ];
 
-const defaultSettingsItem: SidebarItem = {
-  label: '설정',
-  icon: SettingsIcon,
-  href: '#',
-};
-
 export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const primaryItems = variant === 'fullMenu' ? defaultPrimaryItems : [];
-  const logoSrc = collapsed ? '/logo-mark.svg' : '/logo-dark.svg';
+  const logoSrc = collapsed ? '/logo-light-mark.svg' : '/logo-light.svg';
   const logoSize = collapsed ? { width: 49, height: 49 } : { width: 136, height: 49 };
 
   return (
     <aside
       className={cn(
-        'fixed top-4 left-4 flex h-[calc(100vh-32px)] flex-col justify-between rounded-xl bg-black px-3 py-[26px]',
-        collapsed ? 'w-[73px]' : 'w-[252px]',
+        'fixed top-0 left-0 flex h-dvh flex-col justify-between overflow-x-hidden overflow-y-auto border-r border-border-default bg-background-w py-[26px]',
+        collapsed ? 'w-[73px] px-3' : 'w-[252px] px-6',
       )}
     >
       <div className="flex flex-col gap-5">
@@ -95,13 +89,7 @@ export function Sidebar({ variant = 'fullMenu', collapsed = false }: SidebarProp
         </nav>
       </div>
 
-      <nav aria-label="설정">
-        <SidebarNavItem
-          item={defaultSettingsItem}
-          collapsed={collapsed}
-          active={isSidebarItemActive(defaultSettingsItem, pathname)}
-        />
-      </nav>
+      <SidebarProfile collapsed={collapsed} />
     </aside>
   );
 }
@@ -122,7 +110,9 @@ function SidebarSection({
   }
 
   return (
-    <div className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-secondary')}>
+    <div
+      className={cn('flex flex-col gap-2.5 py-2.5', withBorder && 'border-b border-border-bold')}
+    >
       {items.map((item) => (
         <SidebarNavItem
           key={item.label}

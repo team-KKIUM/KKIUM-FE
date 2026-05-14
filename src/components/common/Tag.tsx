@@ -53,6 +53,8 @@ export function Tag({
   const hasAction = addable || removable;
   const resolvedTone = disabled || addable ? 'neutral' : tone;
   const canRemove = removable && !disabled;
+  const actionButtonClassName = size === 'large' ? 'size-[26px]' : 'size-[19px]';
+  const actionIconClassName = size === 'large' ? 'size-6' : 'size-4 -translate-y-px';
 
   return (
     <span
@@ -74,10 +76,13 @@ export function Tag({
           aria-label={`${children?.toString() || '태그'} 삭제`}
           aria-disabled={disabled || undefined}
           disabled={disabled}
-          className="flex size-6 shrink-0 items-center justify-center disabled:cursor-not-allowed"
+          className={cn(
+            'flex shrink-0 items-center justify-center disabled:cursor-not-allowed',
+            actionButtonClassName,
+          )}
           onClick={canRemove ? onRemove : undefined}
         >
-          <XIcon className="size-6" />
+          <XIcon className={actionIconClassName} />
         </button>
       )}
     </span>

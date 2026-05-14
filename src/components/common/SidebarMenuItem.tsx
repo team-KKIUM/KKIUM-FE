@@ -26,8 +26,10 @@ export function SidebarMenuItem({
     <Link
       href={href}
       className={cn(
-        'flex h-12 items-center rounded-md px-2.5 py-2 text-quaternary hover:bg-gray-800 focus-visible:bg-gray-800 focus-visible:outline-none',
-        active && 'bg-gray-800 text-mint-main',
+        'flex h-12 items-center rounded-md px-2.5 py-2 focus-visible:outline-none',
+        active
+          ? 'bg-mint-50 text-mint-600 focus-visible:bg-mint-50'
+          : 'text-quaternary hover:bg-gray-200 focus-visible:bg-gray-200',
         collapsed ? 'justify-center' : 'gap-4',
       )}
       aria-current={active ? 'page' : undefined}
