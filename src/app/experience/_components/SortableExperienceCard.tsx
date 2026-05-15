@@ -34,6 +34,7 @@ export function SortableExperienceCard({
       skillTags={experience.skillTags}
       competencyTags={experience.competencyTags}
       selected={selected}
+      disableActivationKeys
       className={cn('max-w-none', isDragSource && 'relative z-10 opacity-90')}
       onClick={() => onClick?.(experience)}
     />

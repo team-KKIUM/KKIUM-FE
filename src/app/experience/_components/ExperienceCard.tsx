@@ -49,6 +49,7 @@ export interface ExperienceCardProps
   period: string;
   skillTags: string[];
   competencyTags: string[];
+  disableActivationKeys?: boolean;
 }
 
 export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>(
@@ -64,6 +65,7 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
       className,
       onClick,
       onKeyDown,
+      disableActivationKeys = false,
       ...props
     },
     ref,
@@ -78,6 +80,10 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
       }
 
       if (event.key === 'Enter' || event.key === ' ') {
+        if (disableActivationKeys) {
+          return;
+        }
+
         event.preventDefault();
         onClick(event as unknown as React.MouseEvent<HTMLElement>);
       }
