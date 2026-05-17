@@ -198,6 +198,7 @@ export function ExperienceDetailContent({
               editing={editingTagGroup === 'skill'}
               variant="bordered-row"
               viewTagSize="default"
+              onChange={setSkillTags}
               onEdit={() => setEditingTagGroup('skill')}
             />
             <EditableTagGroup
@@ -208,6 +209,7 @@ export function ExperienceDetailContent({
               variant="bordered-row"
               viewTagSize="default"
               borderBottom
+              onChange={setCompetencyTags}
               onEdit={() => setEditingTagGroup('competency')}
             />
           </div>
@@ -272,6 +274,7 @@ interface EditableTagGroupProps {
   borderBottom?: boolean;
   variant?: 'default' | 'bordered-row';
   viewTagSize?: React.ComponentProps<typeof Tag>['size'];
+  onChange?: (tags: string[]) => void;
   onEdit?: () => void;
 }
 
@@ -283,23 +286,70 @@ function EditableTagGroup({
   borderBottom = false,
   variant = 'default',
   viewTagSize = 'large',
+  onChange,
   onEdit,
 }: EditableTagGroupProps) {
+  const [inputValue, setInputValue] = React.useState('');
+
+  React.useEffect(() => {
+    if (!editing) {
+      setInputValue('');
+    }
+  }, [editing]);
+
+  const handleAddTag = () => {
+    const nextTag = inputValue.trim();
+
+    if (!nextTag || tags.includes(nextTag)) {
+      return;
+    }
+
+    onChange?.([...tags, nextTag]);
+    setInputValue('');
+  };
+
+  const handleRemoveTag = (targetIndex: number) => {
+    onChange?.(tags.filter((_, index) => index !== targetIndex));
+  };
+
+  const handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
+    if (event.nativeEvent.isComposing) {
+      return;
+    }
+
+    if (event.key !== 'Enter') {
+      return;
+    }
+
+    event.preventDefault();
+    handleAddTag();
+  };
+
   if (editing) {
     return (
       <div className="flex w-full flex-col gap-2.5">
         <p className="body-2-regular text-strong">{label}</p>
         <div className="flex w-full flex-col overflow-hidden rounded-lg border border-border-default bg-background-w shadow-[0_4px_6px_-4px_rgba(0,0,0,0.1),0_10px_15px_-3px_rgba(0,0,0,0.1)]">
           <div className="flex min-h-[66px] flex-wrap items-center gap-2.5 px-5 py-4">
-            {tags.map((tag) => (
-              <Tag key={tag} tone={tone} size="large" removable>
+            {tags.map((tag, index) => (
+              <Tag
+                key={`${tag}-${index}`}
+                tone={tone}
+                size="large"
+                removable
+                onRemove={() => handleRemoveTag(index)}
+              >
                 {tag}
               </Tag>
             ))}
           </div>
           <Input
+            value={inputValue}
             placeholder={`적용하고 싶은 ${label}을 작성해주세요`}
             className="rounded-none border-x-0 border-b-0"
+            onBlur={handleAddTag}
+            onChange={(event) => setInputValue(event.target.value)}
+            onKeyDown={handleInputKeyDown}
           />
         </div>
       </div>
