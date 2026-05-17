@@ -247,9 +247,7 @@ export function ExperienceDetailContent({
         {detailFields.map(([label, key]) => (
           <div key={key} className="flex w-full flex-col gap-1.5">
             <div className="flex items-center justify-between px-2">
-              <h3
-                className={cn('font-bold text-[#1e2939]', isPage ? 'title-2-bold' : 'body-2-bold')}
-              >
+              <h3 className={cn('font-bold text-primary', isPage ? 'title-2-bold' : 'body-2-bold')}>
                 {label}
               </h3>
             </div>
