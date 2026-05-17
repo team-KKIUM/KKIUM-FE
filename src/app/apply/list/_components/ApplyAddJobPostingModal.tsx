@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 
-import { Modal, ModalDescription, ModalTitle } from '@/components/common/Modal';
+import { Modal, ModalClose, ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { RecruitmentDeadlineFields } from '@/components/common/RecruitmentDeadlineFields';
@@ -187,16 +187,7 @@ export function ApplyAddJobPostingModal() {
             </LabeledField>
 
             <div className="flex w-full flex-col gap-4">
-              <div className="flex w-full min-w-0 items-center justify-between gap-3">
-                <p className="title-2-bold text-strong">자기소개서 문항 입력</p>
-                <Button
-                  type="button"
-                  variant="default"
-                  className="h-9 shrink-0 rounded-lg px-2 py-0.5 body-1-bold"
-                >
-                  저장하기
-                </Button>
-              </div>
+              <p className="title-2-bold text-strong">자기소개서 문항 입력</p>
               <div className="flex flex-col gap-1.5">
                 {coverQuestions.map((row, index) => (
                   <div key={row.id} className="inline-flex w-full min-w-0 items-center gap-2.5">
@@ -244,6 +235,11 @@ export function ApplyAddJobPostingModal() {
             </div>
           </div>
 
+          <ModalClose asChild>
+            <Button type="button" variant="default" size="default" className="w-full text-xs font-bold leading-5">
+              저장하기
+            </Button>
+          </ModalClose>
         </>
       )}
     </Modal>
