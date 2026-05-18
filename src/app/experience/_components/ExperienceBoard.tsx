@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -14,19 +15,39 @@ import { cn } from '@/lib/utils';
 
 export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
   experiences: ExperienceItem[];
+  initialSelectedExperienceId?: string;
 }
 
 type ExperienceOrderMap = Record<ExperienceCategory, string[]>;
 
 const sortableCategories: ExperienceCategory[] = ['all', 'activity', 'career', 'education', 'etc'];
 
-export function ExperienceBoard({ experiences, className, ...props }: ExperienceBoardProps) {
-  const [selectedCategory, setSelectedCategory] = React.useState<ExperienceCategory>('all');
-  const [selectedExperienceId, setSelectedExperienceId] = React.useState<string>();
+function isExperienceCategory(category: string | null): category is ExperienceCategory {
+  return sortableCategories.includes(category as ExperienceCategory);
+}
+
+export function ExperienceBoard({
+  experiences,
+  initialSelectedExperienceId,
+  className,
+  ...props
+}: ExperienceBoardProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedExperienceIdFromQuery = searchParams.get('selected') ?? initialSelectedExperienceId;
+  const selectedCategoryFromQuery = searchParams.get('category');
+  const initialSelectedCategory = isExperienceCategory(selectedCategoryFromQuery)
+    ? selectedCategoryFromQuery
+    : 'all';
+  const [selectedCategory, setSelectedCategory] =
+    React.useState<ExperienceCategory>(initialSelectedCategory);
+  const [selectedExperienceId, setSelectedExperienceId] = React.useState<string | undefined>(
+    selectedExperienceIdFromQuery,
+  );
   const [experienceOrderMap, setExperienceOrderMap] = React.useState(() =>
     createExperienceOrderMap(experiences),
   );
-  const [panelOpen, setPanelOpen] = React.useState(false);
+  const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
@@ -40,6 +61,29 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
       return nextOrderMap;
     });
   }, [experiences]);
+
+  React.useEffect(() => {
+    if (!selectedExperienceIdFromQuery) {
+      return;
+    }
+
+    const initialSelectedExperience = experiences.find(
+      (experience) => experience.id === selectedExperienceIdFromQuery,
+    );
+
+    if (!initialSelectedExperience) {
+      return;
+    }
+
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setSelectedCategory(initialSelectedCategory);
+    setSelectedExperienceId(initialSelectedExperience.id);
+    setPanelOpen(true);
+  }, [experiences, initialSelectedCategory, selectedExperienceIdFromQuery]);
 
   React.useEffect(() => {
     return () => {
@@ -72,6 +116,7 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
       closeTimerRef.current = null;
     }
 
+    router.replace('/experience', { scroll: false });
     setSelectedCategory(category);
     setSelectedExperienceId(undefined);
     setPanelOpen(false);
@@ -85,6 +130,9 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
 
     setSelectedExperienceId(experience.id);
     setPanelOpen(true);
+    router.replace(`/experience?selected=${experience.id}&category=${selectedCategory}`, {
+      scroll: false,
+    });
   };
 
   const handleExperienceReorder = React.useCallback(
@@ -107,6 +155,15 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
       setSelectedExperienceId(undefined);
       closeTimerRef.current = null;
     }, 300);
+    router.replace('/experience', { scroll: false });
+  };
+
+  const handlePanelExpand = () => {
+    if (!selectedExperience) {
+      return;
+    }
+
+    router.push(`/experience/${selectedExperience.id}?category=${selectedCategory}`);
   };
 
   return (
@@ -140,6 +197,7 @@ export function ExperienceBoard({ experiences, className, ...props }: Experience
         <ExperienceDetailPanel
           experience={selectedExperience}
           open={panelOpen}
+          onExpand={handlePanelExpand}
           onClose={handlePanelClose}
         />
       )}

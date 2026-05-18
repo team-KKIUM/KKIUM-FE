@@ -58,7 +58,7 @@ export function ExperienceAddBasicInfoStep() {
               key={fieldGroup.number}
               number={fieldGroup.number}
               label={fieldGroup.label}
-              className={fieldGroup.number === '02.' ? 'col-span-2' : undefined}
+              className={['02.', '03.'].includes(fieldGroup.number) ? 'col-span-2' : undefined}
             >
               {fieldGroup.fields.length > 1 ? (
                 <div className="grid w-full grid-cols-2 gap-2.5">
