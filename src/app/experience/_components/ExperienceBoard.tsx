@@ -56,7 +56,7 @@ export function ExperienceBoard({
   );
   const selectedPieceType =
     selectedCategory === 'all' ? undefined : pieceTypeByCategory[selectedCategory];
-  const { data, fetchNextPage, hasNextPage, isError, isFetchingNextPage, isPending } =
+  const { data, fetchNextPage, hasNextPage, isError, isFetching, isFetchingNextPage, isPending } =
     useInfiniteExperiences(selectedPieceType ? { type: selectedPieceType } : undefined);
   const experiences = React.useMemo(
     () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
@@ -70,12 +70,22 @@ export function ExperienceBoard({
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const hasAppliedInitialSelectionRef = React.useRef(false);
   const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
-  const { data: selectedExperienceDetail } = useExperienceDetail(
+  const {
+    data: selectedExperienceDetail,
+    isError: isDetailError,
+    isFetching: isDetailFetching,
+    isPending: isDetailPending,
+  } = useExperienceDetail(
     Number.isFinite(selectedExperienceNumericId) ? selectedExperienceNumericId : null,
   );
+  const selectedExperienceDetailMatches =
+    selectedExperienceDetail?.experienceId === selectedExperienceNumericId;
   const selectedExperienceDetailItem = React.useMemo(
-    () => (selectedExperienceDetail ? mapExperienceDetailToItem(selectedExperienceDetail) : null),
-    [selectedExperienceDetail],
+    () =>
+      selectedExperienceDetail && selectedExperienceDetailMatches
+        ? mapExperienceDetailToItem(selectedExperienceDetail)
+        : null,
+    [selectedExperienceDetail, selectedExperienceDetailMatches],
   );
 
   React.useEffect(() => {
@@ -162,6 +172,12 @@ export function ExperienceBoard({
     (experience) => experience.id === selectedExperienceId,
   );
   const panelExperience = selectedExperienceDetailItem ?? selectedExperience;
+  const showDetailLoading =
+    panelOpen &&
+    Boolean(selectedExperienceId) &&
+    (isDetailPending || (isDetailFetching && !selectedExperienceDetailMatches));
+  const showListLoading =
+    isPending || (isFetching && !isFetchingNextPage && filteredExperiences.length === 0);
 
   const handleCategoryChange = (category: ExperienceCategory) => {
     if (closeTimerRef.current) {
@@ -230,7 +246,7 @@ export function ExperienceBoard({
         onCategoryChange={handleCategoryChange}
       />
       {/* TODO: 로딩/에러 상태 전용 UI가 확정되면 임시 EmptyState를 교체한다. */}
-      {isPending ? (
+      {showListLoading ? (
         <div className="flex flex-1 items-center justify-center">
           <EmptyState title="경험을 불러오는 중이에요" illustrationLabel="경험 목록 로딩 중" />
         </div>
@@ -270,6 +286,8 @@ export function ExperienceBoard({
         <ExperienceDetailPanel
           experience={panelExperience}
           open={panelOpen}
+          detailError={isDetailError}
+          detailLoading={showDetailLoading}
           onExpand={handlePanelExpand}
           onClose={handlePanelClose}
         />

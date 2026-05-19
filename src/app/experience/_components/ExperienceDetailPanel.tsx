@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { ExperienceDetailContent } from '@/app/experience/_components/ExperienceDetailContent';
 import type { ExperienceItem } from '@/app/experience/_components/ExperienceCardGrid';
+import { EmptyState } from '@/components/common/EmptyState';
 import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,8 @@ export interface ExperienceDetailPanelProps extends Omit<
   onExpand?: () => void;
   onEdit?: () => void;
   onSave?: (experience: Pick<ExperienceItem, 'detail' | 'skillTags' | 'competencyTags'>) => void;
+  detailError?: boolean;
+  detailLoading?: boolean;
   onClose: () => void;
 }
 
@@ -26,6 +29,8 @@ export function ExperienceDetailPanel({
   onExpand,
   onEdit,
   onSave,
+  detailError = false,
+  detailLoading = false,
   onClose,
   className,
   onKeyDown,
@@ -166,12 +171,27 @@ export function ExperienceDetailPanel({
         </button>
       </header>
 
-      <ExperienceDetailContent
-        experience={experience}
-        variant="panel"
-        onEdit={onEdit}
-        onSave={onSave}
-      />
+      {/* TODO: 상세 패널 로딩/에러 UI가 확정되면 임시 EmptyState를 교체한다. */}
+      {detailLoading ? (
+        <div className="flex flex-1 items-center justify-center">
+          <EmptyState title="경험을 불러오는 중이에요" illustrationLabel="경험 상세 로딩 중" />
+        </div>
+      ) : detailError ? (
+        <div className="flex flex-1 items-center justify-center">
+          <EmptyState
+            title="경험을 불러오지 못했어요"
+            description="잠시 후 다시 시도해주세요"
+            illustrationLabel="경험 상세 오류"
+          />
+        </div>
+      ) : (
+        <ExperienceDetailContent
+          experience={experience}
+          variant="panel"
+          onEdit={onEdit}
+          onSave={onSave}
+        />
+      )}
     </aside>
   );
 }
