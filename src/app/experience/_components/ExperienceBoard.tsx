@@ -37,7 +37,8 @@ export function ExperienceBoard({
 }: ExperienceBoardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data, isError, isPending } = useInfiniteExperiences();
+  const { data, fetchNextPage, hasNextPage, isError, isFetchingNextPage, isPending } =
+    useInfiniteExperiences();
   const experiences = React.useMemo(
     () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
     [data],
@@ -57,6 +58,8 @@ export function ExperienceBoard({
   );
   const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
+  const hasAppliedInitialSelectionRef = React.useRef(false);
   const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
   const { data: selectedExperienceDetail } = useExperienceDetail(
     Number.isFinite(selectedExperienceNumericId) ? selectedExperienceNumericId : null,
@@ -79,7 +82,7 @@ export function ExperienceBoard({
   }, [experiences]);
 
   React.useEffect(() => {
-    if (!selectedExperienceIdFromQuery) {
+    if (hasAppliedInitialSelectionRef.current || !selectedExperienceIdFromQuery) {
       return;
     }
 
@@ -99,6 +102,7 @@ export function ExperienceBoard({
     setSelectedCategory(initialSelectedCategory);
     setSelectedExperienceId(initialSelectedExperience.id);
     setPanelOpen(true);
+    hasAppliedInitialSelectionRef.current = true;
   }, [experiences, initialSelectedCategory, selectedExperienceIdFromQuery]);
 
   React.useEffect(() => {
@@ -108,6 +112,29 @@ export function ExperienceBoard({
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    const loadMoreElement = loadMoreRef.current;
+
+    if (!loadMoreElement || !hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '240px 0px' },
+    );
+
+    observer.observe(loadMoreElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const experienceMap = React.useMemo(
     () => new Map(experiences.map((experience) => [experience.id, experience])),
@@ -207,13 +234,20 @@ export function ExperienceBoard({
           />
         </div>
       ) : filteredExperiences.length > 0 ? (
-        <ExperienceCardGrid
-          experiences={filteredExperiences}
-          selectedExperienceId={selectedExperienceId}
-          sortable
-          onExperienceClick={handleExperienceSelect}
-          onExperienceReorder={handleExperienceReorder}
-        />
+        <>
+          <ExperienceCardGrid
+            experiences={filteredExperiences}
+            selectedExperienceId={selectedExperienceId}
+            sortable
+            onExperienceClick={handleExperienceSelect}
+            onExperienceReorder={handleExperienceReorder}
+          />
+          <div ref={loadMoreRef} aria-hidden="true" className="h-1" />
+          {/* TODO: 다음 페이지 로딩 UI가 확정되면 임시 문구를 교체한다. */}
+          {isFetchingNextPage && (
+            <p className="text-center body-3-regular text-tertiary">경험을 더 불러오는 중이에요</p>
+          )}
+        </>
       ) : (
         <div className="flex flex-1 items-center justify-center">
           <EmptyState
