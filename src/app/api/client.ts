@@ -73,13 +73,23 @@ function buildHeaders(body: unknown, headers?: HeadersInit) {
 
 // API 응답을 파싱해서 data만 반환하고, 에러는 ApiError로 던지는 함수
 async function parseApiResponse<T>(response: Response): Promise<T> {
-  const payload = (await response.json()) as ApiResponse<T>;
+  let payload: ApiResponse<T> | null = null;
 
-  if (!response.ok || payload.code !== 'SUCCESS') {
+  try {
+    const contentType = response.headers.get('Content-Type');
+
+    if (contentType?.includes('application/json')) {
+      payload = (await response.json()) as ApiResponse<T>;
+    }
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok || !payload || payload.code !== 'SUCCESS') {
     throw new ApiError({
-      status: payload.status ?? response.status,
-      code: payload.code ?? 'UNKNOWN_ERROR',
-      message: payload.message ?? '요청 처리 중 오류가 발생했습니다.',
+      status: payload?.status ?? response.status,
+      code: payload?.code ?? 'UNKNOWN_ERROR',
+      message: payload?.message ?? '요청 처리 중 오류가 발생했습니다.',
     });
   }
 
