@@ -11,7 +11,7 @@ export default async function ExperienceDetailPage({
   const { experienceId } = await params;
   const numericExperienceId = Number(experienceId);
 
-  if (!Number.isFinite(numericExperienceId)) {
+  if (!Number.isInteger(numericExperienceId) || numericExperienceId <= 0) {
     notFound();
   }
 
