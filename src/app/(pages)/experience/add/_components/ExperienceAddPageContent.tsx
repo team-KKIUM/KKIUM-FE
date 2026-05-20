@@ -1,10 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import type { ExperienceAnalyzeResponse } from '@/app/api/experience/add/types';
-import type { ExperienceMaterial } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
+import type {
+  ExperienceAddMaterialModalView,
+  ExperienceMaterial,
+} from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { ExperienceAddProgress } from '@/app/(pages)/experience/add/_components/ExperienceAddProgress';
 import { ExperienceAddStepContent } from '@/app/(pages)/experience/add/_components/ExperienceAddStepContent';
 import { EXPERIENCE_ADD_STEPS } from '@/app/(pages)/experience/add/_constants/experienceAddSteps';
@@ -27,8 +30,14 @@ import {
 
 export function ExperienceAddPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isNotionConnected =
+    searchParams.get('notion') === 'connected' || searchParams.get('success') === 'true';
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [materials, setMaterials] = useState<ExperienceMaterial[]>([]);
+  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(isNotionConnected);
+  const [materialModalInitialView, setMaterialModalInitialView] =
+    useState<ExperienceAddMaterialModalView>(isNotionConnected ? 'notion-pages' : 'material');
   const [basicInfo, setBasicInfo] = useState(createEmptyBasicInfoForm);
   const [coreInfo, setCoreInfo] = useState(createEmptyCoreInfoForm);
   const [resultInfo, setResultInfo] = useState(createEmptyResultInfoForm);
@@ -37,6 +46,12 @@ export function ExperienceAddPageContent() {
   const isAnalyzing = analyzePdfMutation.isPending || analyzeNotionMutation.isPending;
   const isFirstStep = currentStepIndex === 0;
   const isCompleteStep = currentStepIndex === EXPERIENCE_ADD_STEPS.length;
+
+  useEffect(() => {
+    if (!isNotionConnected) return;
+
+    router.replace('/experience/add', { scroll: false });
+  }, [isNotionConnected, router]);
 
   const goPreviousStep = () => {
     setCurrentStepIndex((stepIndex) => Math.max(stepIndex - 1, 0));
@@ -93,6 +108,10 @@ export function ExperienceAddPageContent() {
           currentStepIndex={currentStepIndex}
           isAnalyzing={isAnalyzing}
           materials={materials}
+          isMaterialModalOpen={isMaterialModalOpen}
+          materialModalInitialView={materialModalInitialView}
+          onMaterialModalOpenChange={setIsMaterialModalOpen}
+          onMaterialModalInitialViewChange={setMaterialModalInitialView}
           onMaterialsChange={setMaterials}
           basicInfo={basicInfo}
           onBasicInfoChange={setBasicInfo}

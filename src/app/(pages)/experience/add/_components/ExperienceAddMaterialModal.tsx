@@ -27,19 +27,27 @@ export interface NotionMaterial {
 }
 
 export type ExperienceMaterial = PdfMaterial | NotionMaterial;
+export type ExperienceAddMaterialModalView = 'material' | 'notion-connect' | 'notion-pages';
 
 interface ExperienceAddMaterialModalProps {
   materials: ExperienceMaterial[];
+  initialView?: ExperienceAddMaterialModalView;
   onSave: (materials: ExperienceMaterial[]) => void;
 }
 
-export function ExperienceAddMaterialModal({ materials, onSave }: ExperienceAddMaterialModalProps) {
-  const [modalView, setModalView] = useState<'material' | 'notion-connect' | 'notion-pages'>(
-    'material',
-  );
+export function ExperienceAddMaterialModal({
+  materials,
+  initialView = 'material',
+  onSave,
+}: ExperienceAddMaterialModalProps) {
+  const [modalView, setModalView] = useState<ExperienceAddMaterialModalView>(initialView);
   const [draftMaterials, setDraftMaterials] = useState<ExperienceMaterial[]>(materials);
   const notionPagesQuery = useNotionPages({ enabled: modalView === 'notion-pages' });
   const notionPages = notionPagesQuery.data?.pages ?? [];
+
+  useEffect(() => {
+    setModalView(initialView);
+  }, [initialView]);
 
   useEffect(() => {
     setDraftMaterials(materials);

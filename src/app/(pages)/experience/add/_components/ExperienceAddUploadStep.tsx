@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 
 import {
   ExperienceAddMaterialModal,
+  type ExperienceAddMaterialModalView,
   type ExperienceMaterial,
 } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -18,14 +18,21 @@ import { Button } from '@/components/ui/button';
 
 interface ExperienceAddUploadStepProps {
   materials: ExperienceMaterial[];
+  isMaterialModalOpen: boolean;
+  materialModalInitialView: ExperienceAddMaterialModalView;
+  onMaterialModalOpenChange: (isOpen: boolean) => void;
+  onMaterialModalInitialViewChange: (view: ExperienceAddMaterialModalView) => void;
   onMaterialsChange: (materials: ExperienceMaterial[]) => void;
 }
 
 export function ExperienceAddUploadStep({
   materials,
+  isMaterialModalOpen,
+  materialModalInitialView,
+  onMaterialModalOpenChange,
+  onMaterialModalInitialViewChange,
   onMaterialsChange,
 }: ExperienceAddUploadStepProps) {
-  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const notionMaterials = materials.filter((material) => material.type === 'notion');
   const pdfMaterials = materials.filter((material) => material.type === 'pdf');
   const hasMaterials = materials.length > 0;
@@ -36,7 +43,7 @@ export function ExperienceAddUploadStep({
 
   const saveMaterials = (nextMaterials: ExperienceMaterial[]) => {
     onMaterialsChange(nextMaterials);
-    setIsMaterialModalOpen(false);
+    onMaterialModalOpenChange(false);
   };
 
   return (
@@ -61,19 +68,24 @@ export function ExperienceAddUploadStep({
       <Modal
         open={isMaterialModalOpen}
         showCloseButton
-        onOpenChange={setIsMaterialModalOpen}
+        onOpenChange={onMaterialModalOpenChange}
         trigger={
           <Button
             type="button"
             variant={hasMaterials ? 'secondary' : 'default'}
             className="label-3-bold"
             leftIcon={<PlusIcon />}
+            onClick={() => onMaterialModalInitialViewChange('material')}
           >
             자료 추가하기
           </Button>
         }
       >
-        <ExperienceAddMaterialModal materials={materials} onSave={saveMaterials} />
+        <ExperienceAddMaterialModal
+          materials={materials}
+          initialView={materialModalInitialView}
+          onSave={saveMaterials}
+        />
       </Modal>
 
       {hasMaterials ? (

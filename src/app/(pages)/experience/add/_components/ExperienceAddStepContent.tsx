@@ -2,7 +2,10 @@ import { ExperienceAddBasicInfoStep } from '@/app/(pages)/experience/add/_compon
 import { ExperienceAddAnalyzingStep } from '@/app/(pages)/experience/add/_components/ExperienceAddAnalyzingStep';
 import { ExperienceAddCompleteStep } from '@/app/(pages)/experience/add/_components/ExperienceAddCompleteStep';
 import { ExperienceAddCoreStep } from '@/app/(pages)/experience/add/_components/ExperienceAddCoreStep';
-import type { ExperienceMaterial } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
+import type {
+  ExperienceAddMaterialModalView,
+  ExperienceMaterial,
+} from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { ExperienceAddResultStep } from '@/app/(pages)/experience/add/_components/ExperienceAddResultStep';
 import { ExperienceAddUploadStep } from '@/app/(pages)/experience/add/_components/ExperienceAddUploadStep';
 import { EXPERIENCE_ADD_STEPS } from '@/app/(pages)/experience/add/_constants/experienceAddSteps';
@@ -16,6 +19,10 @@ interface ExperienceAddStepContentProps {
   currentStepIndex: number;
   isAnalyzing?: boolean;
   materials: ExperienceMaterial[];
+  isMaterialModalOpen: boolean;
+  materialModalInitialView: ExperienceAddMaterialModalView;
+  onMaterialModalOpenChange: (isOpen: boolean) => void;
+  onMaterialModalInitialViewChange: (view: ExperienceAddMaterialModalView) => void;
   onMaterialsChange: (materials: ExperienceMaterial[]) => void;
   basicInfo: ExperienceAddBasicInfoForm;
   onBasicInfoChange: (basicInfo: ExperienceAddBasicInfoForm) => void;
@@ -28,6 +35,10 @@ export function ExperienceAddStepContent({
   currentStepIndex,
   isAnalyzing = false,
   materials,
+  isMaterialModalOpen,
+  materialModalInitialView,
+  onMaterialModalOpenChange,
+  onMaterialModalInitialViewChange,
   onMaterialsChange,
   basicInfo,
   onBasicInfoChange,
@@ -42,7 +53,16 @@ export function ExperienceAddStepContent({
   }
 
   if (currentStepIndex === 0) {
-    return <ExperienceAddUploadStep materials={materials} onMaterialsChange={onMaterialsChange} />;
+    return (
+      <ExperienceAddUploadStep
+        materials={materials}
+        isMaterialModalOpen={isMaterialModalOpen}
+        materialModalInitialView={materialModalInitialView}
+        onMaterialModalOpenChange={onMaterialModalOpenChange}
+        onMaterialModalInitialViewChange={onMaterialModalInitialViewChange}
+        onMaterialsChange={onMaterialsChange}
+      />
+    );
   }
 
   if (currentStepIndex === 1) {
