@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export interface JobTypeCardProps extends Omit<React.ComponentProps<'section'>, 'title'> {
   roleTypeName?: string;
   roleTypeDescription?: string;
-  strengths?: string[];
+  strengths?: readonly string[];
   backgroundColor?: 'red' | 'yellow' | 'blue' | 'green';
 }
 
@@ -20,7 +20,7 @@ const BACKGROUND_IMAGE_BY_COLOR: Record<NonNullable<JobTypeCardProps['background
 export function JobTypeCard({
   roleTypeName = JOB_TYPE_CARD_MOCK.roleTypeName,
   roleTypeDescription = JOB_TYPE_CARD_MOCK.roleTypeDescription,
-  strengths = [...JOB_TYPE_CARD_MOCK.strengths],
+  strengths = JOB_TYPE_CARD_MOCK.strengths,
   backgroundColor = JOB_TYPE_CARD_MOCK.backgroundColor,
   className,
   ...props

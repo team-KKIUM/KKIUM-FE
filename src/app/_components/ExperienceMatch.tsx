@@ -14,8 +14,8 @@ export interface ExperienceMatchProps extends Omit<React.ComponentProps<'section
   recruitmentField?: string;
   recruitmentPeriod?: string;
   feedback?: string;
-  requiredSkills?: string[];
-  requiredCompetencies?: string[];
+  requiredSkills?: readonly string[];
+  requiredCompetencies?: readonly string[];
 }
 
 const ARC_START_DEG = 210;
@@ -59,8 +59,8 @@ export function ExperienceMatch({
   recruitmentField = EXPERIENCE_MATCH_MOCK.recruitmentField,
   recruitmentPeriod = EXPERIENCE_MATCH_MOCK.recruitmentPeriod,
   feedback = EXPERIENCE_MATCH_MOCK.feedback,
-  requiredSkills = [...EXPERIENCE_MATCH_MOCK.requiredSkills],
-  requiredCompetencies = [...EXPERIENCE_MATCH_MOCK.requiredCompetencies],
+  requiredSkills = EXPERIENCE_MATCH_MOCK.requiredSkills,
+  requiredCompetencies = EXPERIENCE_MATCH_MOCK.requiredCompetencies,
   className,
   ...props
 }: ExperienceMatchProps) {
