@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { ChevronDownIcon } from 'lucide-react';
 
 import { Modal, ModalClose, ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
@@ -8,14 +9,30 @@ import { XIcon } from '@/components/common/icons/XIcon';
 import { RecruitmentDeadlineFields } from '@/components/common/RecruitmentDeadlineFields';
 import { type CalendarDateRange } from '@/components/common/RangeCalendar';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { useJobPostingUrlField } from '@/hooks/apply/useJobPostingUrlField';
 
 const MOCK_ANALYSIS = {
   companyName: '토스플레이스',
   field: 'Server Developer',
 } as const;
+
+//mock data
+const RESULT_RECRUITMENT_FIELD_OPTIONS = [
+  MOCK_ANALYSIS.field,
+  'Frontend Developer',
+  'Full Stack Developer',
+  'Mobile Developer',
+  'Data Engineer',
+] as const;
 
 const JOB_EDIT_HEADER: Record<'result' | 'manual', { title: string; description: string }> = {
   result: {
@@ -162,11 +179,54 @@ export function ApplyAddJobPostingModal() {
             </LabeledField>
 
             <LabeledField label="모집 분야">
-              <Input
-                value={recruitmentField}
-                onChange={(e) => setRecruitmentField(e.target.value)}
-                placeholder="모집 분야를 입력해주세요."
-              />
+              {step === 'result' ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-haspopup="listbox"
+                      className={cn(
+                        'flex h-[54px] w-full min-w-0 items-center justify-between gap-2 rounded-lg border-[1.5px] border-border-bold bg-background-w px-4 text-left outline-none transition-colors',
+                        'body-2-regular focus-visible:border-mint-main focus-visible:bg-mint-50/40 data-[state=open]:border-mint-main data-[state=open]:bg-mint-50/40',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'min-w-0 flex-1 truncate',
+                          recruitmentField ? 'text-strong' : 'text-quaternary',
+                        )}
+                      >
+                        {recruitmentField || '모집 분야를 선택해주세요.'}
+                      </span>
+                      <ChevronDownIcon className="size-5 shrink-0 text-quaternary" aria-hidden />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    sideOffset={4}
+                    className="max-h-60 w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
+                  >
+                    {RESULT_RECRUITMENT_FIELD_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option}
+                        className={cn(
+                          'min-h-10 border-b border-border-bold last:border-b-0',
+                          recruitmentField === option && 'bg-gray-100',
+                        )}
+                        onSelect={() => setRecruitmentField(option)}
+                      >
+                        <span>{option}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Input
+                  value={recruitmentField}
+                  onChange={(e) => setRecruitmentField(e.target.value)}
+                  placeholder="모집 분야를 입력해주세요."
+                />
+              )}
             </LabeledField>
 
             <RecruitmentDeadlineFields
