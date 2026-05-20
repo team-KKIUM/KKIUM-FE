@@ -163,7 +163,9 @@ function ExperienceMaterialCard({
           ) : (
             <div className="flex items-center gap-2.5">
               <Tag tone="competency">페이지</Tag>
-              <span className="body-2-regular text-gray-600">{material.updatedAt}</span>
+              <span className="body-2-regular text-gray-600">
+                {material.updatedAt ?? '최근 수정일 정보 없음'}
+              </span>
             </div>
           )}
         </div>
