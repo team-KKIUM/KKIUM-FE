@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   ExperienceCategoryTab,
   type ExperienceCategory,
-} from '@/app/experience/_components/ExperienceCategoryTab';
+} from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
 
 const categories: ExperienceCategory[] = ['all', 'activity', 'career', 'education', 'etc'];
 

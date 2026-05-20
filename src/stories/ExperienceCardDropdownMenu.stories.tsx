@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import { ExperienceCardDropdownMenu } from '@/app/experience/_components/ExperienceCardDropdownMenu';
+import { ExperienceCardDropdownMenu } from '@/app/(pages)/experience/_components/ExperienceCardDropdownMenu';
 
 const meta = {
   title: 'Experience/ExperienceCardDropdownMenu',

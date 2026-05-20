@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import { ExperienceCard } from '@/app/experience/_components/ExperienceCard';
+import { ExperienceCard } from '@/app/(pages)/experience/_components/ExperienceCard';
 
 const meta = {
   title: 'Experience/ExperienceCard',

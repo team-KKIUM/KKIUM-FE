@@ -4,8 +4,8 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   ExperienceCategoryTabs,
   type ExperienceCategoryTabsProps,
-} from '@/app/experience/_components/ExperienceCategoryTabs';
-import type { ExperienceCategory } from '@/app/experience/_components/ExperienceCategoryTab';
+} from '@/app/(pages)/experience/_components/ExperienceCategoryTabs';
+import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
 
 const meta = {
   title: 'Experience/ExperienceCategoryTabs',

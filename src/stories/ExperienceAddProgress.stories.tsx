@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import { ExperienceAddProgress } from '@/app/experience/add/_components/ExperienceAddProgress';
+import { ExperienceAddProgress } from '@/app/(pages)/experience/add/_components/ExperienceAddProgress';
 
 const meta = {
   title: 'Experience/ExperienceAddProgress',
