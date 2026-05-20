@@ -11,16 +11,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Menu: Story = {
+export const Expanded: Story = {
   args: {
-    variant: 'menu',
     collapsed: false,
   },
 };
 
-export const FullMenu: Story = {
+export const Collapsed: Story = {
   args: {
-    variant: 'fullMenu',
-    collapsed: false,
+    collapsed: true,
   },
 };
