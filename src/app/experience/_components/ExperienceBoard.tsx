@@ -10,24 +10,34 @@ import {
 import type { ExperienceCategory } from '@/app/experience/_components/ExperienceCategoryTab';
 import { ExperienceCategoryTabs } from '@/app/experience/_components/ExperienceCategoryTabs';
 import { ExperienceDetailPanel } from '@/app/experience/_components/ExperienceDetailPanel';
+import {
+  mapExperienceCardToItem,
+  mapExperienceDetailToItem,
+} from '@/app/experience/_utils/mapExperienceResponse';
+import type { PieceType } from '@/app/api/experience/types';
 import { EmptyState } from '@/components/common/EmptyState';
+import { useExperienceDetail, useInfiniteExperiences } from '@/hooks/experience/useExperiences';
 import { cn } from '@/lib/utils';
 
 export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
-  experiences: ExperienceItem[];
   initialSelectedExperienceId?: string;
 }
 
 type ExperienceOrderMap = Record<ExperienceCategory, string[]>;
 
 const sortableCategories: ExperienceCategory[] = ['all', 'activity', 'career', 'education', 'etc'];
+const pieceTypeByCategory: Record<Exclude<ExperienceCategory, 'all'>, PieceType> = {
+  activity: 'ACTIVITY',
+  career: 'CAREER',
+  education: 'EDUCATION',
+  etc: 'ETC',
+};
 
 function isExperienceCategory(category: string | null): category is ExperienceCategory {
   return sortableCategories.includes(category as ExperienceCategory);
 }
 
 export function ExperienceBoard({
-  experiences,
   initialSelectedExperienceId,
   className,
   ...props
@@ -44,11 +54,39 @@ export function ExperienceBoard({
   const [selectedExperienceId, setSelectedExperienceId] = React.useState<string | undefined>(
     selectedExperienceIdFromQuery,
   );
+  const selectedPieceType =
+    selectedCategory === 'all' ? undefined : pieceTypeByCategory[selectedCategory];
+  const { data, fetchNextPage, hasNextPage, isError, isFetching, isFetchingNextPage, isPending } =
+    useInfiniteExperiences(selectedPieceType ? { type: selectedPieceType } : undefined);
+  const experiences = React.useMemo(
+    () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
+    [data],
+  );
   const [experienceOrderMap, setExperienceOrderMap] = React.useState(() =>
     createExperienceOrderMap(experiences),
   );
   const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
+  const hasAppliedInitialSelectionRef = React.useRef(false);
+  const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
+  const {
+    data: selectedExperienceDetail,
+    isError: isDetailError,
+    isFetching: isDetailFetching,
+    isPending: isDetailPending,
+  } = useExperienceDetail(
+    Number.isFinite(selectedExperienceNumericId) ? selectedExperienceNumericId : null,
+  );
+  const selectedExperienceDetailMatches =
+    selectedExperienceDetail?.experienceId === selectedExperienceNumericId;
+  const selectedExperienceDetailItem = React.useMemo(
+    () =>
+      selectedExperienceDetail && selectedExperienceDetailMatches
+        ? mapExperienceDetailToItem(selectedExperienceDetail)
+        : null,
+    [selectedExperienceDetail, selectedExperienceDetailMatches],
+  );
 
   React.useEffect(() => {
     setExperienceOrderMap((currentOrderMap) => {
@@ -63,7 +101,7 @@ export function ExperienceBoard({
   }, [experiences]);
 
   React.useEffect(() => {
-    if (!selectedExperienceIdFromQuery) {
+    if (hasAppliedInitialSelectionRef.current || !selectedExperienceIdFromQuery) {
       return;
     }
 
@@ -83,6 +121,7 @@ export function ExperienceBoard({
     setSelectedCategory(initialSelectedCategory);
     setSelectedExperienceId(initialSelectedExperience.id);
     setPanelOpen(true);
+    hasAppliedInitialSelectionRef.current = true;
   }, [experiences, initialSelectedCategory, selectedExperienceIdFromQuery]);
 
   React.useEffect(() => {
@@ -92,6 +131,29 @@ export function ExperienceBoard({
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    const loadMoreElement = loadMoreRef.current;
+
+    if (!loadMoreElement || !hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '240px 0px' },
+    );
+
+    observer.observe(loadMoreElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const experienceMap = React.useMemo(
     () => new Map(experiences.map((experience) => [experience.id, experience])),
@@ -109,6 +171,13 @@ export function ExperienceBoard({
   const selectedExperience = filteredExperiences.find(
     (experience) => experience.id === selectedExperienceId,
   );
+  const panelExperience = selectedExperienceDetailItem ?? selectedExperience;
+  const showDetailLoading =
+    panelOpen &&
+    Boolean(selectedExperienceId) &&
+    (isDetailPending || (isDetailFetching && !selectedExperienceDetailMatches));
+  const showListLoading =
+    isPending || (isFetching && !isFetchingNextPage && filteredExperiences.length === 0);
 
   const handleCategoryChange = (category: ExperienceCategory) => {
     if (closeTimerRef.current) {
@@ -159,11 +228,11 @@ export function ExperienceBoard({
   };
 
   const handlePanelExpand = () => {
-    if (!selectedExperience) {
+    if (!panelExperience) {
       return;
     }
 
-    router.push(`/experience/${selectedExperience.id}?category=${selectedCategory}`);
+    router.push(`/experience/${panelExperience.id}?category=${selectedCategory}`);
   };
 
   return (
@@ -176,14 +245,34 @@ export function ExperienceBoard({
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
-      {filteredExperiences.length > 0 ? (
-        <ExperienceCardGrid
-          experiences={filteredExperiences}
-          selectedExperienceId={selectedExperienceId}
-          sortable
-          onExperienceClick={handleExperienceSelect}
-          onExperienceReorder={handleExperienceReorder}
-        />
+      {/* TODO: 로딩/에러 상태 전용 UI가 확정되면 임시 EmptyState를 교체한다. */}
+      {showListLoading ? (
+        <div className="flex flex-1 items-center justify-center">
+          <EmptyState title="경험을 불러오는 중이에요" illustrationLabel="경험 목록 로딩 중" />
+        </div>
+      ) : isError ? (
+        <div className="flex flex-1 items-center justify-center">
+          <EmptyState
+            title="경험을 불러오지 못했어요"
+            description="잠시 후 다시 시도해주세요"
+            illustrationLabel="경험 목록 오류"
+          />
+        </div>
+      ) : filteredExperiences.length > 0 ? (
+        <>
+          <ExperienceCardGrid
+            experiences={filteredExperiences}
+            selectedExperienceId={selectedExperienceId}
+            sortable
+            onExperienceClick={handleExperienceSelect}
+            onExperienceReorder={handleExperienceReorder}
+          />
+          <div ref={loadMoreRef} aria-hidden="true" className="h-1" />
+          {/* TODO: 다음 페이지 로딩 UI가 확정되면 임시 문구를 교체한다. */}
+          {isFetchingNextPage && (
+            <p className="text-center body-3-regular text-tertiary">경험을 더 불러오는 중이에요</p>
+          )}
+        </>
       ) : (
         <div className="flex flex-1 items-center justify-center">
           <EmptyState
@@ -193,10 +282,12 @@ export function ExperienceBoard({
           />
         </div>
       )}
-      {selectedExperience && (
+      {panelExperience && (
         <ExperienceDetailPanel
-          experience={selectedExperience}
+          experience={panelExperience}
           open={panelOpen}
+          detailError={isDetailError}
+          detailLoading={showDetailLoading}
           onExpand={handlePanelExpand}
           onClose={handlePanelClose}
         />

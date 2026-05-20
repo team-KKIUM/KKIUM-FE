@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { ExperienceDetailPageContent } from '@/app/experience/[experienceId]/_components/ExperienceDetailPageContent';
-import { experienceMockData } from '@/app/experience/_constants/experienceMockData';
 
 export default async function ExperienceDetailPage({
   params,
@@ -10,15 +9,15 @@ export default async function ExperienceDetailPage({
   params: Promise<{ experienceId: string }>;
 }) {
   const { experienceId } = await params;
-  const experience = experienceMockData.find((item) => item.id === experienceId);
+  const numericExperienceId = Number(experienceId);
 
-  if (!experience) {
+  if (!Number.isInteger(numericExperienceId) || numericExperienceId <= 0) {
     notFound();
   }
 
   return (
     <Suspense>
-      <ExperienceDetailPageContent experience={experience} />
+      <ExperienceDetailPageContent experienceId={numericExperienceId} />
     </Suspense>
   );
 }
