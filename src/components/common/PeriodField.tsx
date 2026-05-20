@@ -21,6 +21,8 @@ export interface RecruitmentPeriodFieldProps {
   onChange?: (range: CalendarDateRange | null) => void;
   defaultVisibleMonth?: Date;
   className?: string;
+  disabled?: boolean;
+  showLabel?: boolean;
 }
 
 export function RecruitmentPeriodField({
@@ -31,6 +33,8 @@ export function RecruitmentPeriodField({
   onChange,
   defaultVisibleMonth,
   className,
+  disabled = false,
+  showLabel = true,
 }: RecruitmentPeriodFieldProps) {
   const isControlled = valueProp !== undefined;
   const [innerRange, setInnerRange] = React.useState<CalendarDateRange | null>(defaultRange);
@@ -44,6 +48,10 @@ export function RecruitmentPeriodField({
     if (!isControlled) setInnerRange(next);
     onChange?.(next);
   };
+
+  React.useEffect(() => {
+    if (disabled && open) setOpen(false);
+  }, [disabled, open]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -68,20 +76,25 @@ export function RecruitmentPeriodField({
   const visibleMonth = defaultVisibleMonth ?? range?.start ?? new Date();
 
   return (
-    <div className={cn('flex w-full flex-col gap-4', className)}>
-      <p className="title-2-bold text-strong">{label}</p>
+    <div className={cn('flex w-full flex-col', showLabel ? 'gap-4' : 'gap-0', className)}>
+      {showLabel ? <p className="title-2-bold text-strong">{label}</p> : null}
 
       <div ref={rootRef} className="relative">
         <button
           type="button"
+          disabled={disabled}
           aria-expanded={open}
           aria-controls={listboxId}
           aria-haspopup="dialog"
           className={cn(
-            'flex h-14 w-full items-center gap-2 rounded-lg border border-gray-300 px-4 text-left outline-none transition-colors',
-            ' focus-visible:border-mint-main focus-visible:shadow-focus-ring',
+            'flex h-14 w-full items-center gap-2 rounded-lg border border-gray-300 bg-background-default px-4 text-left outline-none transition-colors',
+            'hover:border-gray-400 focus-visible:border-mint-main focus-visible:shadow-focus-ring',
+            disabled && 'pointer-events-none cursor-not-allowed opacity-60',
           )}
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => {
+            if (disabled) return;
+            setOpen((v) => !v);
+          }}
         >
           <CalendarIcon className="size-6 shrink-0 text-quaternary" aria-hidden />
           <span className={cn('min-w-0 flex-1 truncate body-2-regular', display ? 'text-strong' : 'text-quaternary')}>

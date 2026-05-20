@@ -8,7 +8,7 @@ export default function ApplyListPage() {
   const hasCards = applyListMockData.length > 0;
 
   return (
-    <section className="w-full px-40">
+    <section className="w-full px-32">
       <div className="flex w-full min-w-0 max-w-[1560px] flex-col gap-5">
         <h1 className="max-w-[687px] text-2xl font-extrabold leading-9 text-gray-main">
           지원 관리
