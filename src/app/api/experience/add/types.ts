@@ -39,3 +39,12 @@ export interface ExperienceAnalyzeResponse {
   taken: string | null;
   tags: TagResponse[];
 }
+
+export interface NotionPageResponse {
+  pageId: string;
+  title: string;
+}
+
+export interface NotionPageListResponse {
+  pages: NotionPageResponse[];
+}

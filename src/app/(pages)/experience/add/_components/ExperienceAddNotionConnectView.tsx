@@ -1,12 +1,19 @@
 import { NotionIcon } from '@/components/common/icons/NotionIcon';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
+import { useNotionAuthUrl } from '@/hooks/experience/useExperienceAdd';
 
-interface ExperienceAddNotionConnectViewProps {
-  onConnect: () => void;
-}
+export function ExperienceAddNotionConnectView() {
+  const notionAuthUrlQuery = useNotionAuthUrl();
 
-export function ExperienceAddNotionConnectView({ onConnect }: ExperienceAddNotionConnectViewProps) {
+  const connectNotion = async () => {
+    const { data: authUrl } = await notionAuthUrlQuery.refetch();
+
+    if (!authUrl) return;
+
+    window.location.href = authUrl;
+  };
+
   return (
     <div className="flex h-[474px] w-full flex-col items-center justify-center gap-3">
       <NotionIcon className="size-[60.25px]" />
@@ -23,10 +30,11 @@ export function ExperienceAddNotionConnectView({ onConnect }: ExperienceAddNotio
         type="button"
         size="small"
         className="h-9 px-2.5 label-3-bold"
+        disabled={notionAuthUrlQuery.isFetching}
         leftIcon={<PlusIcon />}
-        onClick={onConnect}
+        onClick={connectNotion}
       >
-        노션 연결하기
+        {notionAuthUrlQuery.isFetching ? '연결 중...' : '노션 연결하기'}
       </Button>
     </div>
   );

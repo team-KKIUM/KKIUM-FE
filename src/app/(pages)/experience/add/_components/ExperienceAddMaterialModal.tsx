@@ -117,7 +117,7 @@ export function ExperienceAddMaterialModal({ materials, onSave }: ExperienceAddM
           <ExperienceAddMaterialModalHeader />
 
           {modalView === 'notion-connect' ? (
-            <ExperienceAddNotionConnectView onConnect={() => setModalView('notion-pages')} />
+            <ExperienceAddNotionConnectView />
           ) : (
             <ExperienceAddMaterialSelectView
               materials={draftMaterials}
