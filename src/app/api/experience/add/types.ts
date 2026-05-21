@@ -45,6 +45,32 @@ export interface ExperienceAnalyzeMaterialsRequest {
   pageId?: string;
 }
 
+export interface ExperienceCreateTagRequest {
+  category: 'TECH' | 'COMPETENCY';
+  field: string;
+}
+
+export interface ExperienceCreateRequest {
+  type: 'ACTIVITY' | 'CAREER' | 'EDUCATION' | 'ETC';
+  title: string;
+  oneLineIntro: string;
+  startDate: string;
+  endDate: string;
+  situation: string;
+  task: string;
+  act: string;
+  result: string;
+  taken: string;
+  tags: ExperienceCreateTagRequest[];
+  name?: string;
+  teamNum?: number;
+  role?: string;
+  contributionRate?: number;
+  company?: string;
+  employmentStatus?: string;
+  organizationName?: string;
+}
+
 export interface NotionPageResponse {
   pageId: string;
   title: string;

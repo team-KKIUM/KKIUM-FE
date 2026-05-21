@@ -21,6 +21,7 @@ import {
   mapAnalyzeResponseToCoreInfoForm,
   mapAnalyzeResponseToResultInfoForm,
 } from '@/app/(pages)/experience/add/_utils/mapAnalyzeResponseToBasicInfoForm';
+import { mapExperienceAddFormToCreateRequest } from '@/app/(pages)/experience/add/_utils/mapExperienceAddFormToCreateRequest';
 import {
   clearExperienceAddPdfDraft,
   getExperienceAddPdfDraft,
@@ -31,6 +32,7 @@ import {
   useAnalyzeExperienceMaterials,
   useAnalyzeExperienceNotion,
   useAnalyzeExperiencePdf,
+  useCreateExperience,
 } from '@/hooks/experience/useExperienceAdd';
 
 export function ExperienceAddPageContent() {
@@ -49,10 +51,12 @@ export function ExperienceAddPageContent() {
   const analyzePdfMutation = useAnalyzeExperiencePdf();
   const analyzeNotionMutation = useAnalyzeExperienceNotion();
   const analyzeMaterialsMutation = useAnalyzeExperienceMaterials();
+  const createExperienceMutation = useCreateExperience();
   const isAnalyzing =
     analyzePdfMutation.isPending ||
     analyzeNotionMutation.isPending ||
     analyzeMaterialsMutation.isPending;
+  const isSaving = createExperienceMutation.isPending;
   const isFirstStep = currentStepIndex === 0;
   const isCompleteStep = currentStepIndex === EXPERIENCE_ADD_STEPS.length;
 
@@ -130,6 +134,21 @@ export function ExperienceAddPageContent() {
       }
     }
 
+    if (currentStepIndex === EXPERIENCE_ADD_STEPS.length - 1) {
+      try {
+        await createExperienceMutation.mutateAsync(
+          mapExperienceAddFormToCreateRequest({
+            basicInfo,
+            coreInfo,
+            resultInfo,
+          }),
+        );
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.');
+        return;
+      }
+    }
+
     setCurrentStepIndex((stepIndex) => Math.min(stepIndex + 1, EXPERIENCE_ADD_STEPS.length));
   };
 
@@ -173,8 +192,13 @@ export function ExperienceAddPageContent() {
               이전
             </Button>
           )}
-          <Button type="button" className="w-40" disabled={isAnalyzing} onClick={goNextStep}>
-            다음
+          <Button
+            type="button"
+            className="w-40"
+            disabled={isAnalyzing || isSaving}
+            onClick={goNextStep}
+          >
+            {currentStepIndex === EXPERIENCE_ADD_STEPS.length - 1 ? '저장하기' : '다음'}
           </Button>
         </footer>
       )}

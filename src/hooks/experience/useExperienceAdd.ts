@@ -6,6 +6,7 @@ import {
   analyzeExperienceMaterials,
   analyzeExperienceNotion,
   analyzeExperiencePdf,
+  createExperience,
   getNotionAuthUrl,
   getNotionPages,
 } from '@/app/api/experience/add';
@@ -25,6 +26,12 @@ export function useAnalyzeExperiencePdf() {
 export function useAnalyzeExperienceMaterials() {
   return useMutation({
     mutationFn: analyzeExperienceMaterials,
+  });
+}
+
+export function useCreateExperience() {
+  return useMutation({
+    mutationFn: createExperience,
   });
 }
 

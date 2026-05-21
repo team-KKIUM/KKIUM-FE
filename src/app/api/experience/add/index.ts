@@ -3,6 +3,7 @@ import { api } from '@/app/api/client';
 import type {
   ExperienceAnalyzeMaterialsRequest,
   ExperienceAnalyzeResponse,
+  ExperienceCreateRequest,
   NotionPageListResponse,
 } from './types';
 
@@ -39,4 +40,8 @@ export function analyzeExperienceNotion(pageId: string) {
   return api.post<ExperienceAnalyzeResponse>('/api/v1/experiences/analyze/notion', undefined, {
     params: { pageId },
   });
+}
+
+export function createExperience(request: ExperienceCreateRequest) {
+  return api.post<null>('/api/v1/experiences', request);
 }
