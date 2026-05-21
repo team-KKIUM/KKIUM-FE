@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - corepack enable
+      - corepack prepare pnpm@9.12.3 --activate
+      - pnpm --version
+      - pnpm install --frozen-lockfile
+
+  build:
+    commands:
+      - pnpm build
+
+artifacts:
+  base-directory: out
+  files:
+    - '**/*'

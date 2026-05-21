@@ -3,6 +3,13 @@ import { Suspense } from 'react';
 
 import { ExperienceDetailPageContent } from '@/app/(pages)/experience/[experienceId]/_components/ExperienceDetailPageContent';
 
+export function generateStaticParams() {
+  // S3 동적 라우트 대응 
+  return Array.from({ length: 20 }, (_, index) => ({
+    experienceId: String(index + 1),
+  }));
+}
+
 export default async function ExperienceDetailPage({
   params,
 }: {
