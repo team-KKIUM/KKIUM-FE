@@ -71,13 +71,11 @@ export const EXPERIENCE_TYPE_FIELD_GROUPS: Record<
     },
     {
       number: '06.',
-      label: '시작 날짜',
-      fields: [{ name: 'startDate', variant: 'date' }],
-    },
-    {
-      number: '07.',
-      label: '종료 날짜',
-      fields: [{ name: 'endDate', variant: 'date' }],
+      label: '날짜',
+      fields: [
+        { name: 'startDate', variant: 'date' },
+        { name: 'endDate', variant: 'date' },
+      ],
     },
   ],
   career: [
@@ -103,13 +101,11 @@ export const EXPERIENCE_TYPE_FIELD_GROUPS: Record<
     },
     {
       number: '06.',
-      label: '시작 날짜',
-      fields: [{ name: 'startDate', variant: 'date' }],
-    },
-    {
-      number: '07.',
-      label: '종료 날짜',
-      fields: [{ name: 'endDate', variant: 'date' }],
+      label: '날짜',
+      fields: [
+        { name: 'startDate', variant: 'date' },
+        { name: 'endDate', variant: 'date' },
+      ],
     },
   ],
   education: [
@@ -135,13 +131,11 @@ export const EXPERIENCE_TYPE_FIELD_GROUPS: Record<
     },
     {
       number: '06.',
-      label: '시작 날짜',
-      fields: [{ name: 'startDate', variant: 'date' }],
-    },
-    {
-      number: '07.',
-      label: '종료 날짜',
-      fields: [{ name: 'endDate', variant: 'date' }],
+      label: '날짜',
+      fields: [
+        { name: 'startDate', variant: 'date' },
+        { name: 'endDate', variant: 'date' },
+      ],
     },
   ],
   etc: [
@@ -157,13 +151,11 @@ export const EXPERIENCE_TYPE_FIELD_GROUPS: Record<
     },
     {
       number: '04.',
-      label: '시작 날짜',
-      fields: [{ name: 'startDate', variant: 'date' }],
-    },
-    {
-      number: '05.',
-      label: '종료 날짜',
-      fields: [{ name: 'endDate', variant: 'date' }],
+      label: '날짜',
+      fields: [
+        { name: 'startDate', variant: 'date' },
+        { name: 'endDate', variant: 'date' },
+      ],
     },
   ],
 };

@@ -73,25 +73,32 @@ export function ExperienceAddBasicInfoStep({ value, onChange }: ExperienceAddBas
 
       {selectedFieldGroups.length > 0 && (
         <div className="grid w-full grid-cols-2 gap-x-4 gap-y-7">
-          {selectedFieldGroups.map((fieldGroup) => (
-            <QuestionFieldGroup
-              key={fieldGroup.number}
-              number={fieldGroup.number}
-              label={fieldGroup.label}
-              className={['02.', '03.'].includes(fieldGroup.number) ? 'col-span-2' : undefined}
-            >
-              {fieldGroup.fields.length > 1 ? (
-                <div className="grid w-full grid-cols-2 gap-2.5">
-                  {fieldGroup.fields.map((field, index) => (
-                    <div key={`${fieldGroup.number}-${index}`}>
-                      {field.variant === 'date' ? (
-                        <TextField
-                          variant="date"
-                          placeholder={field.placeholder}
-                          value={value[field.name]}
-                          description={false}
-                        />
-                      ) : (
+          {selectedFieldGroups.map((fieldGroup) => {
+            const isDateRangeGroup = fieldGroup.fields.every((field) => field.variant === 'date');
+
+            return (
+              <QuestionFieldGroup
+                key={fieldGroup.number}
+                number={fieldGroup.number}
+                label={fieldGroup.label}
+                className={
+                  ['02.', '03.'].includes(fieldGroup.number) || isDateRangeGroup
+                    ? 'col-span-2'
+                    : undefined
+                }
+              >
+                {isDateRangeGroup ? (
+                  <TextField
+                    variant="date"
+                    placeholder={DATE_RANGE_PLACEHOLDER}
+                    value={formatDateRangeValue(value.startDate, value.endDate)}
+                    className="border-gray-300"
+                    description={false}
+                  />
+                ) : fieldGroup.fields.length > 1 ? (
+                  <div className="grid w-full grid-cols-2 gap-2.5">
+                    {fieldGroup.fields.map((field, index) => (
+                      <div key={`${fieldGroup.number}-${index}`}>
                         <TextField
                           variant="input"
                           placeholder={field.placeholder}
@@ -99,35 +106,56 @@ export function ExperienceAddBasicInfoStep({ value, onChange }: ExperienceAddBas
                           description={false}
                           onChange={handleInputChange(field.name)}
                         />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                fieldGroup.fields[0] &&
-                (fieldGroup.fields[0].variant === 'date' ? (
-                  <TextField
-                    variant="date"
-                    placeholder={fieldGroup.fields[0].placeholder}
-                    value={value[fieldGroup.fields[0].name]}
-                    description={false}
-                  />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                  <TextField
-                    variant="input"
-                    placeholder={fieldGroup.fields[0].placeholder}
-                    value={value[fieldGroup.fields[0].name]}
-                    description={false}
-                    onChange={handleInputChange(fieldGroup.fields[0].name)}
-                  />
-                ))
-              )}
-            </QuestionFieldGroup>
-          ))}
+                  fieldGroup.fields[0] && (
+                    <TextField
+                      variant="input"
+                      placeholder={fieldGroup.fields[0].placeholder}
+                      value={value[fieldGroup.fields[0].name]}
+                      description={false}
+                      onChange={handleInputChange(fieldGroup.fields[0].name)}
+                    />
+                  )
+                )}
+              </QuestionFieldGroup>
+            );
+          })}
         </div>
       )}
     </section>
   );
+}
+
+const DATE_RANGE_PLACEHOLDER = '0000년 00월 00일 ~ 0000년 00월 00일';
+
+function formatDateRangeValue(startDate: string, endDate: string) {
+  const formattedStartDate = formatKoreanDateValue(startDate);
+  const formattedEndDate = formatKoreanDateValue(endDate);
+
+  if (!formattedStartDate || !formattedEndDate) return '';
+
+  return `${formattedStartDate} ~ ${formattedEndDate}`;
+}
+
+function formatKoreanDateValue(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return '';
+
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+  if (
+    date.getFullYear() !== Number(year) ||
+    date.getMonth() !== Number(month) - 1 ||
+    date.getDate() !== Number(day)
+  ) {
+    return '';
+  }
+
+  return `${year}년 ${month}월 ${day}일`;
 }
 
 function QuestionFieldGroup({
