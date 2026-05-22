@@ -39,13 +39,23 @@ async function runStoreTransaction<T>(
     const transaction = database.transaction(STORE_NAME, mode);
     const store = transaction.objectStore(STORE_NAME);
     const request = run(store);
+    let result: T;
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      result = request.result;
+    };
     request.onerror = () => reject(request.error);
-    transaction.oncomplete = () => database.close();
+    transaction.oncomplete = () => {
+      database.close();
+      resolve(result);
+    };
     transaction.onerror = () => {
       database.close();
       reject(transaction.error);
+    };
+    transaction.onabort = () => {
+      database.close();
+      reject(transaction.error || new Error('IndexedDB transaction aborted.'));
     };
   });
 }
