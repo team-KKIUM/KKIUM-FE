@@ -41,6 +41,7 @@ export function ExperienceAddUploadStep({
   const notionMaterials = materials.filter((material) => material.type === 'notion');
   const pdfMaterials = materials.filter((material) => material.type === 'pdf');
   const hasMaterials = materials.length > 0;
+  const isMaterialAddDisabled = notionMaterials.length > 0 && pdfMaterials.length > 0;
 
   const removeMaterial = (materialId: string) => {
     const removedMaterial = materials.find((material) => material.id === materialId);
@@ -99,9 +100,9 @@ export function ExperienceAddUploadStep({
         trigger={
           <Button
             type="button"
-            variant={hasMaterials ? 'secondary' : 'default'}
             className="label-3-bold"
             leftIcon={<PlusIcon />}
+            disabled={isMaterialAddDisabled}
             onClick={() => onMaterialModalInitialViewChange('material')}
           >
             자료 추가하기
