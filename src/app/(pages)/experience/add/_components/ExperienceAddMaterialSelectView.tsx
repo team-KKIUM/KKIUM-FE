@@ -76,7 +76,6 @@ export function ExperienceAddMaterialSelectView({
                 ref={fileInputRef}
                 type="file"
                 accept="application/pdf,.pdf"
-                multiple
                 className="sr-only"
                 onChange={(event) => {
                   addPdfFiles(event.currentTarget.files);
