@@ -15,6 +15,10 @@ export function analyzeExperiencePdf(file: File) {
 }
 
 export function analyzeExperienceMaterials({ file, pageId }: ExperienceAnalyzeMaterialsRequest) {
+  if (!file && !pageId) {
+    throw new Error('분석할 PDF 파일 또는 노션 페이지가 필요합니다.');
+  }
+
   const formData = new FormData();
 
   if (file) {
