@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { ExperienceAnalyzeResponse } from '@/app/api/experience/add/types';
 import type {
@@ -48,6 +48,7 @@ export function ExperienceAddPageContent() {
   const [basicInfo, setBasicInfo] = useState(createEmptyBasicInfoForm);
   const [coreInfo, setCoreInfo] = useState(createEmptyCoreInfoForm);
   const [resultInfo, setResultInfo] = useState(createEmptyResultInfoForm);
+  const isProcessingRef = useRef(false);
   const analyzePdfMutation = useAnalyzeExperiencePdf();
   const analyzeNotionMutation = useAnalyzeExperienceNotion();
   const analyzeMaterialsMutation = useAnalyzeExperienceMaterials();
@@ -99,57 +100,69 @@ export function ExperienceAddPageContent() {
   };
 
   const goNextStep = async () => {
-    if (currentStepIndex === 0) {
-      const pdfMaterial = materials.find((material) => material.type === 'pdf');
-      const notionMaterial = materials.find((material) => material.type === 'notion');
+    if (isProcessingRef.current) return;
 
-      try {
-        if (pdfMaterial && notionMaterial) {
-          const analyzeResponse = await analyzeMaterialsMutation.mutateAsync({
-            file: pdfMaterial?.file,
-            pageId: notionMaterial?.pageId,
-          });
+    isProcessingRef.current = true;
 
-          applyAnalyzeResponse(analyzeResponse);
-          void clearExperienceAddPdfDraft().catch((error: unknown) => {
-            console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
-          });
-        } else if (pdfMaterial) {
-          const analyzeResponse = await analyzePdfMutation.mutateAsync(pdfMaterial.file);
-          applyAnalyzeResponse(analyzeResponse);
-          void clearExperienceAddPdfDraft().catch((error: unknown) => {
-            console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
-          });
-        } else if (notionMaterial) {
-          const analyzeResponse = await analyzeNotionMutation.mutateAsync(notionMaterial.pageId);
-          applyAnalyzeResponse(analyzeResponse);
-        } else {
-          setBasicInfo(createEmptyBasicInfoForm());
-          setCoreInfo(createEmptyCoreInfoForm());
-          setResultInfo(createEmptyResultInfoForm());
+    try {
+      if (currentStepIndex === 0) {
+        const pdfMaterial = materials.find((material) => material.type === 'pdf');
+        const notionMaterial = materials.find((material) => material.type === 'notion');
+
+        try {
+          if (pdfMaterial && notionMaterial) {
+            const analyzeResponse = await analyzeMaterialsMutation.mutateAsync({
+              file: pdfMaterial?.file,
+              pageId: notionMaterial?.pageId,
+            });
+
+            applyAnalyzeResponse(analyzeResponse);
+            void clearExperienceAddPdfDraft().catch((error: unknown) => {
+              console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
+            });
+          } else if (pdfMaterial) {
+            const analyzeResponse = await analyzePdfMutation.mutateAsync(pdfMaterial.file);
+            applyAnalyzeResponse(analyzeResponse);
+            void clearExperienceAddPdfDraft().catch((error: unknown) => {
+              console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
+            });
+          } else if (notionMaterial) {
+            const analyzeResponse = await analyzeNotionMutation.mutateAsync(notionMaterial.pageId);
+            applyAnalyzeResponse(analyzeResponse);
+          } else {
+            setBasicInfo(createEmptyBasicInfoForm());
+            setCoreInfo(createEmptyCoreInfoForm());
+            setResultInfo(createEmptyResultInfoForm());
+          }
+        } catch (error) {
+          window.alert(
+            error instanceof Error ? error.message : '자료 분석 중 오류가 발생했습니다.',
+          );
+          return;
         }
-      } catch (error) {
-        window.alert(error instanceof Error ? error.message : '자료 분석 중 오류가 발생했습니다.');
-        return;
       }
-    }
 
-    if (currentStepIndex === EXPERIENCE_ADD_STEPS.length - 1) {
-      try {
-        await createExperienceMutation.mutateAsync(
-          mapExperienceAddFormToCreateRequest({
-            basicInfo,
-            coreInfo,
-            resultInfo,
-          }),
-        );
-      } catch (error) {
-        window.alert(error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.');
-        return;
+      if (currentStepIndex === EXPERIENCE_ADD_STEPS.length - 1) {
+        try {
+          await createExperienceMutation.mutateAsync(
+            mapExperienceAddFormToCreateRequest({
+              basicInfo,
+              coreInfo,
+              resultInfo,
+            }),
+          );
+        } catch (error) {
+          window.alert(
+            error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.',
+          );
+          return;
+        }
       }
-    }
 
-    setCurrentStepIndex((stepIndex) => Math.min(stepIndex + 1, EXPERIENCE_ADD_STEPS.length));
+      setCurrentStepIndex((stepIndex) => Math.min(stepIndex + 1, EXPERIENCE_ADD_STEPS.length));
+    } finally {
+      isProcessingRef.current = false;
+    }
   };
 
   return (
