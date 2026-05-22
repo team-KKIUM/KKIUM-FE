@@ -94,6 +94,7 @@ export function ExperienceAddNotionPageSelectView({
               <button
                 key={page.pageId}
                 type="button"
+                aria-pressed={isSelected}
                 className={cn(
                   'flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left',
                   'focus-visible:shadow-focus-ring focus-visible:outline-none',
