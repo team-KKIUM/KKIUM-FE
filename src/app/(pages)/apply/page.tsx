@@ -1,0 +1,30 @@
+'use client';
+
+import { useState } from 'react';
+
+import { ApplyJobHeader, type ApplyJobTab } from './_components/ApplyJobHeader';
+import { applyJobMockData } from './_constants/applyJobMockData';
+
+export default function ApplyPage() {
+  const [activeTab, setActiveTab] = useState<ApplyJobTab>('analysis');
+
+  return (
+    <section className="w-full px-32">
+      <div className="mx-auto flex w-full min-w-0 max-w-[1028px] flex-col gap-8">
+        <ApplyJobHeader
+          title={applyJobMockData.title}
+          companyName={applyJobMockData.companyName}
+          jobField={applyJobMockData.jobField}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {activeTab === 'analysis' ? (
+          <p className="text-base font-bold leading-6 text-tertiary">공고 분석 콘텐츠가 여기에 표시됩니다.</p>
+        ) : (
+          <p className="text-base font-bold leading-6 text-tertiary">자기소개서 작성 콘텐츠가 여기에 표시됩니다.</p>
+        )}
+      </div>
+    </section>
+  );
+}
