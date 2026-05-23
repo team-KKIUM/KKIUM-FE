@@ -8,7 +8,7 @@ import { ApplyText } from './ApplyText';
 export function ApplyAnalysis() {
   return (
     <section className="flex w-full flex-col gap-8">
-      <ApplySectionHeader title="공고 분석" />
+      <ApplySectionHeader title="공고 분석" infoVariant="job-analysis" />
 
       <ApplyFitScore value={applyJobAnalysisMockData.fitScore} />
 

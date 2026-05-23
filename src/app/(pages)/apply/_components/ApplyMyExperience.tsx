@@ -11,7 +11,7 @@ export function ApplyMyExperience() {
 
   return (
     <aside className="flex h-full w-full min-w-0 flex-col gap-5">
-      <ApplySectionHeader title="내 경험" />
+      <ApplySectionHeader title="내 경험" infoVariant="my-experience" />
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         {applyMyExperienceMockData.map((experience) => {
