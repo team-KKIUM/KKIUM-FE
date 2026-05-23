@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { ApplyAnalysis } from './_components/ApplyAnalysis';
 import { ApplyJobHeader, type ApplyJobTab } from './_components/ApplyJobHeader';
 import { applyJobMockData } from './_constants/applyJobMockData';
 
@@ -9,7 +10,7 @@ export default function ApplyPage() {
   const [activeTab, setActiveTab] = useState<ApplyJobTab>('analysis');
 
   return (
-    <section className="w-full px-32">
+    <section className="w-full px-10">
       <div className="mx-auto flex w-full min-w-0 max-w-[1028px] flex-col gap-8">
         <ApplyJobHeader
           title={applyJobMockData.title}
@@ -20,7 +21,7 @@ export default function ApplyPage() {
         />
 
         {activeTab === 'analysis' ? (
-          <p className="text-base font-bold leading-6 text-tertiary">공고 분석 콘텐츠가 여기에 표시됩니다.</p>
+          <ApplyAnalysis />
         ) : (
           <p className="text-base font-bold leading-6 text-tertiary">자기소개서 작성 콘텐츠가 여기에 표시됩니다.</p>
         )}
