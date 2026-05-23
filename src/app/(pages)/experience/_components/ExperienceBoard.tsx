@@ -9,16 +9,19 @@ import {
 } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
 import { ExperienceCategoryTabs } from '@/app/(pages)/experience/_components/ExperienceCategoryTabs';
+import type { ExperienceDetailSaveValue } from '@/app/(pages)/experience/_components/ExperienceDetailContent';
 import { ExperienceDetailPanel } from '@/app/(pages)/experience/_components/ExperienceDetailPanel';
 import {
   mapExperienceCardToItem,
   mapExperienceDetailToItem,
 } from '@/app/(pages)/experience/_utils/mapExperienceResponse';
+import { mapExperienceItemToUpdateRequest } from '@/app/(pages)/experience/_utils/mapExperienceItemToUpdateRequest';
 import type { PieceType } from '@/app/api/experience/types';
 import { EmptyState } from '@/components/common/EmptyState';
 import {
   useExperienceDetail,
   useInfiniteExperiences,
+  useUpdateExperience,
   useUpdateExperienceTitle,
 } from '@/hooks/experience/useExperiences';
 import { cn } from '@/lib/utils';
@@ -62,6 +65,7 @@ export function ExperienceBoard({
     selectedCategory === 'all' ? undefined : pieceTypeByCategory[selectedCategory];
   const { data, fetchNextPage, hasNextPage, isError, isFetching, isFetchingNextPage, isPending } =
     useInfiniteExperiences(selectedPieceType ? { type: selectedPieceType } : undefined);
+  const updateExperienceMutation = useUpdateExperience();
   const updateExperienceTitleMutation = useUpdateExperienceTitle();
   const experiences = React.useMemo(
     () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
@@ -235,6 +239,31 @@ export function ExperienceBoard({
     [updateExperienceTitleMutation],
   );
 
+  const handleExperienceDetailSave = React.useCallback(
+    async (nextExperience: ExperienceDetailSaveValue) => {
+      if (!panelExperience) {
+        throw new Error('수정할 경험 정보를 확인하지 못했습니다.');
+      }
+
+      const experienceId = Number(panelExperience.id);
+
+      if (!Number.isInteger(experienceId) || experienceId <= 0) {
+        throw new Error('수정할 경험 정보를 확인하지 못했습니다.');
+      }
+
+      const updatedExperience = {
+        ...panelExperience,
+        ...nextExperience,
+      };
+
+      await updateExperienceMutation.mutateAsync({
+        experienceId,
+        request: mapExperienceItemToUpdateRequest(updatedExperience),
+      });
+    },
+    [panelExperience, updateExperienceMutation],
+  );
+
   const handlePanelClose = () => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
@@ -311,6 +340,7 @@ export function ExperienceBoard({
           detailError={isDetailError}
           detailLoading={showDetailLoading}
           onExpand={handlePanelExpand}
+          onSave={handleExperienceDetailSave}
           onClose={handlePanelClose}
         />
       )}

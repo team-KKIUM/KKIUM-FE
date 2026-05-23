@@ -3,12 +3,16 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
-import { ExperienceDetailContent } from '@/app/(pages)/experience/_components/ExperienceDetailContent';
+import {
+  ExperienceDetailContent,
+  type ExperienceDetailSaveValue,
+} from '@/app/(pages)/experience/_components/ExperienceDetailContent';
 import { mapExperienceDetailToItem } from '@/app/(pages)/experience/_utils/mapExperienceResponse';
+import { mapExperienceItemToUpdateRequest } from '@/app/(pages)/experience/_utils/mapExperienceItemToUpdateRequest';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
-import { useExperienceDetail } from '@/hooks/experience/useExperiences';
+import { useExperienceDetail, useUpdateExperience } from '@/hooks/experience/useExperiences';
 
 interface ExperienceDetailPageContentProps {
   experienceId: number;
@@ -19,6 +23,7 @@ export function ExperienceDetailPageContent({ experienceId }: ExperienceDetailPa
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
   const { data, isError, isPending } = useExperienceDetail(experienceId);
+  const updateExperienceMutation = useUpdateExperience();
   const experience = React.useMemo(() => (data ? mapExperienceDetailToItem(data) : null), [data]);
 
   const handleCollapseToPanel = () => {
@@ -33,6 +38,20 @@ export function ExperienceDetailPageContent({ experienceId }: ExperienceDetailPa
 
   const handleBackToExperience = () => {
     router.push('/experience');
+  };
+
+  const handleExperienceSave = async (nextExperience: ExperienceDetailSaveValue) => {
+    if (!experience) {
+      throw new Error('수정할 경험 정보를 확인하지 못했습니다.');
+    }
+
+    await updateExperienceMutation.mutateAsync({
+      experienceId,
+      request: mapExperienceItemToUpdateRequest({
+        ...experience,
+        ...nextExperience,
+      }),
+    });
   };
 
   return (
@@ -74,7 +93,12 @@ export function ExperienceDetailPageContent({ experienceId }: ExperienceDetailPa
             />
           </div>
         ) : (
-          <ExperienceDetailContent experience={experience} variant="page" scrollable={false} />
+          <ExperienceDetailContent
+            experience={experience}
+            variant="page"
+            scrollable={false}
+            onSave={handleExperienceSave}
+          />
         )}
       </div>
     </div>

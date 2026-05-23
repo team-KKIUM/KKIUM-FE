@@ -2,7 +2,10 @@
 
 import * as React from 'react';
 
-import { ExperienceDetailContent } from '@/app/(pages)/experience/_components/ExperienceDetailContent';
+import {
+  ExperienceDetailContent,
+  type ExperienceDetailSaveValue,
+} from '@/app/(pages)/experience/_components/ExperienceDetailContent';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
@@ -17,19 +20,7 @@ export interface ExperienceDetailPanelProps extends Omit<
   open: boolean;
   onExpand?: () => void;
   onEdit?: () => void;
-  onSave?: (
-    experience: Pick<
-      ExperienceItem,
-      | 'title'
-      | 'description'
-      | 'basicDetail'
-      | 'detail'
-      | 'skillTags'
-      | 'competencyTags'
-      | 'startDate'
-      | 'endDate'
-    >,
-  ) => void;
+  onSave?: (experience: ExperienceDetailSaveValue) => Promise<void> | void;
   detailError?: boolean;
   detailLoading?: boolean;
   onClose: () => void;

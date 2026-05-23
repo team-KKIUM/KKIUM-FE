@@ -28,6 +28,17 @@ const detailFields = [
 
 type EditableTagGroupKey = 'skill' | 'competency';
 type BasicDetailKey = keyof ExperienceItem['basicDetail'];
+export type ExperienceDetailSaveValue = Pick<
+  ExperienceItem,
+  | 'title'
+  | 'description'
+  | 'basicDetail'
+  | 'detail'
+  | 'skillTags'
+  | 'competencyTags'
+  | 'startDate'
+  | 'endDate'
+>;
 
 export interface ExperienceDetailContentProps extends React.ComponentProps<'div'> {
   experience: ExperienceItem;
@@ -35,19 +46,7 @@ export interface ExperienceDetailContentProps extends React.ComponentProps<'div'
   defaultEditing?: boolean;
   scrollable?: boolean;
   onEdit?: () => void;
-  onSave?: (
-    experience: Pick<
-      ExperienceItem,
-      | 'title'
-      | 'description'
-      | 'basicDetail'
-      | 'detail'
-      | 'skillTags'
-      | 'competencyTags'
-      | 'startDate'
-      | 'endDate'
-    >,
-  ) => void;
+  onSave?: (experience: ExperienceDetailSaveValue) => Promise<void> | void;
 }
 
 export function ExperienceDetailContent({
@@ -71,6 +70,7 @@ export function ExperienceDetailContent({
   const [skillTags, setSkillTags] = React.useState(experience.skillTags);
   const [competencyTags, setCompetencyTags] = React.useState(experience.competencyTags);
   const [isEditing, setIsEditing] = React.useState(defaultEditing);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [editingTagGroup, setEditingTagGroup] = React.useState<EditableTagGroupKey | null>(null);
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
   const [datePickerTop, setDatePickerTop] = React.useState<number | null>(null);
@@ -93,6 +93,7 @@ export function ExperienceDetailContent({
     setSkillTags(experience.skillTags);
     setCompetencyTags(experience.competencyTags);
     setIsEditing(defaultEditing);
+    setIsSaving(false);
     setEditingTagGroup(null);
     setDatePickerOpen(false);
     setDatePickerTop(null);
@@ -176,21 +177,26 @@ export function ExperienceDetailContent({
     setEditingTagGroup(null);
   };
 
-  const handleSaveEdit = () => {
-    onSave?.({
-      title,
-      description,
-      detail,
-      basicDetail,
-      startDate,
-      endDate,
-      skillTags,
-      competencyTags,
-    });
-    setIsEditing(false);
-    setEditingTagGroup(null);
-    setDatePickerOpen(false);
-    setDatePickerTop(null);
+  const handleSaveEdit = async () => {
+    try {
+      setIsSaving(true);
+      await onSave?.({
+        title,
+        description,
+        detail,
+        basicDetail,
+        startDate,
+        endDate,
+        skillTags,
+        competencyTags,
+      });
+      setIsEditing(false);
+      setEditingTagGroup(null);
+      setDatePickerOpen(false);
+      setDatePickerTop(null);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleDatePicker = () => {
@@ -245,8 +251,8 @@ export function ExperienceDetailContent({
           </div>
 
           {isEditing ? (
-            <Button type="button" onClick={handleSaveEdit}>
-              저장하기
+            <Button type="button" disabled={isSaving} onClick={handleSaveEdit}>
+              {isSaving ? '저장 중...' : '저장하기'}
             </Button>
           ) : (
             <Button type="button" variant="secondary" onClick={handleEditClick}>
