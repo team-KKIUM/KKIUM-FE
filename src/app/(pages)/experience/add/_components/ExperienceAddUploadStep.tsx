@@ -1,10 +1,79 @@
-import { ExperienceAddMaterialModal } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
+'use client';
+
+import Image from 'next/image';
+import type { ReactNode } from 'react';
+
+import {
+  ExperienceAddMaterialModal,
+  type PdfMaterial,
+  type ExperienceAddMaterialModalView,
+  type ExperienceMaterial,
+} from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
+import {
+  clearExperienceAddPdfDraft,
+  saveExperienceAddPdfDraft,
+} from '@/app/(pages)/experience/add/_utils/experienceAddPdfDraftStorage';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Modal } from '@/components/common/Modal';
+import { Tag } from '@/components/common/Tag';
+import { NotionIcon } from '@/components/common/icons/NotionIcon';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
+import { XIcon } from '@/components/common/icons/XIcon';
 import { Button } from '@/components/ui/button';
 
-export function ExperienceAddUploadStep() {
+interface ExperienceAddUploadStepProps {
+  materials: ExperienceMaterial[];
+  isMaterialModalOpen: boolean;
+  materialModalInitialView: ExperienceAddMaterialModalView;
+  onMaterialModalOpenChange: (isOpen: boolean) => void;
+  onMaterialModalInitialViewChange: (view: ExperienceAddMaterialModalView) => void;
+  onMaterialsChange: (materials: ExperienceMaterial[]) => void;
+}
+
+export function ExperienceAddUploadStep({
+  materials,
+  isMaterialModalOpen,
+  materialModalInitialView,
+  onMaterialModalOpenChange,
+  onMaterialModalInitialViewChange,
+  onMaterialsChange,
+}: ExperienceAddUploadStepProps) {
+  const notionMaterials = materials.filter((material) => material.type === 'notion');
+  const pdfMaterials = materials.filter((material) => material.type === 'pdf');
+  const hasMaterials = materials.length > 0;
+  const isMaterialAddDisabled = notionMaterials.length > 0 && pdfMaterials.length > 0;
+
+  const removeMaterial = (materialId: string) => {
+    const removedMaterial = materials.find((material) => material.id === materialId);
+
+    if (removedMaterial?.type === 'pdf') {
+      void clearExperienceAddPdfDraft().catch((error: unknown) => {
+        console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
+      });
+    }
+
+    onMaterialsChange(materials.filter((material) => material.id !== materialId));
+  };
+
+  const saveMaterials = (nextMaterials: ExperienceMaterial[]) => {
+    const pdfMaterial = nextMaterials.find(
+      (material): material is PdfMaterial => material.type === 'pdf',
+    );
+
+    if (pdfMaterial) {
+      void saveExperienceAddPdfDraft(pdfMaterial).catch((error: unknown) => {
+        console.warn('PDF 임시 저장 데이터를 저장하지 못했습니다.', error);
+      });
+    } else {
+      void clearExperienceAddPdfDraft().catch((error: unknown) => {
+        console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
+      });
+    }
+
+    onMaterialsChange(nextMaterials);
+    onMaterialModalOpenChange(false);
+  };
+
   return (
     <section
       aria-labelledby="experience-add-upload-title"
@@ -25,22 +94,127 @@ export function ExperienceAddUploadStep() {
       </div>
 
       <Modal
+        open={isMaterialModalOpen}
         showCloseButton
+        onOpenChange={onMaterialModalOpenChange}
         trigger={
-          <Button type="button" className="h-10 w-full body-3-bold" leftIcon={<PlusIcon />}>
+          <Button
+            type="button"
+            className="label-3-bold"
+            leftIcon={<PlusIcon />}
+            disabled={isMaterialAddDisabled}
+            onClick={() => onMaterialModalInitialViewChange('material')}
+          >
             자료 추가하기
           </Button>
         }
       >
-        <ExperienceAddMaterialModal />
+        <ExperienceAddMaterialModal
+          materials={materials}
+          initialView={materialModalInitialView}
+          onSave={saveMaterials}
+        />
       </Modal>
 
-      <div className="h-[357px] w-full rounded-lg bg-gray-100 py-5">
-        <EmptyState
-          title="아직 추가한 경험이 없어요"
-          description="지금 당장 파일이 없다면 다음 단계로 바로 넘어가도 괜찮아요!"
-        />
-      </div>
+      {hasMaterials ? (
+        <div className="flex w-full flex-col gap-4">
+          {notionMaterials.length > 0 && (
+            <ExperienceMaterialSection title="Notion">
+              {notionMaterials.map((material) => (
+                <ExperienceMaterialCard
+                  key={material.id}
+                  material={material}
+                  onRemove={() => removeMaterial(material.id)}
+                />
+              ))}
+            </ExperienceMaterialSection>
+          )}
+
+          {pdfMaterials.length > 0 && (
+            <ExperienceMaterialSection title="PDF 파일">
+              {pdfMaterials.map((material) => (
+                <ExperienceMaterialCard
+                  key={material.id}
+                  material={material}
+                  onRemove={() => removeMaterial(material.id)}
+                />
+              ))}
+            </ExperienceMaterialSection>
+          )}
+        </div>
+      ) : (
+        <div className="h-[357px] w-full rounded-lg bg-gray-100 py-5">
+          <EmptyState
+            title="아직 추가한 경험이 없어요"
+            description="지금 당장 파일이 없다면 다음 단계로 바로 넘어가도 괜찮아요!"
+          />
+        </div>
+      )}
     </section>
   );
+}
+
+function ExperienceMaterialSection({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <section className="flex w-full flex-col gap-2" aria-label={title}>
+      <h3 className="title-1-bold text-strong">{title}</h3>
+      <div className="flex w-full flex-col gap-2.5">{children}</div>
+    </section>
+  );
+}
+
+function ExperienceMaterialCard({
+  material,
+  onRemove,
+}: {
+  material: ExperienceMaterial;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex w-full items-center justify-between rounded-lg bg-gray-50 px-2.5 py-2">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-sm">
+          {material.type === 'pdf' ? (
+            <Image src="/pdf.svg" alt="" width={22} height={28} className="h-7 w-[22px]" />
+          ) : (
+            <NotionIcon className="size-6" />
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="truncate body-1-bold text-strong">
+            {material.type === 'pdf' ? material.name : material.title}
+          </p>
+          {material.type === 'pdf' ? (
+            <p className="body-2-bold text-gray-600">
+              {formatFileSize(material.size)} 중 {formatFileSize(material.size)}
+            </p>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <Tag tone="competency">페이지</Tag>
+              <span className="body-2-regular text-gray-600">
+                {material.updatedAt ?? '최근 수정일 정보 없음'}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        aria-label={`${material.type === 'pdf' ? material.name : material.title} 자료 삭제`}
+        className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-background-w text-gray-main transition-colors hover:bg-gray-100 focus-visible:shadow-focus-ring focus-visible:outline-none"
+        onClick={onRemove}
+      >
+        <XIcon className="size-6" />
+      </button>
+    </div>
+  );
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  return `${Math.round(size / 1024)} KB`;
 }

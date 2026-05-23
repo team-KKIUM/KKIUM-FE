@@ -2,10 +2,23 @@ import {
   CORE_EXPERIENCE_FIELDS,
   CORE_EXPERIENCE_TIPS,
 } from '@/app/(pages)/experience/add/_constants/experienceCoreQuestions';
+import type { ExperienceAddCoreInfoForm } from '@/app/(pages)/experience/add/_types/experienceAddForm';
 import { TextField } from '@/components/common/TextField';
 import { CoreTipIcon } from '@/components/common/icons/CoreTipIcon';
 
-export function ExperienceAddCoreStep() {
+interface ExperienceAddCoreStepProps {
+  value: ExperienceAddCoreInfoForm;
+  onChange: (value: ExperienceAddCoreInfoForm) => void;
+}
+
+export function ExperienceAddCoreStep({ value, onChange }: ExperienceAddCoreStepProps) {
+  const updateField = (fieldName: keyof ExperienceAddCoreInfoForm, fieldValue: string) => {
+    onChange({
+      ...value,
+      [fieldName]: fieldValue,
+    });
+  };
+
   return (
     <section
       aria-labelledby="experience-add-core-title"
@@ -45,6 +58,8 @@ export function ExperienceAddCoreStep() {
             number={field.number}
             label={field.label}
             placeholder={field.placeholder}
+            value={value[field.name]}
+            onChange={(fieldValue) => updateField(field.name, fieldValue)}
           />
         ))}
       </div>
@@ -56,10 +71,14 @@ function CoreQuestionField({
   number,
   label,
   placeholder,
+  value,
+  onChange,
 }: {
   number: string;
   label: string;
   placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <div className="flex w-full flex-col gap-4">
@@ -70,8 +89,9 @@ function CoreQuestionField({
       <TextField
         variant="textarea"
         placeholder={placeholder}
+        value={value}
         description={false}
-        className="min-h-[140px]"
+        onChange={(event) => onChange(event.currentTarget.value)}
       />
     </div>
   );
