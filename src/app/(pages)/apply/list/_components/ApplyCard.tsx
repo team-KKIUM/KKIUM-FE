@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import Link from 'next/link';
 import * as React from 'react';
 
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
@@ -116,13 +119,14 @@ export function ApplyCard({
         </div>
       </div>
 
-      <button
-        type="button"
+      <Link
+        href="/apply"
         className="inline-flex h-10 w-full items-center justify-center gap-1 rounded-lg bg-mint-50 px-3 py-1 text-mint-600"
+        onClick={(event) => event.stopPropagation()}
       >
         <PencilIcon className="size-6" />
         <span className="body-1-bold">{actionLabel}</span>
-      </button>
+      </Link>
     </article>
   );
 }
