@@ -225,7 +225,7 @@ export function ExperienceDetailContent({
             </span>
           </div>
 
-          <dl className={cn('flex flex-col gap-1.5', isPage ? 'pt-0' : 'pt-2.5')}>
+          <dl className="flex flex-col gap-1.5">
             {experience.detailInfo.map((item) => (
               <div key={item.label} className="flex items-center gap-4">
                 <dt className={cn('font-bold text-strong', isPage ? 'body-1-bold' : 'body-3-bold')}>

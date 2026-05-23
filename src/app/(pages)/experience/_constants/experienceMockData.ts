@@ -20,7 +20,8 @@ const detailInfoMap = {
   activity: [
     { label: '기간', value: '2026.04.01~04.28' },
     { label: '팀원 수', value: '1인' },
-    { label: '내 역할 및 기여도', value: '팀장, 100%' },
+    { label: '내 역할', value: '팀장' },
+    { label: '기여도', value: '100%' },
   ],
   career: [
     { label: '기간', value: '2026.04.01~04.28' },

@@ -81,10 +81,8 @@ function getDetailInfo(response: ExperienceDetailResponse): ExperienceItem['deta
       return [
         { label: '기간', value: period },
         { label: '팀원 수', value: `${response.detail.teamNum}명` },
-        {
-          label: '내 역할 및 기여도',
-          value: `${response.detail.role}, ${response.detail.contributionRate}%`,
-        },
+        { label: '내 역할', value: response.detail.role },
+        { label: '기여도', value: `${response.detail.contributionRate}%` },
       ];
     case 'CAREER':
       return [
