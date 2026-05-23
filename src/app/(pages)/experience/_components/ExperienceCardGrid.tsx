@@ -13,6 +13,8 @@ export interface ExperienceItem {
   type: Exclude<ExperienceCategory, 'all'>;
   title: string;
   description: string;
+  startDate: string;
+  endDate: string;
   period: string;
   detailInfo: {
     label: string;

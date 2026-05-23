@@ -5,6 +5,8 @@ type ExperienceType = Exclude<ExperienceCategory, 'all'>;
 
 const defaultExperienceDetail = {
   description: '복잡한 비즈니스 로직을 DDD 패턴으로 설계하여 유지보수성 향상',
+  startDate: '2026-04-01',
+  endDate: '2026-04-28',
   detail: {
     situation: '기존 서비스는 결제 도메인의 정책과 예외 처리가 여러 계층에 흩어져 있어 변경 영향 범위를 예측하기 어려웠습니다.',
     task: '결제 정책을 명확한 도메인 모델로 분리하고, 추후 기능 확장 시에도 유지보수하기 쉬운 구조를 설계해야 했습니다.',
@@ -12,7 +14,7 @@ const defaultExperienceDetail = {
     result: '결제 정책 변경 시 수정 지점이 줄어들었고, 주요 플로우에 대한 테스트 작성 범위도 명확해졌습니다.',
     taken: '복잡한 비즈니스 로직은 UI나 인프라보다 도메인 규칙을 먼저 정리해야 장기적인 변경 비용을 줄일 수 있다는 점을 배웠습니다.',
   },
-} satisfies Pick<ExperienceItem, 'description' | 'detail'>;
+} satisfies Pick<ExperienceItem, 'description' | 'startDate' | 'endDate' | 'detail'>;
 
 const detailInfoMap = {
   activity: [

@@ -65,6 +65,8 @@ function mapCommonFields(response: CommonExperienceFields) {
     type: typeMap[response.type],
     title: response.title,
     description: response.oneLineIntro,
+    startDate: response.startDate,
+    endDate: response.endDate,
     period: formatPeriod(response.startDate, response.endDate),
     skillTags: getTagsByCategory(response.tags, 'TECH'),
     competencyTags: getTagsByCategory(response.tags, 'COMPETENCY'),

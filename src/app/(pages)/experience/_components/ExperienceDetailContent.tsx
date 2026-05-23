@@ -9,6 +9,11 @@ import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
 import { DetailInput } from '@/components/common/DetailInput';
+import {
+  type SingleMonthCalendarDateRange,
+  SingleMonthRangeCalendar,
+} from '@/components/common/SingleMonthRangeCalendar';
+import { type CalendarDateRange, RangeCalendar } from '@/components/common/RangeCalendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -29,7 +34,12 @@ export interface ExperienceDetailContentProps extends React.ComponentProps<'div'
   defaultEditing?: boolean;
   scrollable?: boolean;
   onEdit?: () => void;
-  onSave?: (experience: Pick<ExperienceItem, 'detail' | 'skillTags' | 'competencyTags'>) => void;
+  onSave?: (
+    experience: Pick<
+      ExperienceItem,
+      'detail' | 'skillTags' | 'competencyTags' | 'startDate' | 'endDate'
+    >,
+  ) => void;
 }
 
 export function ExperienceDetailContent({
@@ -45,10 +55,16 @@ export function ExperienceDetailContent({
   const category = getExperienceCategoryMeta(experience.type);
   const isPage = variant === 'page';
   const [detail, setDetail] = React.useState(experience.detail);
+  const [startDate, setStartDate] = React.useState(experience.startDate);
+  const [endDate, setEndDate] = React.useState(experience.endDate);
   const [skillTags, setSkillTags] = React.useState(experience.skillTags);
   const [competencyTags, setCompetencyTags] = React.useState(experience.competencyTags);
   const [isEditing, setIsEditing] = React.useState(defaultEditing);
   const [editingTagGroup, setEditingTagGroup] = React.useState<EditableTagGroupKey | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = React.useState(false);
+  const [datePickerTop, setDatePickerTop] = React.useState<number | null>(null);
+  const datePickerRootRef = React.useRef<HTMLDivElement>(null);
+  const datePickerButtonRef = React.useRef<HTMLButtonElement>(null);
   const previousExperienceIdRef = React.useRef(experience.id);
 
   React.useEffect(() => {
@@ -58,17 +74,68 @@ export function ExperienceDetailContent({
 
     previousExperienceIdRef.current = experience.id;
     setDetail(experience.detail);
+    setStartDate(experience.startDate);
+    setEndDate(experience.endDate);
     setSkillTags(experience.skillTags);
     setCompetencyTags(experience.competencyTags);
     setIsEditing(defaultEditing);
     setEditingTagGroup(null);
+    setDatePickerOpen(false);
+    setDatePickerTop(null);
   }, [
     defaultEditing,
     experience.competencyTags,
     experience.detail,
+    experience.endDate,
     experience.id,
     experience.skillTags,
+    experience.startDate,
   ]);
+
+  React.useEffect(() => {
+    if (!datePickerOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const root = datePickerRootRef.current;
+
+      if (root && !root.contains(event.target as Node)) {
+        setDatePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+    };
+  }, [datePickerOpen]);
+
+  React.useEffect(() => {
+    if (!datePickerOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDatePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [datePickerOpen]);
+
+  const selectedDateRange = React.useMemo<
+    CalendarDateRange | SingleMonthCalendarDateRange | null
+  >(() => {
+    const parsedStartDate = parseDateValue(startDate);
+    const parsedEndDate = parseDateValue(endDate);
+
+    if (!parsedStartDate || !parsedEndDate) return null;
+
+    return { start: parsedStartDate, end: parsedEndDate };
+  }, [endDate, startDate]);
 
   const handleDetailChange =
     (key: keyof ExperienceItem['detail']): React.ChangeEventHandler<HTMLTextAreaElement> =>
@@ -88,12 +155,28 @@ export function ExperienceDetailContent({
   const handleSaveEdit = () => {
     onSave?.({
       detail,
+      startDate,
+      endDate,
       skillTags,
       competencyTags,
     });
     setIsEditing(false);
     setEditingTagGroup(null);
+    setDatePickerOpen(false);
+    setDatePickerTop(null);
   };
+
+  const toggleDatePicker = () => {
+    const buttonRect = datePickerButtonRef.current?.getBoundingClientRect();
+
+    if (buttonRect) {
+      setDatePickerTop(buttonRect.bottom + 8);
+    }
+
+    setDatePickerOpen((open) => !open);
+  };
+
+  const periodLabel = formatPeriod(startDate, endDate);
 
   return (
     <div
@@ -150,14 +233,64 @@ export function ExperienceDetailContent({
                 </dt>
                 <dd
                   className={cn(
-                    'flex items-center gap-1 text-secondary',
+                    'relative flex items-center gap-1 text-secondary',
                     isPage ? 'body-1-regular' : 'body-3-regular',
                   )}
                 >
-                  {isEditing && item.label === '기간' && (
-                    <CalendarIcon className="size-[21px] shrink-0 text-tertiary" />
-                  )}
-                  <span>{item.value}</span>
+                  {isEditing && item.label === '기간' ? (
+                    <div ref={datePickerRootRef} className="relative flex items-center gap-1">
+                      <button
+                        ref={datePickerButtonRef}
+                        type="button"
+                        aria-label="기간 선택"
+                        aria-expanded={datePickerOpen}
+                        className="flex size-[21px] shrink-0 items-center justify-center rounded-sm text-tertiary focus-visible:shadow-focus-ring focus-visible:outline-none"
+                        onClick={toggleDatePicker}
+                      >
+                        <CalendarIcon className="size-[21px]" />
+                      </button>
+                      {datePickerOpen && (
+                        <div
+                          role="dialog"
+                          aria-label="기간 선택"
+                          className={cn(
+                            'z-60',
+                            isPage
+                              ? 'absolute top-full left-0 mt-2'
+                              : 'fixed right-[max(1rem,calc((min(100vw,500px)-24rem)/2))]',
+                          )}
+                          style={isPage ? undefined : { top: datePickerTop ?? undefined }}
+                        >
+                          {isPage ? (
+                            <RangeCalendar
+                              value={selectedDateRange}
+                              defaultVisibleMonth={selectedDateRange?.start ?? new Date()}
+                              onChange={(nextRange) => {
+                                if (!nextRange) return;
+
+                                setStartDate(formatDateValue(nextRange.start));
+                                setEndDate(formatDateValue(nextRange.end));
+                                setDatePickerOpen(false);
+                              }}
+                            />
+                          ) : (
+                            <SingleMonthRangeCalendar
+                              value={selectedDateRange}
+                              defaultVisibleMonth={selectedDateRange?.start ?? new Date()}
+                              onChange={(nextRange) => {
+                                if (!nextRange) return;
+
+                                setStartDate(formatDateValue(nextRange.start));
+                                setEndDate(formatDateValue(nextRange.end));
+                                setDatePickerOpen(false);
+                              }}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                  <span>{item.label === '기간' ? periodLabel : item.value}</span>
                 </dd>
               </div>
             ))}
@@ -239,6 +372,35 @@ export function ExperienceDetailContent({
       </div>
     </div>
   );
+}
+
+function parseDateValue(value: string) {
+  if (!value) return null;
+
+  const date = new Date(`${value}T00:00:00`);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatPeriod(startDate: string, endDate: string) {
+  const start = startDate.replaceAll('-', '.');
+  const end = endDate.replaceAll('-', '.');
+
+  if (!start || !end) return '';
+
+  if (startDate.slice(0, 4) === endDate.slice(0, 4)) {
+    return `${start}~${end.slice(5)}`;
+  }
+
+  return `${start}~${end}`;
 }
 
 interface EditableTagGroupProps {
