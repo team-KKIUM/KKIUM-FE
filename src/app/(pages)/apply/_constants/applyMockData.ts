@@ -1,6 +1,7 @@
+import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
 
-// --- 지원 상세 (공고 헤더) ---
+// --- 지원 상세 ---
 
 export type ApplyJobPosting = {
   title: string;
@@ -80,7 +81,7 @@ export const applyJobAnalysisMockData = {
   ],
 } as const;
 
-// --- 내 경험 (공고 분석 패널) ---
+// --- 내 경험  ---
 
 export type ExperienceAnalysisData = {
   goodPoints: string;
@@ -98,6 +99,28 @@ export type ApplyMyExperienceItem = {
   matchScore: number;
   analysis: ExperienceAnalysisData;
 };
+
+const emptyExperienceDetail: ExperienceItem['detail'] = {
+  situation: '',
+  task: '',
+  action: '',
+  result: '',
+  taken: '',
+};
+
+export function mapApplyMyExperienceToExperienceItem(item: ApplyMyExperienceItem): ExperienceItem {
+  return {
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    description: item.description,
+    period: '',
+    skillTags: [...item.skillTags],
+    competencyTags: [...item.competencyTags],
+    detailInfo: [],
+    detail: emptyExperienceDetail,
+  };
+}
 
 export const applyMyExperienceMockData: readonly ApplyMyExperienceItem[] = [
   {
@@ -152,6 +175,12 @@ export const applyMyExperienceMockData: readonly ApplyMyExperienceItem[] = [
     },
   },
 ];
+
+/** 경험 선택 모달 mock (적합도·정렬은 백엔드 응답 그대로) */
+export const coverLetterQuestionExperiencesMock = applyMyExperienceMockData.map((item) => ({
+  experience: mapApplyMyExperienceToExperienceItem(item),
+  fitScore: item.matchScore,
+}));
 
 // --- 자기소개서 ---
 
