@@ -7,7 +7,7 @@ import type { ExperienceCategory } from '@/app/(pages)/experience/_components/Ex
 import { Tag } from '@/components/common/Tag';
 import { cn } from '@/lib/utils';
 
-import type { ExperienceAnalysisData } from '../_constants/applyMyExperienceMockData';
+import type { ExperienceAnalysisData } from '../../_constants/applyMyExperienceMockData';
 import { ExperienceAnalysisPanel } from './ExperienceAnalysisPanel';
 
 const iconMap: Record<Exclude<ExperienceCategory, 'all'>, string> = {

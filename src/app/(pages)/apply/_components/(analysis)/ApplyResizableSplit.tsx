@@ -8,7 +8,7 @@ import {
   APPLY_RESIZE_MIN_LEFT_WIDTH,
   APPLY_RESIZE_MIN_RIGHT_WIDTH,
   APPLY_RESIZE_PANEL_INSET,
-} from '../_constants/applyResizableLayoutConstants';
+} from '../../_constants/applyResizableLayoutConstants';
 import { cn } from '@/lib/utils';
 
 export interface ApplyResizableSplitProps {

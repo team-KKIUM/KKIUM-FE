@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { ApplyAnalysis } from './_components/ApplyAnalysis';
-import { ApplyJobHeader, type ApplyJobTab } from './_components/ApplyJobHeader';
-import { ApplyMyExperience } from './_components/ApplyMyExperience';
-import { ApplyResizableSplit } from './_components/ApplyResizableSplit';
+import { ApplyAnalysis } from './_components/(analysis)/ApplyAnalysis';
+import { ApplyJobHeader, type ApplyJobTab } from './_components/(analysis)/ApplyJobHeader';
+import { ApplyMyExperience } from './_components/(analysis)/ApplyMyExperience';
+import { ApplyResizableSplit } from './_components/(analysis)/ApplyResizableSplit';
 import { applyJobMockData } from './_constants/applyJobMockData';
 
 export default function ApplyPage() {
