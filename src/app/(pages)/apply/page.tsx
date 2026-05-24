@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ApplyAnalysis } from './_components/(analysis)/ApplyAnalysis';
 import { ApplyJobHeader, type ApplyJobTab } from './_components/(analysis)/ApplyJobHeader';
 import { ApplyMyExperience } from './_components/(analysis)/ApplyMyExperience';
-import { ApplyResizableSplit } from './_components/(analysis)/ApplyResizableSplit';
+import { ResizableSplit } from './_components/ResizableSplit';
 import { applyJobMockData } from './_constants/applyJobMockData';
 
 export default function ApplyPage() {
@@ -23,11 +23,21 @@ export default function ApplyPage() {
         />
 
         {activeTab === 'analysis' ? (
-          <ApplyResizableSplit left={<ApplyAnalysis />} right={<ApplyMyExperience />} />
+          <ResizableSplit
+            separatorAriaLabel="공고 분석과 내 경험 패널 너비 조절"
+            left={<ApplyAnalysis />}
+            right={<ApplyMyExperience />}
+          />
         ) : (
-          <div className="max-w-[1028px]">
-            <p className="text-base font-bold leading-6 text-tertiary">자기소개서 작성 콘텐츠가 여기에 표시됩니다.</p>
-          </div>
+          <ResizableSplit
+            separatorAriaLabel="자기소개서 작성 패널 너비 조절"
+            left={
+              <p className="text-base font-bold leading-6 text-tertiary">
+                자기소개서 작성 콘텐츠가 여기에 표시됩니다.
+              </p>
+            }
+            right={null}
+          />
         )}
       </div>
     </section>
