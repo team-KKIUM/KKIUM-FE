@@ -469,7 +469,7 @@ function getDetailInfoItems(
   periodLabel: string,
 ): EditableDetailInfoItem[] {
   switch (type) {
-    case 'activity':
+    case 'activity': {
       const teamNum = basicDetail.teamNum ?? '';
       const contributionRate = basicDetail.contributionRate ?? '';
 
@@ -497,6 +497,7 @@ function getDetailInfoItems(
           name: 'contributionRate',
         },
       ];
+    }
     case 'career':
       return [
         { type: 'period', label: '기간', value: periodLabel },
