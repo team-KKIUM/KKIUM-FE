@@ -1,5 +1,6 @@
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
+import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
 
 // --- 지원 상세 ---
 
@@ -108,16 +109,24 @@ const emptyExperienceDetail: ExperienceItem['detail'] = {
   taken: '',
 };
 
+const emptyExperienceBasicDetail: ExperienceItem['basicDetail'] = {};
+
+const DEFAULT_EXPERIENCE_START_DATE = '2026-04-01';
+const DEFAULT_EXPERIENCE_END_DATE = '2026-04-28';
+
 export function mapApplyMyExperienceToExperienceItem(item: ApplyMyExperienceItem): ExperienceItem {
   return {
     id: item.id,
     type: item.type,
     title: item.title,
     description: item.description,
-    period: '',
+    startDate: DEFAULT_EXPERIENCE_START_DATE,
+    endDate: DEFAULT_EXPERIENCE_END_DATE,
+    period: formatExperiencePeriod(DEFAULT_EXPERIENCE_START_DATE, DEFAULT_EXPERIENCE_END_DATE),
     skillTags: [...item.skillTags],
     competencyTags: [...item.competencyTags],
     detailInfo: [],
+    basicDetail: emptyExperienceBasicDetail,
     detail: emptyExperienceDetail,
   };
 }
