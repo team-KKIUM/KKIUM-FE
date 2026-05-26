@@ -51,7 +51,7 @@ export function ApplyCoverLetterQuestionEditor({
   };
 
   const handleAiDraftClick = () => {
-    if (!canUseAiDraft) {
+    if (!canUseAiDraft || hasDraft) {
       return;
     }
 
@@ -66,7 +66,7 @@ export function ApplyCoverLetterQuestionEditor({
     <article
       data-slot="cover-letter-question-editor"
       className={cn(
-        'flex min-h-0 w-full flex-1 flex-col gap-3 overflow-hidden pr-10',
+        'flex min-h-0 w-full flex-1 flex-col gap-3 overflow-visible pr-10',
         className,
       )}
     >
@@ -83,10 +83,10 @@ export function ApplyCoverLetterQuestionEditor({
             className="h-7 min-w-0 flex-1 border-none bg-transparent p-0 text-xl font-bold leading-7 text-strong outline-none placeholder:text-tertiary focus-visible:ring-0"
           />
         </div>
-        <AiDraftButton disabled={!canUseAiDraft} onClick={handleAiDraftClick} />
+        <AiDraftButton disabled={!canUseAiDraft || hasDraft} onClick={handleAiDraftClick} />
       </div>
 
-      <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-visible">
         <Textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -105,6 +105,7 @@ export function ApplyCoverLetterQuestionEditor({
             onExpandedChange={handleExpandedChange}
             draft={draftContent}
             hasDraft={hasDraft}
+            className="-left-9 -right-10"
           />
         )}
       </div>

@@ -1,9 +1,12 @@
 'use client';
 
+import * as React from 'react';
+
 import { ChevronDownIcon } from '@/components/common/icons/ChevronDownIcon';
 import { ChevronUpIcon } from '@/components/common/icons/ChevronUpIcon';
 import { CopyIcon } from '@/components/common/icons/CopyIcon';
 import { StarIcon } from '@/components/common/icons/StarIcon';
+import { ToastMessage } from '@/components/ui/ToastMessage';
 import { cn } from '@/lib/utils';
 
 export interface ApplyCoverLetterAiDraftPanelProps {
@@ -23,6 +26,17 @@ export function ApplyCoverLetterAiDraftPanel({
   onCopy,
   className,
 }: ApplyCoverLetterAiDraftPanelProps) {
+  const [toastOpen, setToastOpen] = React.useState(false);
+  const toastTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleCopy = async () => {
     if (!draft) {
       return;
@@ -31,6 +45,16 @@ export function ApplyCoverLetterAiDraftPanel({
     try {
       await navigator.clipboard.writeText(draft);
       onCopy?.();
+      setToastOpen(true);
+
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+
+      toastTimerRef.current = setTimeout(() => {
+        setToastOpen(false);
+        toastTimerRef.current = null;
+      }, 1600);
     } catch {
       // clipboard unavailable
     }
@@ -98,6 +122,7 @@ export function ApplyCoverLetterAiDraftPanel({
           </span>
         </button>
       )}
+      <ToastMessage open={toastOpen} message="복사되었습니다" />
     </div>
   );
 }

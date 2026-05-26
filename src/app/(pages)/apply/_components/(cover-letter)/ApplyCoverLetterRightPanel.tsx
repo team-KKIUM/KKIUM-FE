@@ -117,7 +117,7 @@ export function ApplyCoverLetterRightPanel({
   return (
     <section
       data-slot="cover-letter-right-panel"
-      className={cn('flex h-full min-h-0 w-full min-w-0 flex-col gap-6 pb-4', className)}
+      className={cn('flex h-full min-h-0 w-full min-w-0 flex-col gap-6', className)}
     >
       <ApplyCoverLetterQuestionNav
         className="mt-6 shrink-0"
