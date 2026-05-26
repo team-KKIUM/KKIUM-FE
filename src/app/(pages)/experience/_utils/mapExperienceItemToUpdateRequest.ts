@@ -66,11 +66,13 @@ function getTypeDetail(
 }
 
 function toNumber(value: string | undefined) {
-  if (value == null || value.trim() === '') {
+  const trimmedValue = value?.trim();
+
+  if (!trimmedValue) {
     return undefined;
   }
 
-  const numberValue = Number(value);
+  const numberValue = parseInt(trimmedValue, 10);
 
-  return Number.isFinite(numberValue) ? numberValue : undefined;
+  return Number.isInteger(numberValue) ? numberValue : undefined;
 }
