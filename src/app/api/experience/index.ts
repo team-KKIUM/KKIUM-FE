@@ -11,6 +11,7 @@ import type {
 
 export type GetExperiencesParams = {
   type?: ExperiencePieceType;
+  keyword?: string;
   cursor?: number | null;
   size?: number;
 };
