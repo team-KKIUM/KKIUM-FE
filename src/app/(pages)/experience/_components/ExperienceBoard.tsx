@@ -98,6 +98,7 @@ export function ExperienceBoard({
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const hasAppliedInitialSelectionRef = React.useRef(false);
+  const previousKeywordRef = React.useRef(keyword);
   const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
   const {
     data: selectedExperienceDetail,
@@ -128,6 +129,32 @@ export function ExperienceBoard({
       return nextOrderMap;
     });
   }, [experiences]);
+
+  React.useEffect(() => {
+    if (previousKeywordRef.current === keyword) {
+      return;
+    }
+
+    previousKeywordRef.current = keyword;
+
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setSelectedExperienceId(undefined);
+    setPanelOpen(false);
+
+    const params = new URLSearchParams();
+
+    if (selectedCategory !== 'all') {
+      params.set('category', selectedCategory);
+    }
+
+    router.replace(params.size > 0 ? `/experience?${params.toString()}` : '/experience', {
+      scroll: false,
+    });
+  }, [keyword, router, selectedCategory]);
 
   React.useEffect(() => {
     if (hasAppliedInitialSelectionRef.current || !selectedExperienceIdFromQuery) {
