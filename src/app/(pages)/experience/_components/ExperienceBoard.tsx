@@ -493,7 +493,7 @@ function syncExperienceOrderMap(
 
     const nextIds = defaultOrderMap[category];
     const nextIdSet = new Set(nextIds);
-    const currentIds = currentOrderMap[category];
+    const currentIds = currentOrderMap[category] ?? [];
     const currentIdSet = new Set(currentIds);
     const preservedIds = currentIds.filter((id) => nextIdSet.has(id));
     const addedIds = nextIds.filter((id) => !currentIdSet.has(id));
