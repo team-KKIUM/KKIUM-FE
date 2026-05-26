@@ -1,56 +1,17 @@
 import Image from 'next/image';
 
+import {
+  EXPERIENCE_CATEGORY_ITEMS,
+  type ExperienceCategory,
+} from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { cn } from '@/lib/utils';
 
-export type ExperienceCategory = 'all' | 'activity' | 'career' | 'education' | 'etc';
+export type { ExperienceCategory } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 
 export interface ExperienceCategoryTabProps extends React.ComponentProps<'button'> {
   category: ExperienceCategory;
   selected?: boolean;
 }
-
-const categoryItems: Record<
-  ExperienceCategory,
-  {
-    label: string;
-    icon?: {
-      default: string;
-      selected: string;
-    };
-  }
-> = {
-  all: {
-    label: '전체',
-  },
-  activity: {
-    label: '학내외활동',
-    icon: {
-      default: '/activity-default.svg',
-      selected: '/activity-selected.svg',
-    },
-  },
-  career: {
-    label: '인턴/직무경력',
-    icon: {
-      default: '/career-default.svg',
-      selected: '/career-selected.svg',
-    },
-  },
-  education: {
-    label: '수강/교육',
-    icon: {
-      default: '/education-default.svg',
-      selected: '/education-selected.svg',
-    },
-  },
-  etc: {
-    label: '기타',
-    icon: {
-      default: '/etc-default.svg',
-      selected: '/etc-selected.svg',
-    },
-  },
-};
 
 export function ExperienceCategoryTab({
   category,
@@ -58,7 +19,8 @@ export function ExperienceCategoryTab({
   className,
   ...props
 }: ExperienceCategoryTabProps) {
-  const item = categoryItems[category];
+  const item = EXPERIENCE_CATEGORY_ITEMS[category];
+  const hasIcon = 'defaultIconSrc' in item && 'selectedIconSrc' in item;
 
   return (
     <button
@@ -73,9 +35,9 @@ export function ExperienceCategoryTab({
       )}
       {...props}
     >
-      {item.icon && (
+      {hasIcon && (
         <Image
-          src={selected ? item.icon.selected : item.icon.default}
+          src={selected ? item.selectedIconSrc : item.defaultIconSrc}
           alt=""
           width={18}
           height={18}

@@ -1,4 +1,4 @@
-import { applyJobAnalysisMockData } from '../_constants/applyJobAnalysisMockData';
+import { applyJobAnalysisMockData } from '../../_constants/applyMockData';
 import { ApplyFitScore } from './ApplyFitScore';
 import { ApplyJobInfo } from './ApplyJobInfo';
 import { ApplyJobTags } from './ApplyJobTags';

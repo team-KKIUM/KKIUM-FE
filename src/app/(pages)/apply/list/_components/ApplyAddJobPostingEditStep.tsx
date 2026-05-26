@@ -5,7 +5,7 @@ import { ChevronDownIcon } from 'lucide-react';
 import {
   JOB_EDIT_STEP_HEADER,
   RESULT_RECRUITMENT_FIELD_OPTIONS,
-} from '@/app/(pages)/apply/list/_constants/addJobPostingModalMock';
+} from '@/app/(pages)/apply/_constants/applyMockData';
 import { ModalClose, ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { XIcon } from '@/components/common/icons/XIcon';

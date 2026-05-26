@@ -1,6 +1,6 @@
 import { ApplyAddJobPostingModal } from './_components/ApplyAddJobPostingModal';
 import { ApplyListSection } from './_components/ApplyListSection';
-import { applyListMockData } from './_constants/applyListMockData';
+import { applyListMockData } from '../_constants/applyMockData';
 import { EmptyState } from '@/components/common/EmptyState';
 import { SearchBar } from '@/components/common/SearchBar';
 

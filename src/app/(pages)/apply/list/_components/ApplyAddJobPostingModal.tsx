@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 
-import { JOB_POSTING_ANALYSIS_MOCK } from '@/app/(pages)/apply/list/_constants/addJobPostingModalMock';
+import { JOB_POSTING_ANALYSIS_MOCK } from '@/app/(pages)/apply/_constants/applyMockData';
 import { Modal } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { type CalendarDateRange } from '@/components/common/RangeCalendar';

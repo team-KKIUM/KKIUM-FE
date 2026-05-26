@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 
-import { GraphIcon } from '@/assets/icons/GraphIcon';
-import { SaveIcon } from '@/assets/icons/SaveIcon';
-import { WriteIcon } from '@/assets/icons/WriteIcon';
+import { GraphIcon } from '@/components/common/icons/GraphIcon';
+import { SaveIcon } from '@/components/common/icons/SaveIcon';
+import { WriteIcon } from '@/components/common/icons/WriteIcon';
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

@@ -7,7 +7,7 @@ import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { cn } from '@/lib/utils';
 
-import type { ApplyListItem } from '../_constants/applyListMockData';
+import type { ApplyListItem } from '@/app/(pages)/apply/_constants/applyMockData';
 
 export interface ApplyDetailSidebarProps {
   open: boolean;

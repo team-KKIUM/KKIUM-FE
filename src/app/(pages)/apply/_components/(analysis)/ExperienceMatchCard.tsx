@@ -4,18 +4,12 @@ import Image from 'next/image';
 import * as React from 'react';
 
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
+import { getExperienceCategoryIconSrc } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { Tag } from '@/components/common/Tag';
 import { cn } from '@/lib/utils';
 
-import type { ExperienceAnalysisData } from '../_constants/applyMyExperienceMockData';
+import type { ExperienceAnalysisData } from '../../_constants/applyMockData';
 import { ExperienceAnalysisPanel } from './ExperienceAnalysisPanel';
-
-const iconMap: Record<Exclude<ExperienceCategory, 'all'>, string> = {
-  activity: '/activity-selected.svg',
-  career: '/career-selected.svg',
-  education: '/education-selected.svg',
-  etc: '/etc-selected.svg',
-};
 
 export interface ExperienceMatchCardProps extends Omit<React.ComponentProps<'article'>, 'title'> {
   type: Exclude<ExperienceCategory, 'all'>;
@@ -154,7 +148,7 @@ export function ExperienceMatchCard({
         >
           <header className="flex w-full items-center gap-1">
             <Image
-              src={iconMap[type]}
+              src={getExperienceCategoryIconSrc(type)}
               alt=""
               aria-hidden
               width={64}

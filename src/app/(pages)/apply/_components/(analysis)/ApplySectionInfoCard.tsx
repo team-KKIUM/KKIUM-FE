@@ -3,9 +3,10 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 export const APPLY_SECTION_INFO_CARD_WIDTH = 296;
+export const APPLY_QUESTION_FIT_INFO_CARD_WIDTH = 340;
 export const APPLY_SECTION_INFO_HORIZONTAL_MARGIN = 20;
 
-export type ApplySectionInfoVariant = 'job-analysis' | 'my-experience';
+export type ApplySectionInfoVariant = 'job-analysis' | 'my-experience' | 'question-fit';
 
 export interface ApplySectionInfoCardProps {
   variant: ApplySectionInfoVariant;
@@ -36,6 +37,16 @@ function MyExperienceInfoBody() {
   );
 }
 
+function QuestionFitInfoBody() {
+  return (
+    <p className="w-full text-xs leading-4 font-normal text-secondary">
+      ✓ 문항의 의도를 먼저 파악한 뒤, 내 경험과 공고 내용 중 관련 있는 부분을 함께 찾아요.
+      <br />
+      <br />✓ 점수가 높은 경험은 해당 문항의 답변 소재로 활용하기 좋은 경험이에요.
+    </p>
+  );
+}
+
 const INFO_CONTENT: Record<
   ApplySectionInfoVariant,
   { titleHighlight: string; titleRest: string; body: ReactNode }
@@ -50,19 +61,30 @@ const INFO_CONTENT: Record<
     titleRest: ' 확인했어요',
     body: <MyExperienceInfoBody />,
   },
+  'question-fit': {
+    titleHighlight: '이 문항에 어떤 경험을 쓰면 좋을지 ',
+    titleRest: '살펴봤어요',
+    body: <QuestionFitInfoBody />,
+  },
 };
+
+function getInfoCardWidth(variant: ApplySectionInfoVariant) {
+  return variant === 'question-fit' ? APPLY_QUESTION_FIT_INFO_CARD_WIDTH : APPLY_SECTION_INFO_CARD_WIDTH;
+}
 
 export function ApplySectionInfoCard({ variant, className }: ApplySectionInfoCardProps) {
   const content = INFO_CONTENT[variant];
+  const cardWidth = getInfoCardWidth(variant);
 
   return (
     <div
       role="dialog"
       aria-label="안내"
       className={cn(
-        'flex w-[296px] flex-col gap-2.5 rounded-xl bg-background-w p-5 shadow-lg',
+        'flex flex-col gap-2.5 rounded-xl bg-background-w p-5 shadow-lg',
         className,
       )}
+      style={{ width: cardWidth }}
     >
       <p className="w-full text-sm leading-5 font-bold">
         <span className="text-success underline">{content.titleHighlight}</span>

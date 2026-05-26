@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { applyMyExperienceMockData } from '../_constants/applyMyExperienceMockData';
+import { applyMyExperienceMockData } from '../../_constants/applyMockData';
 import { ApplySectionHeader } from './ApplySectionHeader';
 import { ExperienceMatchCard } from './ExperienceMatchCard';
 

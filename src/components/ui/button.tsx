@@ -15,6 +15,7 @@ const buttonVariants = cva(
           'bg-gray-200 text-tertiary hover:bg-gray-300 hover:shadow-sm focus-visible:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-400',
         fill: 'bg-mint-50 text-mint-600 hover:bg-mint-100 hover:shadow-sm focus-visible:bg-mint-50 disabled:bg-gray-200 disabled:text-gray-400',
         line: 'border-border-default bg-background-w text-tertiary hover:border-border-bold hover:bg-background-default hover:shadow-sm focus-visible:border-border-default focus-visible:bg-background-w disabled:border-border-thick disabled:bg-gray-100 disabled:text-gray-400',
+        ai: 'bg-[radial-gradient(ellipse_62.5%_47.95%_at_51.28%_107.81%,var(--color-brand)_0%,var(--color-mint-300)_100%)] text-on-fill shadow-[inset_0px_0px_4.2px_1px_rgba(255,255,255,0.4)] hover:brightness-105 focus-visible:brightness-105 disabled:opacity-60',
       },
       size: {
         default: 'body-1-bold h-10 px-3 py-1',

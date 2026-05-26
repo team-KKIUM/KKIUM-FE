@@ -1,31 +1,19 @@
 import type { ExperienceAddBasicInfoForm } from '@/app/(pages)/experience/add/_types/experienceAddForm';
+import {
+  EXPERIENCE_CATEGORIES,
+  getExperienceCategoryMeta,
+} from '@/app/(pages)/experience/_utils/ExperienceCategory';
 
-export const EXPERIENCE_TYPE_OPTIONS = [
-  {
-    value: 'activity',
-    label: '학내외활동',
-    defaultIconSrc: '/activity-default.svg',
-    selectedIconSrc: '/activity-selected.svg',
-  },
-  {
-    value: 'career',
-    label: '인턴/직무경력',
-    defaultIconSrc: '/career-default.svg',
-    selectedIconSrc: '/career-selected.svg',
-  },
-  {
-    value: 'education',
-    label: '수강/교육',
-    defaultIconSrc: '/education-default.svg',
-    selectedIconSrc: '/education-selected.svg',
-  },
-  {
-    value: 'etc',
-    label: '기타',
-    defaultIconSrc: '/etc-default.svg',
-    selectedIconSrc: '/etc-selected.svg',
-  },
-] as const;
+export const EXPERIENCE_TYPE_OPTIONS = EXPERIENCE_CATEGORIES.map((value) => {
+  const meta = getExperienceCategoryMeta(value);
+
+  return {
+    value,
+    label: meta.label,
+    defaultIconSrc: meta.defaultIconSrc,
+    selectedIconSrc: meta.selectedIconSrc,
+  };
+});
 
 export type ExperienceType = (typeof EXPERIENCE_TYPE_OPTIONS)[number]['value'];
 

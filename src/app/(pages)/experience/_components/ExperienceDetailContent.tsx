@@ -4,7 +4,7 @@ import Image from 'next/image';
 import * as React from 'react';
 
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
-import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
+import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
@@ -12,31 +12,6 @@ import { DetailInput } from '@/components/common/DetailInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
-const categoryMap: Record<
-  Exclude<ExperienceCategory, 'all'>,
-  {
-    label: string;
-    icon: string;
-  }
-> = {
-  activity: {
-    label: '학내외활동',
-    icon: '/activity-selected.svg',
-  },
-  career: {
-    label: '인턴/직무경력',
-    icon: '/career-selected.svg',
-  },
-  education: {
-    label: '수강/교육',
-    icon: '/education-selected.svg',
-  },
-  etc: {
-    label: '기타',
-    icon: '/etc-selected.svg',
-  },
-};
 
 const detailFields = [
   ['Situation', 'situation'],
@@ -67,7 +42,7 @@ export function ExperienceDetailContent({
   className,
   ...props
 }: ExperienceDetailContentProps) {
-  const category = categoryMap[experience.type];
+  const category = getExperienceCategoryMeta(experience.type);
   const isPage = variant === 'page';
   const [detail, setDetail] = React.useState(experience.detail);
   const [skillTags, setSkillTags] = React.useState(experience.skillTags);
@@ -156,7 +131,7 @@ export function ExperienceDetailContent({
             )}
           >
             <Image
-              src={category.icon}
+              src={category.selectedIconSrc}
               alt=""
               width={isPage ? 109 : 72}
               height={isPage ? 109 : 72}

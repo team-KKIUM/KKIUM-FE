@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import { ExternalLinkIcon } from '@/assets/icons/ExternalLinkIcon';
+import { ExternalLinkIcon } from '@/components/common/icons/ExternalLinkIcon';
 import { cn } from '@/lib/utils';
 
 export interface NullComponentProps {

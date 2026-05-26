@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { ExternalLinkIcon } from '@/assets/icons/ExternalLinkIcon';
+import { ExternalLinkIcon } from '@/components/common/icons/ExternalLinkIcon';
 import { ChevronRightIcon } from '@/components/common/icons/ChevronRightIcon';
 import { cn } from '@/lib/utils';
 

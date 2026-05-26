@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import type { ApplyListItem } from '../_constants/applyListMockData';
+import type { ApplyListItem } from '@/app/(pages)/apply/_constants/applyMockData';
 import { ApplyCard } from './ApplyCard';
 import { ApplyDetailSidebar } from './ApplyDetailSidebar';
 

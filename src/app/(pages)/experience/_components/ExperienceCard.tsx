@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { Tag } from '@/components/common/Tag';
+import { getExperienceCategoryIconSrc } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { cn } from '@/lib/utils';
 import { ExperienceCardDropdownMenu } from './ExperienceCardDropdownMenu';
 import type { ExperienceCategory } from './ExperienceCategoryTab';
@@ -32,13 +33,6 @@ const experienceCardVariants = cva(
     },
   },
 );
-
-const iconMap: Record<Exclude<ExperienceCategory, 'all'>, string> = {
-  activity: '/activity-selected.svg',
-  career: '/career-selected.svg',
-  education: '/education-selected.svg',
-  etc: '/etc-selected.svg',
-};
 
 export interface ExperienceCardProps
   extends
@@ -105,7 +99,7 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
       >
         <div className="flex w-full items-start justify-between">
           <Image
-            src={iconMap[type]}
+            src={getExperienceCategoryIconSrc(type)}
             alt=""
             width={72}
             height={72}

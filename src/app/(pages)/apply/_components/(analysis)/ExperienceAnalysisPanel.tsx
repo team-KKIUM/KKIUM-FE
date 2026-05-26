@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import type { ExperienceAnalysisData } from '@/app/(pages)/apply/_constants/applyMyExperienceMockData';
+import type { ExperienceAnalysisData } from '@/app/(pages)/apply/_constants/applyMockData';
 import { BadIcon } from '@/components/common/icons/BadIcon';
 import { GoodIcon } from '@/components/common/icons/GoodIcon';
 import { cn } from '@/lib/utils';
