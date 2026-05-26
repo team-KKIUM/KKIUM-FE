@@ -68,10 +68,14 @@ export function ExperienceCardDropdownMenu({
             <EditIcon className="size-6 text-tertiary" />
           </span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="active:bg-gray-300" onSelect={handleDeleteSelect}>
+        <DropdownMenuItem
+          variant="destructive"
+          className="active:bg-gray-300"
+          onSelect={handleDeleteSelect}
+        >
           <span>삭제</span>
           <span className="flex size-8 items-center justify-center">
-            <TrashIcon className="size-6 text-tertiary" />
+            <TrashIcon className="size-6 text-red-300" />
           </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
