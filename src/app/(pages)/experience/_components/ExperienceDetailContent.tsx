@@ -5,6 +5,7 @@ import * as React from 'react';
 
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
+import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
@@ -214,7 +215,7 @@ export function ExperienceDetailContent({
     setDatePickerOpen((open) => !open);
   };
 
-  const periodLabel = formatPeriod(startDate, endDate);
+  const periodLabel = formatExperiencePeriod(startDate, endDate);
   const detailInfoItems = React.useMemo(
     () => getDetailInfoItems(experience.type, basicDetail, periodLabel),
     [basicDetail, experience.type, periodLabel],
@@ -588,19 +589,6 @@ function formatDateValue(date: Date) {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
-}
-
-function formatPeriod(startDate: string, endDate: string) {
-  const start = startDate.replaceAll('-', '.');
-  const end = endDate.replaceAll('-', '.');
-
-  if (!start || !end) return '';
-
-  if (startDate.slice(0, 4) === endDate.slice(0, 4)) {
-    return `${start}~${end.slice(5)}`;
-  }
-
-  return `${start}~${end}`;
 }
 
 interface EditableTagGroupProps {

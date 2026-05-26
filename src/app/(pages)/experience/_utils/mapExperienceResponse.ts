@@ -5,6 +5,7 @@ import type {
   TagResponse,
 } from '@/app/api/experience/types';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
+import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
 
 type UiExperienceType = ExperienceItem['type'];
 type CommonExperienceFields = Pick<
@@ -30,7 +31,7 @@ const emptyDetail: ExperienceItem['detail'] = {
 const emptyBasicDetail: ExperienceItem['basicDetail'] = {};
 
 export function mapExperienceCardToItem(response: ExperienceCardResponse): ExperienceItem {
-  const period = formatPeriod(response.startDate, response.endDate);
+  const period = formatExperiencePeriod(response.startDate, response.endDate);
 
   return {
     ...mapCommonFields(response),
@@ -96,14 +97,14 @@ function mapCommonFields(response: CommonExperienceFields) {
     description: response.oneLineIntro,
     startDate: response.startDate,
     endDate: response.endDate,
-    period: formatPeriod(response.startDate, response.endDate),
+    period: formatExperiencePeriod(response.startDate, response.endDate),
     skillTags: getTagsByCategory(response.tags, 'TECH'),
     competencyTags: getTagsByCategory(response.tags, 'COMPETENCY'),
   };
 }
 
 function getDetailInfo(response: ExperienceDetailResponse): ExperienceItem['detailInfo'] {
-  const period = formatPeriod(response.detail.startDate, response.detail.endDate);
+  const period = formatExperiencePeriod(response.detail.startDate, response.detail.endDate);
 
   switch (response.type) {
     case 'ACTIVITY':
@@ -132,19 +133,4 @@ function getDetailInfo(response: ExperienceDetailResponse): ExperienceItem['deta
 
 function getTagsByCategory(tags: TagResponse[], category: TagResponse['category']) {
   return tags.filter((tag) => tag.category === category).map((tag) => tag.field);
-}
-
-function formatPeriod(startDate: string, endDate: string) {
-  const start = formatDate(startDate);
-  const end = formatDate(endDate);
-
-  if (startDate.slice(0, 4) === endDate.slice(0, 4)) {
-    return `${start}~${end.slice(5)}`;
-  }
-
-  return `${start}~${end}`;
-}
-
-function formatDate(date: string) {
-  return date.replaceAll('-', '.');
 }
