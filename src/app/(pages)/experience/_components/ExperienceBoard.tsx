@@ -317,27 +317,34 @@ export function ExperienceBoard({
       const experienceId = Number(experience.id);
 
       if (!Number.isInteger(experienceId) || experienceId <= 0) {
-        throw new Error('삭제할 경험 정보를 확인하지 못했습니다.');
+        window.alert('삭제할 경험 정보를 확인하지 못했습니다.');
+        return;
       }
 
-      await deleteExperienceMutation.mutateAsync(experienceId);
+      try {
+        await deleteExperienceMutation.mutateAsync(experienceId);
 
-      setExperienceOrderMap((currentOrderMap) =>
-        sortableCategories.reduce<ExperienceOrderMap>((nextOrderMap, category) => {
-          nextOrderMap[category] = currentOrderMap[category].filter((id) => id !== experience.id);
-          return nextOrderMap;
-        }, {} as ExperienceOrderMap),
-      );
+        setExperienceOrderMap((currentOrderMap) =>
+          sortableCategories.reduce<ExperienceOrderMap>((nextOrderMap, category) => {
+            nextOrderMap[category] = currentOrderMap[category].filter(
+              (id) => id !== experience.id,
+            );
+            return nextOrderMap;
+          }, {} as ExperienceOrderMap),
+        );
 
-      if (selectedExperienceId === experience.id) {
-        if (closeTimerRef.current) {
-          clearTimeout(closeTimerRef.current);
-          closeTimerRef.current = null;
+        if (selectedExperienceId === experience.id) {
+          if (closeTimerRef.current) {
+            clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+          }
+
+          setPanelOpen(false);
+          setSelectedExperienceId(undefined);
+          router.replace('/experience', { scroll: false });
         }
-
-        setPanelOpen(false);
-        setSelectedExperienceId(undefined);
-        router.replace('/experience', { scroll: false });
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : '경험 삭제 중 오류가 발생했습니다.');
       }
     },
     [deleteExperienceMutation, router, selectedExperienceId],
