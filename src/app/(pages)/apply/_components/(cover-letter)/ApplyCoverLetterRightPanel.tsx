@@ -53,21 +53,13 @@ export function ApplyCoverLetterRightPanel({
   const setQuestions = (updater: React.SetStateAction<ApplyCoverLetterQuestion[]>) => {
     const next = typeof updater === 'function' ? updater(questions) : updater;
 
-    if (onQuestionsChange) {
-      onQuestionsChange(next);
-      return;
-    }
-
     setUncontrolledQuestions(next);
+    onQuestionsChange?.(next);
   };
 
   const setActiveIndex = (index: number) => {
-    if (onActiveIndexChange) {
-      onActiveIndexChange(index);
-      return;
-    }
-
     setUncontrolledActiveIndex(index);
+    onActiveIndexChange?.(index);
   };
 
   const activeQuestion = questions[activeIndex];
