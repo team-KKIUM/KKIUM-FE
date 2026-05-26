@@ -8,6 +8,10 @@ import { CopyIcon } from '@/components/common/icons/CopyIcon';
 import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { ToastMessage } from '@/components/ui/ToastMessage';
+import {
+  useApplyJobPostingResume,
+  useUpdateApplyJobPostingResume,
+} from '@/hooks/apply/useApplyJobPostings';
 import { cn } from '@/lib/utils';
 
 import type { ApplyListItem } from '@/app/(pages)/apply/_constants/applyMockData';
@@ -25,6 +29,8 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
   const [toastOpen, setToastOpen] = React.useState(false);
   const toastTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [editableQuestions, setEditableQuestions] = React.useState(item?.coverLetter ?? []);
+  const resumeQuery = useApplyJobPostingResume(item?.id ?? null, open && item != null);
+  const updateResumeMutation = useUpdateApplyJobPostingResume();
 
   React.useEffect(() => {
     if (open) {
@@ -70,6 +76,21 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
   }, [item]);
 
   React.useEffect(() => {
+    if (!resumeQuery.data) {
+      return;
+    }
+
+    setEditableQuestions(
+      resumeQuery.data.questions
+        .sort((a, b) => a.orderNum - b.orderNum)
+        .map((question) => ({
+          label: question.content,
+          answer: question.answer,
+        })),
+    );
+  }, [open, item?.id, resumeQuery.data, resumeQuery.status]);
+
+  React.useEffect(() => {
     return () => {
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
@@ -106,6 +127,43 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
       }, 1600);
     } catch {
     }
+  };
+
+  const handleEditButtonClick = () => {
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    if (!item || !resumeQuery.data) {
+      setIsEditing(false);
+      return;
+    }
+
+    updateResumeMutation.mutate(
+      {
+        jdId: item.id,
+        request: {
+          postingTitle: resumeQuery.data.postingTitle,
+          companyName: resumeQuery.data.companyName,
+          recruitmentField: resumeQuery.data.recruitmentField,
+          startDate: resumeQuery.data.startDate,
+          endDate: resumeQuery.data.endDate,
+          questions: resumeQuery.data.questions
+            .sort((a, b) => a.orderNum - b.orderNum)
+            .map((question, index) => ({
+              questionId: question.questionId,
+              content: editableQuestions[index]?.label ?? question.content,
+              answer: editableQuestions[index]?.answer ?? question.answer,
+            })),
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+        },
+      },
+    );
   };
 
   return (
@@ -210,7 +268,7 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
                     'inline-flex h-9 shrink-0 items-center justify-start gap-1 overflow-hidden rounded-lg px-2 py-0.5',
                     isEditing ? 'bg-gray-main' : 'bg-gray-200',
                   )}
-                  onClick={() => setIsEditing((prev) => !prev)}
+                  onClick={handleEditButtonClick}
                 >
                   <span
                     className={cn(

@@ -7,15 +7,18 @@ import {
   jdListParamsSchema,
   jdListResponseSchema,
   jdMutationResponseSchema,
+  jdResumeResponseSchema,
   parseJdOcrResponseSchema,
   parseJdUrlRequestSchema,
   parsedJdUrlResponseSchema,
+  updateJdResumeRequestSchema,
   updateJdOrderRequestSchema,
   updateJdTitleRequestSchema,
   type CreateJdAiRequest,
   type JdListParams,
   type JdId,
   type ParseJdUrlRequest,
+  type UpdateJdResumeRequest,
   type UpdateJdOrderRequest,
   type UpdateJdTitleRequest,
 } from './types';
@@ -44,6 +47,21 @@ export async function updateJdTitle(jdId: JdId, request: UpdateJdTitleRequest) {
 export async function updateJdOrder(request: UpdateJdOrderRequest) {
   const parsedRequest = updateJdOrderRequestSchema.parse(request);
   const response = await api.patch<unknown>('/api/v1/jd/order', parsedRequest);
+
+  return jdMutationResponseSchema.parse(response);
+}
+
+export async function getJdResume(jdId: JdId) {
+  const parsedJdId = parseJdId(jdId);
+  const response = await api.get<unknown>(`/api/v1/jd/${parsedJdId}/resume`);
+
+  return jdResumeResponseSchema.parse(response);
+}
+
+export async function updateJdResume(jdId: JdId, request: UpdateJdResumeRequest) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedRequest = updateJdResumeRequestSchema.parse(request);
+  const response = await api.patch<unknown>(`/api/v1/jd/${parsedJdId}/resume`, parsedRequest);
 
   return jdMutationResponseSchema.parse(response);
 }

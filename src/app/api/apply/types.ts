@@ -95,6 +95,38 @@ export const parseJdOcrResponseSchema = z.object({
   text: z.string(),
 });
 
+const jdResumeQuestionSchema = z.object({
+  questionId: z.number(),
+  orderNum: z.number(),
+  content: z.string(),
+  answer: z.string(),
+});
+
+export const jdResumeResponseSchema = z.object({
+  id: z.number(),
+  postingTitle: z.string(),
+  companyName: z.string(),
+  recruitmentField: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  questions: z.array(jdResumeQuestionSchema),
+});
+
+export const updateJdResumeRequestSchema = z.object({
+  postingTitle: z.string().trim().min(1),
+  companyName: z.string().trim().min(1),
+  recruitmentField: z.string().trim().min(1),
+  startDate: z.string(),
+  endDate: z.string(),
+  questions: z.array(
+    z.object({
+      questionId: z.number().int().positive(),
+      content: z.string(),
+      answer: z.string(),
+    }),
+  ),
+});
+
 export const parsedJdUrlResponseSchema = z.object({
   url: z.string(),
   postingTitle: z.string(),
@@ -121,7 +153,9 @@ export type CreateJdAiRequest = z.infer<typeof createJdAiRequestSchema>;
 export type CreateJdAiResponse = z.infer<typeof createJdAiResponseSchema>;
 export type ParseJdUrlRequest = z.infer<typeof parseJdUrlRequestSchema>;
 export type ParseJdOcrResponse = z.infer<typeof parseJdOcrResponseSchema>;
+export type JdResumeResponse = z.infer<typeof jdResumeResponseSchema>;
 export type ParsedJdUrlResponse = z.infer<typeof parsedJdUrlResponseSchema>;
+export type UpdateJdResumeRequest = z.infer<typeof updateJdResumeRequestSchema>;
 export type UpdateJdOrderRequest = z.infer<typeof updateJdOrderRequestSchema>;
 export type UpdateJdTitleRequest = z.infer<typeof updateJdTitleRequestSchema>;
 export type JdMutationResponse = z.infer<typeof jdMutationResponseSchema>;

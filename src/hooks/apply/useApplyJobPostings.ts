@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  skipToken,
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
 } from '@tanstack/react-query';
@@ -11,9 +13,11 @@ import {
   createJdAi,
   deleteJd,
   getJdList,
+  getJdResume,
   parseJdOcr,
   parseJdUrl,
   toggleJdTarget,
+  updateJdResume,
   updateJdOrder,
   updateJdTitle,
 } from '@/app/api/apply';
@@ -23,6 +27,7 @@ import type {
   JdListParams,
   JdId,
   ParseJdUrlRequest,
+  UpdateJdResumeRequest,
   UpdateJdOrderRequest,
   UpdateJdTitleRequest,
 } from '@/app/api/apply/types';
@@ -47,6 +52,13 @@ export function useInfiniteApplyJobPostings(params?: Omit<JdListParams, 'page'>)
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+  });
+}
+
+export function useApplyJobPostingResume(jdId: JdId | null | undefined, enabled = true) {
+  return useQuery({
+    queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+    queryFn: enabled && jdId != null ? () => getJdResume(jdId) : skipToken,
   });
 }
 
@@ -83,6 +95,21 @@ export function useUpdateApplyJobPostingTitle() {
 export function useParseApplyJobPostingUrl() {
   return useMutation({
     mutationFn: (request: ParseJdUrlRequest) => parseJdUrl(request),
+  });
+}
+
+export function useUpdateApplyJobPostingResume() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ jdId, request }: { jdId: JdId; request: UpdateJdResumeRequest }) =>
+      updateJdResume(jdId, request),
+    onSuccess: (_, { jdId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+      });
+      void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.lists() });
+    },
   });
 }
 
