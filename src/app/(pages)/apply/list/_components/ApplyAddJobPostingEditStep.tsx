@@ -6,7 +6,7 @@ import {
   JOB_EDIT_STEP_HEADER,
   RESULT_RECRUITMENT_FIELD_OPTIONS,
 } from '@/app/(pages)/apply/_constants/applyMockData';
-import { ModalClose, ModalDescription, ModalTitle } from '@/components/common/Modal';
+import { ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { RecruitmentDeadlineFields } from '@/components/common/RecruitmentDeadlineFields';
@@ -26,9 +26,12 @@ export type CoverQuestionRow = { id: string; value: string };
 
 export interface ApplyAddJobPostingEditStepProps {
   step: 'result' | 'manual';
+  postingTitle: string;
+  onPostingTitleChange: (value: string) => void;
   companyName: string;
   onCompanyNameChange: (value: string) => void;
   recruitmentField: string;
+  recruitmentFieldOptions?: readonly string[];
   onRecruitmentFieldChange: (value: string) => void;
   postingBody: string;
   onPostingBodyChange: (value: string) => void;
@@ -42,6 +45,9 @@ export interface ApplyAddJobPostingEditStepProps {
   onCoverQuestionChange: (id: string, value: string) => void;
   onRemoveCoverQuestion: (id: string) => void;
   onAddCoverQuestion: () => void;
+  onSave: () => void;
+  isSaving?: boolean;
+  saveError?: string | null;
 }
 
 function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
@@ -55,9 +61,12 @@ function LabeledField({ label, children }: { label: string; children: React.Reac
 
 export function ApplyAddJobPostingEditStep({
   step,
+  postingTitle,
+  onPostingTitleChange,
   companyName,
   onCompanyNameChange,
   recruitmentField,
+  recruitmentFieldOptions = RESULT_RECRUITMENT_FIELD_OPTIONS,
   onRecruitmentFieldChange,
   postingBody,
   onPostingBodyChange,
@@ -71,6 +80,9 @@ export function ApplyAddJobPostingEditStep({
   onCoverQuestionChange,
   onRemoveCoverQuestion,
   onAddCoverQuestion,
+  onSave,
+  isSaving = false,
+  saveError,
 }: ApplyAddJobPostingEditStepProps) {
   return (
     <>
@@ -82,6 +94,14 @@ export function ApplyAddJobPostingEditStep({
       </div>
 
       <div className="flex w-full flex-col gap-6">
+        <LabeledField label="공고 제목">
+          <Input
+            value={postingTitle}
+            onChange={(e) => onPostingTitleChange(e.target.value)}
+            placeholder="공고 제목을 입력해주세요."
+          />
+        </LabeledField>
+
         <LabeledField label="기업명">
           <Input
             value={companyName}
@@ -119,7 +139,7 @@ export function ApplyAddJobPostingEditStep({
                 sideOffset={4}
                 className="max-h-60 w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
               >
-                {RESULT_RECRUITMENT_FIELD_OPTIONS.map((option) => (
+                {recruitmentFieldOptions.map((option) => (
                   <DropdownMenuItem
                     key={option}
                     className={cn(
@@ -197,11 +217,22 @@ export function ApplyAddJobPostingEditStep({
         </div>
       </div>
 
-      <ModalClose asChild>
-        <Button type="button" variant="default" size="default" className="w-full text-base font-bold leading-6">
-          저장하기
-        </Button>
-      </ModalClose>
+      {saveError ? (
+        <p className="body-3-regular text-red-700" role="alert">
+          {saveError}
+        </p>
+      ) : null}
+
+      <Button
+        type="button"
+        variant="default"
+        size="default"
+        disabled={isSaving}
+        className="w-full text-base font-bold leading-6"
+        onClick={onSave}
+      >
+        {isSaving ? '저장 중...' : '저장하기'}
+      </Button>
     </>
   );
 }

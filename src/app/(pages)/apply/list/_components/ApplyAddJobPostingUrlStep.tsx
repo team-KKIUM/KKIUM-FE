@@ -20,6 +20,10 @@ export interface ApplyAddJobPostingUrlStepProps {
   onRequestManual: () => void;
   onAnalyze: () => void;
   canAnalyze: boolean;
+  isAnalyzing?: boolean;
+  analyzeError?: string | null;
+  isOcrAnalyzing?: boolean;
+  onImageFileSelected?: (file: File) => void;
 }
 
 export function ApplyAddJobPostingUrlStep({
@@ -33,6 +37,10 @@ export function ApplyAddJobPostingUrlStep({
   onRequestManual,
   onAnalyze,
   canAnalyze,
+  isAnalyzing = false,
+  analyzeError,
+  isOcrAnalyzing = false,
+  onImageFileSelected,
 }: ApplyAddJobPostingUrlStepProps) {
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = React.useState<string | null>(null);
@@ -41,6 +49,7 @@ export function ApplyAddJobPostingUrlStep({
   const hasSelectedImage = selectedImagePreviewUrl != null;
   const shouldShowUrlError = showError && !validation.ok && !hasSelectedImage;
   const canSubmitAnalyze = canAnalyze || hasSelectedImage;
+  const disabledAnalyze = !canSubmitAnalyze || isAnalyzing || isOcrAnalyzing;
 
   React.useEffect(() => {
     return () => {
@@ -77,8 +86,9 @@ export function ApplyAddJobPostingUrlStep({
         return URL.createObjectURL(file);
       });
       setFileError(null);
+      onImageFileSelected?.(file);
     },
-    [isSupportedImageFile],
+    [isSupportedImageFile, onImageFileSelected],
   );
 
   return (
@@ -113,6 +123,11 @@ export function ApplyAddJobPostingUrlStep({
             {shouldShowUrlError ? (
               <p id={errorId} className="body-3-regular text-red-700" role="alert">
                 {validation.error}
+              </p>
+            ) : null}
+            {analyzeError ? (
+              <p className="body-3-regular text-red-700" role="alert">
+                {analyzeError}
               </p>
             ) : null}
           </div>
@@ -222,11 +237,11 @@ export function ApplyAddJobPostingUrlStep({
         type="button"
         variant="default"
         size="default"
-        disabled={!canSubmitAnalyze}
+        disabled={disabledAnalyze}
         className="w-full text-base font-bold leading-5"
         onClick={onAnalyze}
       >
-        공고 분석하기
+        {isOcrAnalyzing ? '이미지 분석 중...' : isAnalyzing ? '공고 분석 중...' : '공고 분석하기'}
       </Button>
     </>
   );
