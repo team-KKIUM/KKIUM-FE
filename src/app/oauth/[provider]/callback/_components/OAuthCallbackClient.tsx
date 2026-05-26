@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { requestSocialLogin } from '@/app/_utils/authFetch';
+import { consumeOAuthState, requestSocialLogin } from '@/app/_utils/authFetch';
 
 export type OAuthProvider = 'google' | 'kakao';
 
@@ -17,6 +17,13 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
 
     const code = searchParams.get('code');
     const error = searchParams.get('error');
+    const incomingState = searchParams.get('state');
+    const persistedState = consumeOAuthState(provider);
+
+    if (!incomingState || !persistedState || incomingState !== persistedState) {
+      router.replace('/login?error=invalid_state');
+      return;
+    }
 
     if (error) {
       router.replace(`/login?error=${encodeURIComponent(error)}`);

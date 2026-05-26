@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { createOAuthState } from '@/app/_utils/authFetch';
 import type { LoginButtonProps } from '../_types/login';
 
 const KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize';
@@ -9,22 +10,22 @@ const kakaoRedirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
 
 function buildKakaoAuthorizeUrl() {
   if (!kakaoClientId || !kakaoRedirectUri) return null;
+  const state = createOAuthState('kakao');
 
   const params = new URLSearchParams({
     client_id: kakaoClientId,
     redirect_uri: kakaoRedirectUri,
     response_type: 'code',
   });
+  if (state) params.set('state', state);
 
   return `${KAKAO_AUTH_URL}?${params.toString()}`;
 }
 
 export function KakaoLoginButton({ onClick }: Omit<LoginButtonProps, 'type'> = {}) {
-  const kakaoAuthorizeUrl = buildKakaoAuthorizeUrl();
-  const isEnabled = Boolean(kakaoAuthorizeUrl);
-
   const handleKakaoLogin = () => {
     onClick?.();
+    const kakaoAuthorizeUrl = buildKakaoAuthorizeUrl();
     if (!kakaoAuthorizeUrl) return;
     window.location.href = kakaoAuthorizeUrl;
   };
@@ -33,7 +34,6 @@ export function KakaoLoginButton({ onClick }: Omit<LoginButtonProps, 'type'> = {
     <button
       type="button"
       onClick={handleKakaoLogin}
-      disabled={!isEnabled}
       className="flex h-10 w-full items-center justify-center rounded-md bg-[#FEE500] px-3 text-black/90 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
       aria-label="카카오로 로그인"
     >

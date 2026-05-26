@@ -29,7 +29,7 @@ export class ApiError extends Error {
 // TODO: 로그인 구현 전까지 localStorage의 임시 accessToken을 사용한다.
 function getAccessToken() {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem('accessToken');
+  return window.sessionStorage.getItem('mg_access_token');
 }
 
 // API 요청 보낼 최종 URL을 만들어주는 함수

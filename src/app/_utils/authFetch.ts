@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const ACCESS_TOKEN_STORAGE_KEY = 'mg_access_token';
-const REFRESH_TOKEN_STORAGE_KEY = 'mg_refresh_token';
+const OAUTH_STATE_STORAGE_PREFIX = 'oauth_state_';
 
 interface AuthFetchInit extends Omit<RequestInit, 'headers'> {
   headers?: HeadersInit;
@@ -36,14 +36,11 @@ function getStorage() {
   return window.sessionStorage;
 }
 
-export function saveAuthTokensToSession(accessToken: string, refreshToken?: string) {
+export function saveAuthTokensToSession(accessToken: string) {
   const storage = getStorage();
   if (!storage) return;
 
   storage.setItem(ACCESS_TOKEN_STORAGE_KEY, accessToken);
-
-  if (refreshToken) storage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-  else storage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
 
 export async function requestSocialLogin(provider: 'google' | 'kakao', code: string) {
@@ -65,13 +62,41 @@ export async function requestSocialLogin(provider: 'google' | 'kakao', code: str
 
   const payload = (await response.json()) as SocialLoginResponse;
   const accessToken = payload?.data?.accessToken ?? payload?.data?.access_token;
-  const refreshToken = payload?.data?.refreshToken ?? payload?.data?.refresh_token;
 
   if (!accessToken) {
     throw new Error('Access token is missing in social login response.');
   }
 
-  saveAuthTokensToSession(accessToken, refreshToken);
+  saveAuthTokensToSession(accessToken);
+}
+
+function getOAuthStateStorageKey(provider: 'google' | 'kakao') {
+  return `${OAUTH_STATE_STORAGE_PREFIX}${provider}`;
+}
+
+function generateOAuthState() {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+export function createOAuthState(provider: 'google' | 'kakao') {
+  const storage = getStorage();
+  if (!storage) return null;
+
+  const state = generateOAuthState();
+  storage.setItem(getOAuthStateStorageKey(provider), state);
+  return state;
+}
+
+export function consumeOAuthState(provider: 'google' | 'kakao') {
+  const storage = getStorage();
+  if (!storage) return null;
+
+  const key = getOAuthStateStorageKey(provider);
+  const state = storage.getItem(key);
+  storage.removeItem(key);
+  return state;
 }
 
 export async function authFetch(path: string, init: AuthFetchInit = {}) {

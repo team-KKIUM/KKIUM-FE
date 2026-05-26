@@ -126,7 +126,7 @@ export function mapApplyMyExperienceToExperienceItem(item: ApplyMyExperienceItem
     skillTags: [...item.skillTags],
     competencyTags: [...item.competencyTags],
     detailInfo: [],
-    basicDetail: emptyExperienceBasicDetail,
+    basicDetail: { ...emptyExperienceBasicDetail },
     detail: emptyExperienceDetail,
   };
 }

@@ -24,8 +24,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   } as React.CSSProperties;
 
   React.useEffect(() => {
-    document.documentElement.style.setProperty('--app-sidebar-width', sidebarWidth);
-    document.documentElement.style.setProperty('--app-content-left', sidebarWidth);
+    const width = hideSidebar ? '0px' : sidebarWidth;
+    document.documentElement.style.setProperty('--app-sidebar-width', width);
+    document.documentElement.style.setProperty('--app-content-left', width);
 
     return () => {
       document.documentElement.style.removeProperty('--app-sidebar-width');
