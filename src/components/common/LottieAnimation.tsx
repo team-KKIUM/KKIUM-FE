@@ -26,6 +26,7 @@ export function LottieAnimation({
       src={src}
       autoplay={autoplay}
       loop={loop}
+      role={ariaLabel ? 'img' : undefined}
       aria-label={ariaLabel}
       aria-hidden={ariaLabel ? undefined : true}
       className={cn('block', className)}
