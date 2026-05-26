@@ -1,0 +1,14 @@
+---
+description: API 함수와 클라이언트 훅 작성 규칙
+globs: src/app/api/**/*.ts,src/hooks/**/*.ts,src/app/**/*.tsx
+alwaysApply: false
+---
+
+# API 구축 규칙
+
+- API 함수는 `src/app/api/{domain}`에 두고, `index.ts`는 호출 함수만, `types.ts`는 zod 스키마와 `z.infer` 타입을 둔다.
+- 요청 path param, query, body는 API 함수 내부에서 zod로 검증한 뒤 `api.get/post/patch/delete`에 전달한다.
+- 서버 응답의 `data`도 zod 스키마로 parse해서 컴포넌트가 검증된 값만 받게 한다.
+- 컴포넌트에서 API를 직접 호출하지 말고, 클라이언트 상태나 mutation이 필요하면 `src/hooks/{domain}`에 커스텀 훅을 만든다.
+- React Query mutation 훅은 성공 시 관련 query key를 invalidate하고, 화면에 즉시 반영해야 하는 로컬 상태 변경은 컴포넌트 콜백에서 처리한다.
+- UI 컴포넌트는 가능하면 `onUpdate`, `onDelete` 같은 콜백 props만 받고, API endpoint 세부사항은 API 함수와 훅 안에 숨긴다.
