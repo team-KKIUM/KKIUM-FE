@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'fill', 'line'],
+      options: ['default', 'secondary', 'fill', 'line', 'danger', 'dangerFill', 'ai'],
     },
     size: {
       control: 'select',
@@ -78,6 +78,61 @@ export const StateMatrix: Story = {
         </Button>
       </ButtonRow>
 
+      <ButtonRow title="Size Matrix">
+        <Button leftIcon={<PlusIcon />}>경험 추가</Button>
+        <Button size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+        <Button variant="secondary" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="secondary" size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="secondary" size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+        <Button variant="line" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="line" size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="line" size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+        <Button variant="fill" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="fill" size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="fill" size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+        <Button variant="danger" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="danger" size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="danger" size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+        <Button variant="dangerFill" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="dangerFill" size="medium" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="dangerFill" size="small" leftIcon={<PlusIcon />}>
+          추가하기
+        </Button>
+      </ButtonRow>
+
       <ButtonRow title="Line">
         <Button variant="line" leftIcon={<PlusIcon />}>
           경험 추가
@@ -112,6 +167,36 @@ export const StateMatrix: Story = {
           경험 추가
         </Button>
         <Button variant="fill" disabled leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+      </ButtonRow>
+
+      <ButtonRow title="Danger">
+        <Button variant="danger" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="danger" className="bg-red-50 shadow-sm" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="danger" className="bg-background-w shadow-focus-ring" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="danger" disabled leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+      </ButtonRow>
+
+      <ButtonRow title="Danger Fill">
+        <Button variant="dangerFill" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="dangerFill" className="bg-red-500 shadow-sm" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="dangerFill" className="bg-danger shadow-focus-ring" leftIcon={<PlusIcon />}>
+          경험 추가
+        </Button>
+        <Button variant="dangerFill" disabled leftIcon={<PlusIcon />}>
           경험 추가
         </Button>
       </ButtonRow>
