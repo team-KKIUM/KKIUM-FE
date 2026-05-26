@@ -1,0 +1,46 @@
+'use client';
+
+import Image from 'next/image';
+import type { LoginButtonProps } from '../_types/login';
+
+const KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize';
+const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY;
+const kakaoRedirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
+
+function buildKakaoAuthorizeUrl() {
+  if (!kakaoClientId || !kakaoRedirectUri) return null;
+
+  const params = new URLSearchParams({
+    client_id: kakaoClientId,
+    redirect_uri: kakaoRedirectUri,
+    response_type: 'code',
+  });
+
+  return `${KAKAO_AUTH_URL}?${params.toString()}`;
+}
+
+export function KakaoLoginButton({ onClick }: Omit<LoginButtonProps, 'type'> = {}) {
+  const kakaoAuthorizeUrl = buildKakaoAuthorizeUrl();
+  const isEnabled = Boolean(kakaoAuthorizeUrl);
+
+  const handleKakaoLogin = () => {
+    onClick?.();
+    if (!kakaoAuthorizeUrl) return;
+    window.location.href = kakaoAuthorizeUrl;
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleKakaoLogin}
+      disabled={!isEnabled}
+      className="flex h-10 w-full items-center justify-center rounded-md bg-[#FEE500] px-3 text-black/90 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+      aria-label="카카오로 로그인"
+    >
+      <span className="inline-flex items-center gap-2">
+        <Image src="/oauth/kakao-logo.svg" alt="" width={16} height={16} aria-hidden="true" />
+        <span className="body-3-bold">카카오 로그인</span>
+      </span>
+    </button>
+  );
+}
