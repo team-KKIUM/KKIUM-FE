@@ -4,13 +4,12 @@ import Image from 'next/image';
 import * as React from 'react';
 
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
+import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
 import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
-import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
-import { TagSet } from '@/app/(pages)/experience/_components/TagSet';
 import { DetailInput } from '@/components/common/DetailInput';
 import {
   type SingleMonthCalendarDateRange,
@@ -603,76 +602,4 @@ function formatDateValue(date: Date) {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
-}
-
-interface EditableTagGroupProps {
-  label: string;
-  tags: readonly string[];
-  tone: React.ComponentProps<typeof Tag>['tone'];
-  editing?: boolean;
-  borderBottom?: boolean;
-  variant?: 'default' | 'bordered-row';
-  viewTagSize?: React.ComponentProps<typeof Tag>['size'];
-  onChange?: (tags: string[]) => void;
-  onEdit?: () => void;
-  onRequestClose?: () => void;
-}
-
-function EditableTagGroup({
-  label,
-  tags,
-  tone,
-  editing = false,
-  borderBottom = false,
-  variant = 'default',
-  viewTagSize = 'large',
-  onChange,
-  onEdit,
-  onRequestClose,
-}: EditableTagGroupProps) {
-  if (editing) {
-    return (
-      <div className="flex w-full flex-col gap-2.5">
-        <p className="body-2-regular text-strong">{label}</p>
-        <TagSet
-          label={label}
-          tags={tags}
-          tone={tone}
-          onChange={onChange}
-          onRequestClose={onRequestClose}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        'flex w-full items-center justify-between gap-2.5',
-        variant === 'bordered-row' && 'min-h-[65px] border-t border-border-default pt-1',
-        variant === 'bordered-row' && borderBottom && 'min-h-[75px] border-b pb-2.5',
-      )}
-    >
-      <div className="flex min-w-0 flex-col gap-2.5">
-        <p className="body-2-regular text-strong">{label}</p>
-        <div className="flex flex-wrap gap-2.5">
-          {tags.map((tag) => (
-            <Tag key={tag} tone={tone} size={viewTagSize}>
-              {tag}
-            </Tag>
-          ))}
-        </div>
-      </div>
-      {onEdit ? (
-        <button
-          type="button"
-          aria-label={`${label} 태그 수정`}
-          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded text-tertiary focus-visible:shadow-focus-ring focus-visible:outline-none"
-          onClick={onEdit}
-        >
-          <EditIcon className="size-6" />
-        </button>
-      ) : null}
-    </div>
-  );
 }

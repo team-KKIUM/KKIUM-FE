@@ -8,12 +8,10 @@ import type {
   ExperienceAddCoreInfoForm,
   ExperienceAddResultInfoForm,
 } from '@/app/(pages)/experience/add/_types/experienceAddForm';
-import { TagSet } from '@/app/(pages)/experience/_components/TagSet';
-import { Tag } from '@/components/common/Tag';
+import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
 import { TextField } from '@/components/common/TextField';
-import { EditIcon } from '@/components/common/icons/EditIcon';
 
-type EditableTagGroup = 'skill' | 'competency';
+type EditableTagGroupKey = 'skill' | 'competency';
 
 interface ExperienceAddResultStepProps {
   basicInfo: ExperienceAddBasicInfoForm;
@@ -34,7 +32,7 @@ const CORE_RESULT_FIELDS = [
   { name: 'task', label: 'Task (해결 과제)' },
   { name: 'act', label: 'Act (실제 행동)' },
   { name: 'result', label: 'Result (결과 및 성과)' },
-  { name: 'taken', label: 'Taken (배운점)' },
+  { name: 'taken', label: 'Taken (배운 점)' },
 ] as const;
 
 export function ExperienceAddResultStep({
@@ -45,7 +43,7 @@ export function ExperienceAddResultStep({
   onCoreInfoChange,
   onResultInfoChange,
 }: ExperienceAddResultStepProps) {
-  const [editingTagGroup, setEditingTagGroup] = useState<EditableTagGroup | null>(null);
+  const [editingTagGroup, setEditingTagGroup] = useState<EditableTagGroupKey | null>(null);
 
   return (
     <section
@@ -82,11 +80,12 @@ export function ExperienceAddResultStep({
       </ResultSection>
 
       <ResultSection number="02." title="태그">
-        <ResultTagGroup
+        <EditableTagGroup
           label="기술"
           tags={resultInfo.skillTags}
           tone="skill"
           editing={editingTagGroup === 'skill'}
+          variant='bordered-row'
           onChange={(tags) =>
             onResultInfoChange({
               ...resultInfo,
@@ -96,11 +95,13 @@ export function ExperienceAddResultStep({
           onEdit={() => setEditingTagGroup('skill')}
           onRequestClose={() => setEditingTagGroup(null)}
         />
-        <ResultTagGroup
+        <EditableTagGroup
           label="역량"
           tags={resultInfo.competencyTags}
           tone="competency"
           editing={editingTagGroup === 'competency'}
+          variant='bordered-row'
+          borderBottom
           onChange={(tags) =>
             onResultInfoChange({
               ...resultInfo,
@@ -195,61 +196,5 @@ function ResultTextareaField({
         onChange={(event) => onChange(event.currentTarget.value)}
       />
     </label>
-  );
-}
-
-function ResultTagGroup({
-  label,
-  tags,
-  tone,
-  editing,
-  onChange,
-  onEdit,
-  onRequestClose,
-}: {
-  label: string;
-  tags: readonly string[];
-  tone: React.ComponentProps<typeof Tag>['tone'];
-  editing?: boolean;
-  onChange: (tags: string[]) => void;
-  onEdit: () => void;
-  onRequestClose: () => void;
-}) {
-  if (editing) {
-    return (
-      <div className="flex w-full flex-col gap-2.5">
-        <p className="body-2-regular text-strong">{label}</p>
-        <TagSet
-          label={label}
-          tags={tags}
-          tone={tone}
-          onChange={onChange}
-          onRequestClose={onRequestClose}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex w-full items-center justify-between gap-2.5">
-      <div className="flex min-w-0 flex-col gap-2.5">
-        <p className="body-2-regular text-strong">{label}</p>
-        <div className="flex flex-wrap gap-2.5">
-          {tags.map((tag) => (
-            <Tag key={tag} tone={tone} size="large">
-              {tag}
-            </Tag>
-          ))}
-        </div>
-      </div>
-      <button
-        type="button"
-        aria-label={`${label} 태그 수정`}
-        className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded focus-visible:shadow-focus-ring focus-visible:outline-none"
-        onClick={onEdit}
-      >
-        <EditIcon className="size-6 text-tertiary" />
-      </button>
-    </div>
   );
 }
