@@ -150,7 +150,7 @@ export function TermsAgreementModal({ open, onDismiss, onComplete }: TermsAgreem
   return (
     <Dialog open={open}>
       <DialogContent
-        className="max-w-none border-none bg-transparent p-0 shadow-none"
+        className="left-[calc((var(--app-content-left,0px)+100vw)/2)] flex w-auto max-w-none flex-col items-center justify-center border-none bg-transparent p-0 shadow-none ring-0 sm:max-w-none"
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">서비스 이용약관 및 개인정보 동의</DialogTitle>

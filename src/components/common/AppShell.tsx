@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
+import { getAccessTokenFromSession, isPublicAuthPath } from '@/app/_utils/authFetch';
 import { Sidebar } from '@/components/common/Sidebar';
 
 const SIDEBAR_WIDTH = {
@@ -12,16 +13,31 @@ const SIDEBAR_WIDTH = {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed] = React.useState(false);
+  const [canRender, setCanRender] = React.useState(false);
+
+  const hideSidebar = isPublicAuthPath(pathname);
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;
-  const hideSidebar =
-    pathname === '/login' ||
-    pathname.startsWith('/oauth/') ||
-    pathname.startsWith('/auth/callback');
   const appShellStyle = {
     '--app-sidebar-width': hideSidebar ? '0px' : sidebarWidth,
     '--app-content-left': hideSidebar ? '0px' : sidebarWidth,
   } as React.CSSProperties;
+
+  React.useEffect(() => {
+    if (isPublicAuthPath(pathname)) {
+      setCanRender(true);
+      return;
+    }
+
+    if (!getAccessTokenFromSession()) {
+      setCanRender(false);
+      router.replace('/login');
+      return;
+    }
+
+    setCanRender(true);
+  }, [pathname, router]);
 
   React.useEffect(() => {
     const width = hideSidebar ? '0px' : sidebarWidth;
@@ -33,6 +49,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       document.documentElement.style.removeProperty('--app-content-left');
     };
   }, [hideSidebar, sidebarWidth]);
+
+  if (!canRender) {
+    return null;
+  }
 
   return (
     <div
