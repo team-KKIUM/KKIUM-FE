@@ -6,7 +6,6 @@ import { useRef } from 'react';
 import type { ExperienceMaterial } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { LogoIcon } from '@/components/common/icons/LogoIcon';
 import { NotionIcon } from '@/components/common/icons/NotionIcon';
-import { UploadCompleteIcon } from '@/components/common/icons/UploadCompleteIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { ModalClose } from '@/components/common/Modal';
 import { Button } from '@/components/ui/button';
@@ -155,15 +154,9 @@ function UploadedPdfCard({ name, size, onRemove }: UploadedPdfCardProps) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate body-1-bold text-strong">{name}</p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className="body-2-bold text-gray-600">
-            {fileSize} 중 {fileSize}
-          </p>
-          <div className="flex items-center gap-1">
-            <UploadCompleteIcon className="size-6 text-success" />
-            <span className="body-2-bold text-success">업로딩 완료</span>
-          </div>
-        </div>
+        <p className="body-2-bold text-gray-600">
+          {fileSize} 중 {fileSize}
+        </p>
       </div>
       <button
         type="button"
