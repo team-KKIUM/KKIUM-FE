@@ -1,3 +1,5 @@
+import { redirectToLoginOnUnauthorized } from '@/app/_utils/authFetch';
+
 import type { ApiErrorPayload, ApiResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -72,8 +74,21 @@ function buildHeaders(body: unknown, headers?: HeadersInit) {
   return nextHeaders;
 }
 
+function throwIfUnauthorized(status: number) {
+  if (status === 401) {
+    redirectToLoginOnUnauthorized();
+    throw new ApiError({
+      status: 401,
+      code: 'UNAUTHORIZED',
+      message: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
+    });
+  }
+}
+
 // API 응답을 파싱해서 data만 반환하고, 에러는 ApiError로 던지는 함수
 async function parseApiResponse<T>(response: Response): Promise<T> {
+  throwIfUnauthorized(response.status);
+
   let payload: ApiResponse<T> | null = null;
 
   const contentType = response.headers.get('Content-Type');
@@ -90,9 +105,12 @@ async function parseApiResponse<T>(response: Response): Promise<T> {
     });
   }
 
+  const status = payload?.status ?? response.status;
+  throwIfUnauthorized(status);
+
   if (!response.ok || !payload || payload.code !== 'SUCCESS') {
     throw new ApiError({
-      status: payload?.status ?? response.status,
+      status,
       code: payload?.code ?? 'UNKNOWN_ERROR',
       message: payload?.message ?? '요청 처리 중 오류가 발생했습니다.',
     });

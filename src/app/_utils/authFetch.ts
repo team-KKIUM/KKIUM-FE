@@ -74,7 +74,24 @@ export function getAccessTokenFromSession(): string | null {
   return token || null;
 }
 
-// 로그인 없이 접근 가능한 경로 
+export function clearAccessTokenFromSession() {
+  getStorage()?.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+}
+
+// 인증 만료 시 로그인 화면으로 이동 
+export function redirectToLoginOnUnauthorized() {
+  if (typeof window === 'undefined') return;
+
+  clearAccessTokenFromSession();
+
+  if (isPublicAuthPath(window.location.pathname)) {
+    return;
+  }
+
+  window.location.replace('/login');
+}
+
+// 로그인 없이 접근 가능한 경로
 export function isPublicAuthPath(pathname: string) {
   const path = pathname.replace(/\/$/, '') || '/';
   return (
@@ -139,6 +156,12 @@ export async function requestSocialLogin(provider: 'google' | 'kakao', code: str
 
   if (contentType.includes('application/json')) {
     payload = (await response.json()) as SocialLoginResponse;
+  }
+
+  if (response.status === 401) {
+    redirectToLoginOnUnauthorized();
+    const message = payload?.message ?? 'Social login failed (401)';
+    throw new Error(message);
   }
 
   if (!response.ok) {
@@ -235,9 +258,15 @@ export async function authFetch(path: string, init: AuthFetchInit = {}) {
     headers.set('Content-Type', 'application/json');
   }
 
-  return fetch(url.toString(), {
+  const response = await fetch(url.toString(), {
     ...init,
     headers,
     cache: init.cache ?? 'no-store',
   });
+
+  if (response.status === 401) {
+    redirectToLoginOnUnauthorized();
+  }
+
+  return response;
 }
