@@ -84,6 +84,8 @@ export function ApplyAddJobPostingEditStep({
   isSaving = false,
   saveError,
 }: ApplyAddJobPostingEditStepProps) {
+  const hasCoverQuestions = coverQuestions.some((question) => question.value.trim().length > 0);
+
   return (
     <>
       <div className="flex w-full min-w-0 items-start justify-between pr-10">
@@ -227,7 +229,7 @@ export function ApplyAddJobPostingEditStep({
         type="button"
         variant="default"
         size="default"
-        disabled={isSaving}
+        disabled={isSaving || !hasCoverQuestions}
         className="w-full text-base font-bold leading-6"
         onClick={onSave}
       >

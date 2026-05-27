@@ -257,6 +257,13 @@ export function ApplyAddJobPostingModal() {
           isSaving={createJobPostingMutation.isPending}
           saveError={saveError}
           onSave={() => {
+            const hasCoverQuestions = coverQuestions.some(
+              (question) => question.value.trim().length > 0,
+            );
+            if (!hasCoverQuestions) {
+              return;
+            }
+
             createJobPostingMutation.mutate(buildCreateJdAiRequest(), {
               onSuccess: () => {
                 resetForm();
