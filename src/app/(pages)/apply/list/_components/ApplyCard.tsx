@@ -181,15 +181,19 @@ export function ApplyCard({
               </h3>
             )}
 
-            <div className="flex flex-col items-start gap-0.5">
-              <div className="flex items-center gap-1.5 body-1-regular text-gray-800">
-                <span>기업명</span>
-                <span className="body-1-bold">{companyName}</span>
+            <div className="flex w-full min-w-0 flex-col gap-0.5">
+              <div className="flex w-full min-w-0 items-center gap-1.5">
+                <span className="shrink-0 whitespace-nowrap body-1-regular text-gray-800">
+                  기업명
+                </span>
+                <span className="min-w-0 truncate body-1-bold text-gray-800">{companyName}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 body-1-regular text-gray-800">
-                <span>모집 분야</span>
-                <span className="body-1-bold">{jobField}</span>
+              <div className="flex w-full min-w-0 items-center gap-1.5">
+                <span className="shrink-0 whitespace-nowrap body-1-regular text-gray-800">
+                  모집 분야
+                </span>
+                <span className="min-w-0 truncate body-1-bold text-gray-800">{jobField}</span>
               </div>
             </div>
 
