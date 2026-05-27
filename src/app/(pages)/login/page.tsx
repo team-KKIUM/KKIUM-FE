@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
 import Image from 'next/image';
+
 import { GoogleLoginButton } from './_components/GoogleLoginButton';
 import { KakaoLoginButton } from './_components/KakaoLoginButton';
 import { LoginErrorBanner } from './_components/LoginErrorBanner';
@@ -7,7 +7,7 @@ import { LoginVisual } from './_components/LoginVisual';
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen w-full items-stretch bg-white">
+    <div className="flex min-h-screen w-full items-stretch bg-white">
       <div className="flex w-full items-center justify-center bg-white p-6 lg:w-[668px] lg:min-w-[668px]">
         <section className="inline-flex w-full flex-col items-center gap-12 overflow-hidden rounded-xl bg-white px-8 py-12 sm:px-16 sm:py-20 lg:w-[668px]">
           <div className="flex flex-col items-center gap-5">
@@ -20,15 +20,13 @@ export default function LoginPage() {
           </div>
 
           <div className="flex w-full max-w-72 flex-col items-start gap-3">
-            <Suspense fallback={null}>
-              <LoginErrorBanner />
-            </Suspense>
+            <LoginErrorBanner />
             <KakaoLoginButton />
             <GoogleLoginButton />
           </div>
         </section>
       </div>
       <LoginVisual />
-    </main>
+    </div>
   );
 }
