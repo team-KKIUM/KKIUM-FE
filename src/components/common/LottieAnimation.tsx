@@ -2,7 +2,7 @@
 
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import type { DotLottieReactProps } from '@lottiefiles/dotlottie-react';
-import * as React from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -14,9 +14,18 @@ interface LottieAnimationProps
   ariaLabel?: string;
 }
 
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+/** SSR/정적 HTML과 첫 hydration이 같도록 서버·클라이언트 초기 스냅샷을 분리합니다. */
+function useIsClient() {
+  return useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
+}
+
 /**
- * DotLottie는 WASM/Canvas 기반이라 정적 프리렌더(SSR)에서 훅/런타임 오류가 날 수 있습니다.
- * 클라이언트 마운트 이후에만 실제 플레이어를 렌더합니다.
+ * DotLottie는 WASM/Canvas 기반이라 서버·정적 프리렌더에서 실행할 수 없습니다.
+ * `useSyncExternalStore`로 마운트 전까지 placeholder만 그려 #418(하이드레이션 불일치)을 막습니다.
  */
 export function LottieAnimation({
   src,
@@ -26,19 +35,16 @@ export function LottieAnimation({
   className,
   ...props
 }: LottieAnimationProps) {
-  const [mounted, setMounted] = React.useState(false);
+  const isClient = useIsClient();
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (!isClient) {
     return (
       <div
         className={cn('block', className)}
         aria-hidden={ariaLabel ? undefined : true}
         role={ariaLabel ? 'img' : undefined}
         aria-label={ariaLabel}
+        suppressHydrationWarning
       />
     );
   }
@@ -52,6 +58,7 @@ export function LottieAnimation({
       aria-label={ariaLabel}
       aria-hidden={ariaLabel ? undefined : true}
       className={cn('block', className)}
+      suppressHydrationWarning
       {...props}
     />
   );

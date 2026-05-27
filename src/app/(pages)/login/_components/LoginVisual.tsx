@@ -1,11 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-const LottieAnimation = dynamic(
-  () => import('@/components/common/LottieAnimation').then((mod) => mod.LottieAnimation),
-  { ssr: false },
-);
+import { LottieAnimation } from '@/components/common/LottieAnimation';
 
 export function LoginVisual() {
   return (

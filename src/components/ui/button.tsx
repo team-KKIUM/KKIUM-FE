@@ -53,18 +53,33 @@ function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
+  const buttonClassName = cn(buttonVariants({ variant, size, className }));
+
+  if (asChild) {
+    return (
+      <Comp
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        className={buttonClassName}
+        {...props}
+      >
+        {children}
+      </Comp>
+    );
+  }
 
   return (
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={buttonClassName}
       {...props}
     >
-      {!asChild && leftIcon && <ButtonIcon size={size}>{leftIcon}</ButtonIcon>}
+      {leftIcon && <ButtonIcon size={size}>{leftIcon}</ButtonIcon>}
       {children}
-      {!asChild && rightIcon && <ButtonIcon size={size}>{rightIcon}</ButtonIcon>}
+      {rightIcon && <ButtonIcon size={size}>{rightIcon}</ButtonIcon>}
     </Comp>
   );
 }
