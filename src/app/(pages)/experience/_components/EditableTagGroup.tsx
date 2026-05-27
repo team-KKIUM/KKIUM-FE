@@ -58,8 +58,8 @@ export function EditableTagGroup({
       <div className="flex min-w-0 flex-col gap-2.5">
         <p className="body-2-regular text-strong">{label}</p>
         <div className="flex flex-wrap gap-2.5">
-          {tags.map((tag) => (
-            <Tag key={tag} tone={tone} size={viewTagSize}>
+          {tags.map((tag, index) => (
+            <Tag key={`${tag}-${index}`} tone={tone} size={viewTagSize}>
               {tag}
             </Tag>
           ))}
