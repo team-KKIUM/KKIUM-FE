@@ -1,24 +1,33 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { consumeOAuthState, requestSocialLogin } from '@/app/_utils/authFetch';
 
+const TermsAgreementModal = dynamic(
+  () => import('./TermsAgreementModal').then((mod) => mod.TermsAgreementModal),
+  { ssr: false },
+);
+
 export type OAuthProvider = 'google' | 'kakao';
+
+const requestedLoginRequests = new Set<string>();
 
 export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const requestedRef = useRef(false);
+  const [showTermsAgreement, setShowTermsAgreement] = useState(false);
 
   useEffect(() => {
-    if (requestedRef.current) return;
-    requestedRef.current = true;
-
     const code = searchParams.get('code');
     const error = searchParams.get('error');
     const incomingState = searchParams.get('state');
     const persistedState = consumeOAuthState(provider);
+    const requestKey = code ? `${provider}:${code}` : provider;
+
+    if (requestedLoginRequests.has(requestKey)) return;
+    requestedLoginRequests.add(requestKey);
 
     if (!incomingState || !persistedState || incomingState !== persistedState) {
       router.replace('/login?error=invalid_state');
@@ -36,8 +45,13 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
     }
 
     void requestSocialLogin(provider, code)
-      .then(() => {
-        router.replace('/');
+      .then((result) => {
+        if (result.termsAgreed) {
+          router.replace('/');
+          return;
+        }
+
+        setShowTermsAgreement(true);
       })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : 'auth_failed';
@@ -45,5 +59,17 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
       });
   }, [provider, router, searchParams]);
 
-  return null;
+  return (
+    <TermsAgreementModal
+      open={showTermsAgreement}
+      onDismiss={() => {
+        setShowTermsAgreement(false);
+        router.replace('/login');
+      }}
+      onComplete={() => {
+        setShowTermsAgreement(false);
+        router.replace('/');
+      }}
+    />
+  );
 }

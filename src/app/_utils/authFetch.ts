@@ -11,6 +11,7 @@ interface SocialLoginData {
   access_token?: string;
   refreshToken?: string;
   refresh_token?: string;
+  termsAgreed?: boolean;
 }
 
 interface SocialLoginResponse {
@@ -43,10 +44,30 @@ export function saveAuthTokensToSession(accessToken: string) {
   storage.setItem(ACCESS_TOKEN_STORAGE_KEY, accessToken);
 }
 
+export function resolveOAuthRedirectUri(provider: 'google' | 'kakao'): string {
+  const fromEnv =
+    provider === 'google'
+      ? process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI?.trim()
+      : process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI?.trim();
+  if (fromEnv) return fromEnv;
+  if (typeof window === 'undefined') {
+    throw new Error(
+      `NEXT_PUBLIC_${provider === 'google' ? 'GOOGLE' : 'KAKAO'}_REDIRECT_URI is not set.`,
+    );
+  }
+  return `${window.location.origin}/oauth/${provider}/callback`;
+}
+
 export async function requestSocialLogin(provider: 'google' | 'kakao', code: string) {
   const loginType = provider.toUpperCase();
-  const loginUrl = buildApiUrl(`auth/login/${loginType}`);
-  loginUrl.searchParams.set('code', code);
+  const loginUrl = buildApiUrl(`/auth/login/${loginType}`);
+  const normalizedCode = code.trim();
+
+  if (!normalizedCode) {
+    throw new Error('OAuth authorization code is missing.');
+  }
+
+  loginUrl.searchParams.set('code', normalizedCode);
 
   const response = await fetch(loginUrl.toString(), {
     method: 'POST',
@@ -56,11 +77,22 @@ export async function requestSocialLogin(provider: 'google' | 'kakao', code: str
     cache: 'no-store',
   });
 
-  if (!response.ok) {
-    throw new Error(`Social login failed (${response.status})`);
+  const contentType = response.headers.get('Content-Type') ?? '';
+  let payload: SocialLoginResponse | null = null;
+
+  if (contentType.includes('application/json')) {
+    payload = (await response.json()) as SocialLoginResponse;
   }
 
-  const payload = (await response.json()) as SocialLoginResponse;
+  if (!response.ok) {
+    const message = payload?.message ?? `Social login failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  if (!payload) {
+    throw new Error('Invalid social login response format.');
+  }
+
   const accessToken = payload?.data?.accessToken ?? payload?.data?.access_token;
 
   if (!accessToken) {
@@ -68,6 +100,24 @@ export async function requestSocialLogin(provider: 'google' | 'kakao', code: str
   }
 
   saveAuthTokensToSession(accessToken);
+
+  return {
+    accessToken,
+    termsAgreed: payload?.data?.termsAgreed === true,
+  };
+}
+
+export async function requestTermsAgreement(termsAgreed: boolean) {
+  const response = await authFetch('auth/terms', {
+    method: 'POST',
+    body: JSON.stringify({
+      termsAgreed,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Terms agreement failed (${response.status})`);
+  }
 }
 
 function getOAuthStateStorageKey(provider: 'google' | 'kakao') {

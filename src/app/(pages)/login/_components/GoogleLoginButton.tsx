@@ -1,21 +1,25 @@
 'use client';
 
 import Image from 'next/image';
-import { createOAuthState } from '@/app/_utils/authFetch';
+import { createOAuthState, resolveOAuthRedirectUri } from '@/app/_utils/authFetch';
 import type { LoginButtonProps } from '../_types/login';
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_SCOPE = 'email profile';
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-const googleRedirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
-
 function buildGoogleAuthorizeUrl() {
-  if (!googleClientId || !googleRedirectUri) return null;
+  if (!googleClientId) return null;
   const state = createOAuthState('google');
+  let redirectUri: string;
+  try {
+    redirectUri = resolveOAuthRedirectUri('google');
+  } catch {
+    return null;
+  }
 
   const params = new URLSearchParams({
     client_id: googleClientId,
-    redirect_uri: googleRedirectUri,
+    redirect_uri: redirectUri,
     response_type: 'code',
     scope: GOOGLE_SCOPE,
   });
