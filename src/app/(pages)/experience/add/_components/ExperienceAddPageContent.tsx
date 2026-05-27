@@ -28,6 +28,7 @@ import {
   clearExperienceAddPdfDraft,
   getExperienceAddPdfDraft,
 } from '@/app/(pages)/experience/add/_utils/experienceAddPdfDraftStorage';
+import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +51,7 @@ export function ExperienceAddPageContent() {
   const [basicInfo, setBasicInfo] = useState(createEmptyBasicInfoForm);
   const [coreInfo, setCoreInfo] = useState(createEmptyCoreInfoForm);
   const [resultInfo, setResultInfo] = useState(createEmptyResultInfoForm);
+  const [errorMessage, setErrorMessage] = useState('');
   const isProcessingRef = useRef(false);
   const analyzePdfMutation = useAnalyzeExperiencePdf();
   const analyzeNotionMutation = useAnalyzeExperienceNotion();
@@ -140,7 +142,7 @@ export function ExperienceAddPageContent() {
             setResultInfo(createEmptyResultInfoForm());
           }
         } catch (error) {
-          window.alert(
+          setErrorMessage(
             error instanceof Error ? error.message : '자료 분석 중 오류가 발생했습니다.',
           );
           return;
@@ -157,7 +159,7 @@ export function ExperienceAddPageContent() {
             }),
           );
         } catch (error) {
-          window.alert(
+          setErrorMessage(
             error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.',
           );
           return;
@@ -227,6 +229,15 @@ export function ExperienceAddPageContent() {
           </Button>
         </footer>
       )}
+      <ErrorDialog
+        open={errorMessage.length > 0}
+        message={errorMessage}
+        onOpenChange={(open) => {
+          if (!open) {
+            setErrorMessage('');
+          }
+        }}
+      />
     </div>
   );
 }

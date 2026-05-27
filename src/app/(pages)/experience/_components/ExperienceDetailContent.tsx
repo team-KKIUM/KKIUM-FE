@@ -6,6 +6,7 @@ import * as React from 'react';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
+import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
@@ -75,6 +76,7 @@ export function ExperienceDetailContent({
   const [editingTagGroup, setEditingTagGroup] = React.useState<EditableTagGroupKey | null>(null);
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
   const [datePickerTop, setDatePickerTop] = React.useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState('');
   const datePickerRootRef = React.useRef<HTMLDivElement>(null);
   const datePickerButtonRef = React.useRef<HTMLButtonElement>(null);
   const previousExperienceIdRef = React.useRef(experience.id);
@@ -199,7 +201,7 @@ export function ExperienceDetailContent({
       setDatePickerOpen(false);
       setDatePickerTop(null);
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : '경험 수정 중 오류가 발생했습니다.');
+      setErrorMessage(error instanceof Error ? error.message : '경험 수정 중 오류가 발생했습니다.');
     } finally {
       setIsSaving(false);
     }
@@ -445,6 +447,15 @@ export function ExperienceDetailContent({
           </div>
         ))}
       </div>
+      <ErrorDialog
+        open={errorMessage.length > 0}
+        message={errorMessage}
+        onOpenChange={(open) => {
+          if (!open) {
+            setErrorMessage('');
+          }
+        }}
+      />
     </div>
   );
 }

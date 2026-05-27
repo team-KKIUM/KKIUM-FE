@@ -19,6 +19,7 @@ import { mapExperienceItemToUpdateRequest } from '@/app/(pages)/experience/_util
 import type { PieceType } from '@/app/api/experience/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorDialog } from '@/components/common/ErrorDialog';
 import {
   useDeleteExperience,
   useExperienceDetail,
@@ -98,6 +99,7 @@ export function ExperienceBoard({
   const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
   const [deleteTargetExperience, setDeleteTargetExperience] =
     React.useState<ExperienceItem | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState('');
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const hasAppliedInitialSelectionRef = React.useRef(false);
@@ -334,7 +336,7 @@ export function ExperienceBoard({
       const experienceId = Number(experience.id);
 
       if (!Number.isInteger(experienceId) || experienceId <= 0) {
-        window.alert('삭제할 경험 정보를 확인하지 못했습니다.');
+        setErrorMessage('삭제할 경험 정보를 확인하지 못했습니다.');
         return;
       }
 
@@ -361,7 +363,7 @@ export function ExperienceBoard({
           router.replace('/experience', { scroll: false });
         }
       } catch (error) {
-        window.alert(error instanceof Error ? error.message : '경험 삭제 중 오류가 발생했습니다.');
+        setErrorMessage(error instanceof Error ? error.message : '경험 삭제 중 오류가 발생했습니다.');
       } finally {
         setDeleteTargetExperience(null);
       }
@@ -486,6 +488,15 @@ export function ExperienceBoard({
         onConfirm={() => {
           if (deleteTargetExperience) {
             void handleExperienceDeleteConfirm(deleteTargetExperience);
+          }
+        }}
+      />
+      <ErrorDialog
+        open={errorMessage.length > 0}
+        message={errorMessage}
+        onOpenChange={(open) => {
+          if (!open) {
+            setErrorMessage('');
           }
         }}
       />
