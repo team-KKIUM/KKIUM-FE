@@ -246,6 +246,6 @@ function isBasicInfoComplete(basicInfo: ExperienceAddBasicInfoForm) {
   if (!basicInfo.type) return false;
 
   return EXPERIENCE_TYPE_FIELD_GROUPS[basicInfo.type].every((fieldGroup) =>
-    fieldGroup.fields.every((field) => basicInfo[field.name].trim().length > 0),
+    fieldGroup.fields.every((field) => (basicInfo[field.name] ?? '').trim().length > 0),
   );
 }
