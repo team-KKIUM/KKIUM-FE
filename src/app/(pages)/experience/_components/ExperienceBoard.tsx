@@ -415,7 +415,13 @@ export function ExperienceBoard({
       return;
     }
 
-    router.push(`/experience/${panelExperience.id}?category=${selectedCategory}`);
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set('selected', panelExperience.id);
+    params.set('category', selectedCategory);
+    params.set('view', 'detail');
+
+    router.push(`/experience?${params.toString()}`);
   };
 
   return (
