@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import Image from 'next/image';
 import { GoogleLoginButton } from './_components/GoogleLoginButton';
 import { KakaoLoginButton } from './_components/KakaoLoginButton';
+import { LoginErrorBanner } from './_components/LoginErrorBanner';
 import { LoginVisual } from './_components/LoginVisual';
 
 export default function LoginPage() {
@@ -18,6 +20,9 @@ export default function LoginPage() {
           </div>
 
           <div className="flex w-full max-w-72 flex-col items-start gap-3">
+            <Suspense fallback={null}>
+              <LoginErrorBanner />
+            </Suspense>
             <KakaoLoginButton />
             <GoogleLoginButton />
           </div>

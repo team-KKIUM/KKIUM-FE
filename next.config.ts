@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['@lottiefiles/dotlottie-react', '@lottiefiles/dotlottie-web'],
 };
 
 export default nextConfig;

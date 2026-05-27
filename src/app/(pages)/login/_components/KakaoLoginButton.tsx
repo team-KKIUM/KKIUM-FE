@@ -1,20 +1,24 @@
 'use client';
 
 import Image from 'next/image';
-import { createOAuthState } from '@/app/_utils/authFetch';
+import { createOAuthState, resolveOAuthRedirectUri } from '@/app/_utils/authFetch';
 import type { LoginButtonProps } from '../_types/login';
 
 const KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize';
 const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY;
-const kakaoRedirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
-
 function buildKakaoAuthorizeUrl() {
-  if (!kakaoClientId || !kakaoRedirectUri) return null;
+  if (!kakaoClientId) return null;
   const state = createOAuthState('kakao');
+  let redirectUri: string;
+  try {
+    redirectUri = resolveOAuthRedirectUri('kakao');
+  } catch {
+    return null;
+  }
 
   const params = new URLSearchParams({
     client_id: kakaoClientId,
-    redirect_uri: kakaoRedirectUri,
+    redirect_uri: redirectUri,
     response_type: 'code',
   });
   if (state) params.set('state', state);
