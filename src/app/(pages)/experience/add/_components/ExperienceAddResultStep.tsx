@@ -8,10 +8,10 @@ import type {
   ExperienceAddCoreInfoForm,
   ExperienceAddResultInfoForm,
 } from '@/app/(pages)/experience/add/_types/experienceAddForm';
+import { TagSet } from '@/app/(pages)/experience/_components/TagSet';
 import { Tag } from '@/components/common/Tag';
 import { TextField } from '@/components/common/TextField';
 import { EditIcon } from '@/components/common/icons/EditIcon';
-import { Input } from '@/components/ui/input';
 
 type EditableTagGroup = 'skill' | 'competency';
 
@@ -21,6 +21,7 @@ interface ExperienceAddResultStepProps {
   resultInfo: ExperienceAddResultInfoForm;
   onBasicInfoChange: (value: ExperienceAddBasicInfoForm) => void;
   onCoreInfoChange: (value: ExperienceAddCoreInfoForm) => void;
+  onResultInfoChange: (value: ExperienceAddResultInfoForm) => void;
 }
 
 const BASIC_RESULT_FIELDS = [
@@ -42,6 +43,7 @@ export function ExperienceAddResultStep({
   resultInfo,
   onBasicInfoChange,
   onCoreInfoChange,
+  onResultInfoChange,
 }: ExperienceAddResultStepProps) {
   const [editingTagGroup, setEditingTagGroup] = useState<EditableTagGroup | null>(null);
 
@@ -85,6 +87,12 @@ export function ExperienceAddResultStep({
           tags={resultInfo.skillTags}
           tone="skill"
           editing={editingTagGroup === 'skill'}
+          onChange={(tags) =>
+            onResultInfoChange({
+              ...resultInfo,
+              skillTags: tags,
+            })
+          }
           onEdit={() => setEditingTagGroup('skill')}
         />
         <ResultTagGroup
@@ -92,6 +100,12 @@ export function ExperienceAddResultStep({
           tags={resultInfo.competencyTags}
           tone="competency"
           editing={editingTagGroup === 'competency'}
+          onChange={(tags) =>
+            onResultInfoChange({
+              ...resultInfo,
+              competencyTags: tags,
+            })
+          }
           onEdit={() => setEditingTagGroup('competency')}
         />
       </ResultSection>
@@ -187,31 +201,26 @@ function ResultTagGroup({
   tags,
   tone,
   editing,
+  onChange,
   onEdit,
 }: {
   label: string;
   tags: readonly string[];
   tone: React.ComponentProps<typeof Tag>['tone'];
   editing?: boolean;
+  onChange: (tags: string[]) => void;
   onEdit: () => void;
 }) {
   if (editing) {
     return (
       <div className="flex w-full flex-col gap-2.5">
         <p className="body-2-regular text-strong">{label}</p>
-        <div className="flex w-full flex-col overflow-hidden rounded-lg border border-border-default bg-background-w">
-          <div className="flex min-h-[66px] flex-wrap items-center gap-2.5 px-5 py-4">
-            {tags.map((tag) => (
-              <Tag key={tag} tone={tone} size="large" removable>
-                {tag}
-              </Tag>
-            ))}
-          </div>
-          <Input
-            placeholder={`적용하고 싶은 ${label}을 작성해주세요`}
-            className="rounded-none border-x-0 border-b-0"
-          />
-        </div>
+        <TagSet
+          label={label}
+          tags={tags}
+          tone={tone}
+          onChange={onChange}
+        />
       </div>
     );
   }

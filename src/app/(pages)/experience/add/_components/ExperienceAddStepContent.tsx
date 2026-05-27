@@ -29,6 +29,7 @@ interface ExperienceAddStepContentProps {
   coreInfo: ExperienceAddCoreInfoForm;
   onCoreInfoChange: (coreInfo: ExperienceAddCoreInfoForm) => void;
   resultInfo: ExperienceAddResultInfoForm;
+  onResultInfoChange: (resultInfo: ExperienceAddResultInfoForm) => void;
 }
 
 export function ExperienceAddStepContent({
@@ -45,6 +46,7 @@ export function ExperienceAddStepContent({
   coreInfo,
   onCoreInfoChange,
   resultInfo,
+  onResultInfoChange,
 }: ExperienceAddStepContentProps) {
   const currentStep = EXPERIENCE_ADD_STEPS[currentStepIndex] ?? EXPERIENCE_ADD_STEPS[0];
 
@@ -81,6 +83,7 @@ export function ExperienceAddStepContent({
         resultInfo={resultInfo}
         onBasicInfoChange={onBasicInfoChange}
         onCoreInfoChange={onCoreInfoChange}
+        onResultInfoChange={onResultInfoChange}
       />
     );
   }

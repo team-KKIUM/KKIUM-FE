@@ -9,6 +9,7 @@ import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatEx
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { EditIcon } from '@/components/common/icons/EditIcon';
 import { Tag } from '@/components/common/Tag';
+import { TagSet } from '@/app/(pages)/experience/_components/TagSet';
 import { DetailInput } from '@/components/common/DetailInput';
 import {
   type SingleMonthCalendarDateRange,
@@ -16,7 +17,6 @@ import {
 } from '@/components/common/SingleMonthRangeCalendar';
 import { type CalendarDateRange, RangeCalendar } from '@/components/common/RangeCalendar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 const detailFields = [
@@ -380,7 +380,7 @@ export function ExperienceDetailContent({
               tags={skillTags}
               editing={editingTagGroup === 'skill'}
               variant="bordered-row"
-              viewTagSize="default"
+              viewTagSize="large"
               onChange={setSkillTags}
               onEdit={() => setEditingTagGroup('skill')}
             />
@@ -390,7 +390,7 @@ export function ExperienceDetailContent({
               tags={competencyTags}
               editing={editingTagGroup === 'competency'}
               variant="bordered-row"
-              viewTagSize="default"
+              viewTagSize="large"
               borderBottom
               onChange={setCompetencyTags}
               onEdit={() => setEditingTagGroup('competency')}
@@ -400,7 +400,7 @@ export function ExperienceDetailContent({
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-1">
               {skillTags.map((tag, index) => (
-                <Tag key={`skill-${tag}-${index}`} tone="skill" size={isPage ? 'large' : 'default'}>
+                <Tag key={`skill-${tag}-${index}`} tone="skill" size='large'>
                   {tag}
                 </Tag>
               ))}
@@ -411,7 +411,7 @@ export function ExperienceDetailContent({
                 <Tag
                   key={`competency-${tag}-${index}`}
                   tone="competency"
-                  size={isPage ? 'large' : 'default'}
+                  size='large'
                 >
                   {tag}
                 </Tag>
@@ -615,69 +615,17 @@ function EditableTagGroup({
   onChange,
   onEdit,
 }: EditableTagGroupProps) {
-  const [inputValue, setInputValue] = React.useState('');
-
-  React.useEffect(() => {
-    if (!editing) {
-      setInputValue('');
-    }
-  }, [editing]);
-
-  const handleAddTag = () => {
-    const nextTag = inputValue.trim();
-
-    if (!nextTag || tags.includes(nextTag)) {
-      return;
-    }
-
-    onChange?.([...tags, nextTag]);
-    setInputValue('');
-  };
-
-  const handleRemoveTag = (targetIndex: number) => {
-    onChange?.(tags.filter((_, index) => index !== targetIndex));
-  };
-
-  const handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (event.nativeEvent.isComposing) {
-      return;
-    }
-
-    if (event.key !== 'Enter') {
-      return;
-    }
-
-    event.preventDefault();
-    handleAddTag();
-  };
-
   if (editing) {
     return (
       <div className="flex w-full flex-col gap-2.5">
         <p className="body-2-regular text-strong">{label}</p>
-        <div className="flex w-full flex-col overflow-hidden rounded-lg border border-border-default bg-background-w shadow-[0_4px_6px_-4px_rgba(0,0,0,0.1),0_10px_15px_-3px_rgba(0,0,0,0.1)]">
-          <div className="flex min-h-[66px] flex-wrap items-center gap-2.5 px-5 py-4">
-            {tags.map((tag, index) => (
-              <Tag
-                key={`${tag}-${index}`}
-                tone={tone}
-                size="large"
-                removable
-                onRemove={() => handleRemoveTag(index)}
-              >
-                {tag}
-              </Tag>
-            ))}
-          </div>
-          <Input
-            value={inputValue}
-            placeholder={`적용하고 싶은 ${label}을 작성해주세요`}
-            className="rounded-none border-x-0 border-b-0"
-            onBlur={handleAddTag}
-            onChange={(event) => setInputValue(event.target.value)}
-            onKeyDown={handleInputKeyDown}
-          />
-        </div>
+        <TagSet
+          label={label}
+          tags={tags}
+          tone={tone}
+          // className={tagSetClassName}
+          onChange={onChange}
+        />
       </div>
     );
   }

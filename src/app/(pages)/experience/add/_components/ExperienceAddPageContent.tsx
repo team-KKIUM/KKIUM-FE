@@ -200,6 +200,7 @@ export function ExperienceAddPageContent() {
           coreInfo={coreInfo}
           onCoreInfoChange={setCoreInfo}
           resultInfo={resultInfo}
+          onResultInfoChange={setResultInfo}
         />
       </main>
 
