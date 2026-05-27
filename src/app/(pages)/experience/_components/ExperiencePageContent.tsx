@@ -38,16 +38,19 @@ function ExperiencePageRouteContent({
   const searchParams = useSearchParams();
   const selectedExperienceId = searchParams.get('selected');
   const isDetailView = searchParams.get('view') === 'detail';
-  const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
-  const isValidExperienceId =
-    Number.isInteger(numericExperienceId) && Number(numericExperienceId) > 0;
-
-  if (isDetailView && !isValidExperienceId) {
-    notFound();
-  }
 
   if (isDetailView) {
-    return <ExperienceDetailPageContent experienceId={Number(numericExperienceId)} />;
+    const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
+
+    if (
+      numericExperienceId === null ||
+      !Number.isInteger(numericExperienceId) ||
+      numericExperienceId <= 0
+    ) {
+      notFound();
+    }
+
+    return <ExperienceDetailPageContent experienceId={numericExperienceId} />;
   }
 
   return (
