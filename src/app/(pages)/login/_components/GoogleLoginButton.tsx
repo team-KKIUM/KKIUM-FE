@@ -44,7 +44,14 @@ export function GoogleLoginButton({ onClick }: Omit<LoginButtonProps, 'type'> = 
       aria-label="구글로 로그인"
     >
       <span className="flex items-center justify-center gap-2.5">
-        <Image src="/oauth/google-logo.svg" alt="" width={20} height={20} aria-hidden="true" />
+        <Image
+          src="/oauth/google-logo.svg"
+          alt=""
+          width={20}
+          height={20}
+          className="size-5"
+          aria-hidden="true"
+        />
         <span className="text-sm leading-5 font-medium text-stone-900">Google 계정으로 로그인</span>
       </span>
     </button>

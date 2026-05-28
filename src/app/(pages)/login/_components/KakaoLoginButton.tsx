@@ -42,7 +42,14 @@ export function KakaoLoginButton({ onClick }: Omit<LoginButtonProps, 'type'> = {
       aria-label="카카오로 로그인"
     >
       <span className="inline-flex items-center gap-2">
-        <Image src="/oauth/kakao-logo.svg" alt="" width={16} height={16} aria-hidden="true" />
+        <Image
+          src="/oauth/kakao-logo.svg"
+          alt=""
+          width={16}
+          height={16}
+          className="size-4"
+          aria-hidden="true"
+        />
         <span className="body-3-bold">카카오 로그인</span>
       </span>
     </button>
