@@ -18,6 +18,7 @@ export interface ApplyJobHeaderProps {
   activeTab: ApplyJobTab;
   onTabChange: (tab: ApplyJobTab) => void;
   onSave?: () => void;
+  isSaving?: boolean;
   backHref?: string;
 }
 
@@ -33,8 +34,11 @@ export function ApplyJobHeader({
   activeTab,
   onTabChange,
   onSave,
+  isSaving = false,
   backHref = '/apply/list',
 }: ApplyJobHeaderProps) {
+  const isSaveDisabled = activeTab === 'analysis' || isSaving || onSave == null;
+
   return (
     <header className="flex w-full flex-col gap-4">
       <div className="flex items-start justify-between gap-4 self-stretch">
@@ -63,6 +67,7 @@ export function ApplyJobHeader({
           size="default"
           leftIcon={<SaveIcon />}
           className="shrink-0"
+          disabled={isSaveDisabled}
           onClick={onSave}
         >
           저장하기

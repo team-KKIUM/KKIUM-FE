@@ -7,13 +7,16 @@ import {
   applyCoverLetterQuestionsMock,
   type ApplyCoverLetterQuestion,
 } from '../../_constants/applyMockData';
+import type { JdId } from '@/app/api/apply/types';
 import { cn } from '@/lib/utils';
 
+import { getJdQuestionIdFromCoverLetterQuestion } from '../../_utils/buildSaveResumeRequest';
 import { ApplyCoverLetterQuestionEditor } from './ApplyCoverLetterQuestionEditor';
 import { ApplyCoverLetterQuestionNav } from './ApplyCoverLetterQuestionNav';
 
 export interface ApplyCoverLetterRightPanelProps {
   className?: string;
+  jdId?: JdId | null;
   questions?: ApplyCoverLetterQuestion[];
   activeIndex?: number;
   onActiveIndexChange?: (index: number) => void;
@@ -36,6 +39,7 @@ function createEmptyQuestion(index: number): ApplyCoverLetterQuestion {
 
 export function ApplyCoverLetterRightPanel({
   className,
+  jdId,
   questions: controlledQuestions,
   activeIndex: controlledActiveIndex,
   onActiveIndexChange,
@@ -125,6 +129,9 @@ export function ApplyCoverLetterRightPanel({
         value={activeQuestion.content}
         onChange={handleContentChange}
         onTitleChange={handleTitleChange}
+        jdId={jdId}
+        jdQuestionId={getJdQuestionIdFromCoverLetterQuestion(activeQuestion)}
+        selectedExperienceIds={selectedExperienceIdsByQuestion[activeQuestion.id] ?? []}
         hasSelectedExperiences={
           (selectedExperienceIdsByQuestion[activeQuestion.id] ?? []).length > 0
         }

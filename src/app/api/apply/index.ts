@@ -16,13 +16,21 @@ import {
   parsedJdUrlResponseSchema,
   UNPARSEABLE_JD_URL_MESSAGE,
   updateJdResumeRequestSchema,
+  saveResumeRequestSchema,
+  createResumeAiDraftRequestSchema,
+  createResumeAiDraftResponseSchema,
+  resumeWritingGuideParamsSchema,
+  resumeWritingGuideResponseSchema,
+  resumeQuestionExperiencesResponseSchema,
   updateJdOrderRequestSchema,
   updateJdTitleRequestSchema,
   type CreateJdAiRequest,
+  type CreateResumeAiDraftRequest,
   type JdListParams,
   type JdId,
   type ParseJdUrlRequest,
   type JdExperienceAnalysisResponse,
+  type SaveResumeRequest,
   type UpdateJdResumeRequest,
   type UpdateJdOrderRequest,
   type UpdateJdTitleRequest,
@@ -90,6 +98,56 @@ export async function updateJdResume(jdId: JdId, request: UpdateJdResumeRequest)
   const response = await api.patch<unknown>(`/api/v1/jd/${parsedJdId}/resume`, parsedRequest);
 
   return jdMutationResponseSchema.parse(response);
+}
+
+export async function saveJdResume(jdId: JdId, request: SaveResumeRequest) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedRequest = saveResumeRequestSchema.parse(request);
+  const response = await api.post<unknown>(`/api/v1/resume/${parsedJdId}`, parsedRequest);
+
+  return jdMutationResponseSchema.parse(response);
+}
+
+export async function createJdResumeAiDraft(
+  jdId: JdId,
+  questionId: number,
+  request: CreateResumeAiDraftRequest,
+) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedQuestionId = jdIdSchema.parse(questionId);
+  const parsedRequest = createResumeAiDraftRequestSchema.parse(request);
+  const response = await api.post<unknown>(
+    `/api/v1/resume/jd/${parsedJdId}/questions/${parsedQuestionId}/ai-draft`,
+    parsedRequest,
+  );
+
+  return createResumeAiDraftResponseSchema.parse(response);
+}
+
+export async function getJdResumeWritingGuide(
+  jdId: JdId,
+  questionId: number,
+  params: { experienceIds: number[] },
+) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedQuestionId = jdIdSchema.parse(questionId);
+  const parsedParams = resumeWritingGuideParamsSchema.parse(params);
+  const response = await api.get<unknown>(
+    `/api/v1/resume/jd/${parsedJdId}/questions/${parsedQuestionId}/writing-guide`,
+    { params: { experienceIds: parsedParams.experienceIds } },
+  );
+
+  return resumeWritingGuideResponseSchema.parse(response);
+}
+
+export async function getJdResumeQuestionExperiences(jdId: JdId, questionId: number) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedQuestionId = jdIdSchema.parse(questionId);
+  const response = await api.get<unknown>(
+    `/api/v1/resume/jd/${parsedJdId}/questions/${parsedQuestionId}/experiences`,
+  );
+
+  return resumeQuestionExperiencesResponseSchema.parse(response);
 }
 
 export async function parseJdUrl(request: ParseJdUrlRequest) {

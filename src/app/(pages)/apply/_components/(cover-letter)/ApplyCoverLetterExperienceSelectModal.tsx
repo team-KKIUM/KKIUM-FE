@@ -2,15 +2,14 @@
 
 import * as React from 'react';
 
-import { mapExperienceCardToItem } from '@/app/(pages)/experience/_utils/mapExperienceResponse';
+import type { JdId } from '@/app/api/apply/types';
 import { Modal, ModalClose, ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { Button } from '@/components/ui/button';
-import { useExperiences } from '@/hooks/experience/useExperiences';
+import { useApplyResumeQuestionExperiences } from '@/hooks/apply/useApplyResumeQuestionExperiences';
 import { cn } from '@/lib/utils';
 
 import { APPLY_COVER_LETTER_MAX_SELECTED_EXPERIENCES } from '../../_constants/applyMockData';
-import { useCoverLetterQuestionExperiences } from '../../_hooks/useCoverLetterQuestionExperiences';
 
 import { ApplyCoverLetterExperienceSelectEmptyState } from './ApplyCoverLetterExperienceSelectEmptyState';
 import { CoverLetterQuestionFitInfoLink } from './CoverLetterQuestionFitInfoLink';
@@ -19,7 +18,8 @@ import { ExperienceSelect } from './ExperienceSelect';
 export interface ApplyCoverLetterExperienceSelectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  questionId: string;
+  jdId?: JdId | null;
+  jdQuestionId?: number | null;
   questionOrder: number;
   questionText: string;
   selectedExperienceIds?: string[];
@@ -33,18 +33,20 @@ function formatQuestionOrder(order: number) {
 export function ApplyCoverLetterExperienceSelectModal({
   open,
   onOpenChange,
-  questionId,
+  jdId,
+  jdQuestionId,
   questionOrder,
   questionText,
   selectedExperienceIds = [],
   onSave,
 }: ApplyCoverLetterExperienceSelectModalProps) {
-  const { data, isPending } = useExperiences();
-  const experiences = React.useMemo(
-    () => data?.experiences.map(mapExperienceCardToItem) ?? [],
-    [data?.experiences],
+  const canFetchExperiences = jdId != null && jdQuestionId != null;
+  const experiencesQuery = useApplyResumeQuestionExperiences(
+    jdId,
+    jdQuestionId,
+    open && canFetchExperiences,
   );
-  const questionExperiences = useCoverLetterQuestionExperiences(questionId, experiences);
+  const questionExperiences = experiencesQuery.data ?? [];
   const [draftSelectedIds, setDraftSelectedIds] = React.useState<string[]>(selectedExperienceIds);
 
   React.useEffect(() => {
@@ -53,6 +55,8 @@ export function ApplyCoverLetterExperienceSelectModal({
     }
   }, [open, selectedExperienceIds]);
 
+  const isPending = canFetchExperiences && experiencesQuery.isPending;
+  const isError = canFetchExperiences && experiencesQuery.isError;
   const hasExperiences = questionExperiences.length > 0;
   const canSave = draftSelectedIds.length > 0;
 
@@ -151,6 +155,10 @@ export function ApplyCoverLetterExperienceSelectModal({
             {isPending ? (
               <p className="flex flex-1 items-center justify-center body-2-regular text-tertiary">
                 경험 목록을 불러오는 중이에요.
+              </p>
+            ) : isError ? (
+              <p className="flex flex-1 items-center justify-center body-2-regular text-tertiary">
+                경험 목록을 불러오지 못했습니다.
               </p>
             ) : (
               <ApplyCoverLetterExperienceSelectEmptyState />

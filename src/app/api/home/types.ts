@@ -40,3 +40,4 @@ export const homeDashboardResponseSchema = z.object({
 });
 
 export type HomeDashboardResponse = z.infer<typeof homeDashboardResponseSchema>;
+export type HomeTargetJd = HomeDashboardResponse['targetJds'][number];

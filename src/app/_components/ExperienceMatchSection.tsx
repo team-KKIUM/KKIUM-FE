@@ -2,12 +2,10 @@
 
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { ChevronRightIcon } from '@/components/common/icons/ChevronRightIcon';
-import type { HomeDashboardResponse } from '@/app/api/home/types';
+import type { HomeTargetJd } from '@/app/api/home/types';
 
 import { ExperienceMatch } from './ExperienceMatch';
 import { NullComponent } from './NullComponent';
-
-type TargetJd = NonNullable<HomeDashboardResponse['targetJd']>;
 
 export interface TargetPostingSectionProps {
   hasMatchData: boolean;
@@ -16,7 +14,7 @@ export interface TargetPostingSectionProps {
   canGoNext: boolean;
   onPrevPosting: () => void;
   onNextPosting: () => void;
-  targetJd?: TargetJd | null;
+  targetJd?: HomeTargetJd | null;
   applyHref?: string;
 }
 

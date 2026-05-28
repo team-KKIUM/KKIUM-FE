@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import type { ResumeWritingGuideResponse } from '@/app/api/apply/types';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,9 @@ export interface ApplyCoverLetterPanelProps {
   onSelectExperienceClick?: () => void;
   selectedExperiences?: ExperienceItem[];
   onSelectedExperienceRemove?: (experienceId: string) => void;
+  writingGuide?: ResumeWritingGuideResponse | null;
+  isWritingGuideLoading?: boolean;
+  isWritingGuideError?: boolean;
 }
 
 export function ApplyCoverLetterPanel({
@@ -24,6 +28,9 @@ export function ApplyCoverLetterPanel({
   onSelectExperienceClick,
   selectedExperiences = [],
   onSelectedExperienceRemove,
+  writingGuide,
+  isWritingGuideLoading = false,
+  isWritingGuideError = false,
 }: ApplyCoverLetterPanelProps) {
   const hasSelectedExperiences = selectedExperiences.length > 0;
   const [detailExperienceId, setDetailExperienceId] = React.useState<string | null>(null);
@@ -76,7 +83,11 @@ export function ApplyCoverLetterPanel({
       >
         {hasSelectedExperiences ? (
           <>
-            <ApplyCoverLetterWritingGuideCard />
+            <ApplyCoverLetterWritingGuideCard
+              guide={writingGuide}
+              isLoading={isWritingGuideLoading}
+              isError={isWritingGuideError}
+            />
             {selectedExperiences.map((experience) => (
               <ApplyCoverLetterSelectedExperienceCard
                 key={experience.id}

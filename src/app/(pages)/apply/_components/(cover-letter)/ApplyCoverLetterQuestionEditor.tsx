@@ -2,9 +2,11 @@
 
 import * as React from 'react';
 
-import { coverLetterAiDraftMock } from '../../_constants/applyMockData';
+import type { JdId } from '@/app/api/apply/types';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+
+import { useApplyResumeAiDraft } from '@/hooks/apply/useApplyResumeAiDraft';
 
 import { AiDraftButton } from './AiDraftButton';
 import { ApplyCoverLetterAiDraftPanel } from './AiDraftPanel';
@@ -16,7 +18,9 @@ export interface ApplyCoverLetterQuestionEditorProps {
   onChange: (value: string) => void;
   onTitleChange: (title: string) => void;
   hasSelectedExperiences?: boolean;
-  aiDraft?: string;
+  jdId?: JdId | null;
+  jdQuestionId?: number | null;
+  selectedExperienceIds?: string[];
   className?: string;
 }
 
@@ -31,31 +35,32 @@ export function ApplyCoverLetterQuestionEditor({
   onChange,
   onTitleChange,
   hasSelectedExperiences = false,
-  aiDraft = coverLetterAiDraftMock,
+  jdId,
+  jdQuestionId,
+  selectedExperienceIds = [],
   className,
 }: ApplyCoverLetterQuestionEditorProps) {
   const [aiDraftOpen, setAiDraftOpen] = React.useState(false);
   const [draftContent, setDraftContent] = React.useState('');
+  const {
+    cachedDraft,
+    generateDraft,
+    isGenerating: isAiDraftGenerating,
+  } = useApplyResumeAiDraft(jdId, jdQuestionId, selectedExperienceIds);
 
   React.useEffect(() => {
     setAiDraftOpen(false);
-    setDraftContent('');
-  }, [order]);
+    setDraftContent(cachedDraft);
+  }, [order, cachedDraft]);
 
   const canUseAiDraft = hasSelectedExperiences;
   const hasDraft = draftContent.length > 0;
+  const canGenerateAiDraft =
+    jdId != null && jdQuestionId != null && selectedExperienceIds.length > 0;
 
-  const openAiDraft = () => {
-    setDraftContent(aiDraft);
+  const handleDraftGenerated = (draft: string) => {
+    setDraftContent(draft);
     setAiDraftOpen(true);
-  };
-
-  const handleAiDraftClick = () => {
-    if (!canUseAiDraft || hasDraft) {
-      return;
-    }
-
-    openAiDraft();
   };
 
   const handleExpandedChange = (expanded: boolean) => {
@@ -70,20 +75,28 @@ export function ApplyCoverLetterQuestionEditor({
         className,
       )}
     >
-      <div className="flex w-full min-w-0 items-center gap-2">
-        <div className="flex min-w-0 flex-1 items-center gap-0.5">
-          <span className="shrink-0 text-xl font-bold leading-7 text-mint-300">
+      <div className="flex w-full min-w-0 items-start gap-2">
+        <div className="flex min-w-0 flex-1 items-start gap-0.5">
+          <span className="shrink-0 pt-px text-xl font-bold leading-7 text-mint-300">
             {formatQuestionOrder(order)}.
           </span>
-          <input
-            type="text"
+          <textarea
             value={title}
+            rows={2}
             onChange={(event) => onTitleChange(event.target.value)}
             aria-label={`${formatQuestionOrder(order)} 문항 제목`}
-            className="h-7 min-w-0 flex-1 border-none bg-transparent p-0 text-xl font-bold leading-7 text-strong outline-none placeholder:text-tertiary focus-visible:ring-0"
+            className="min-h-14 max-h-14 min-w-0 flex-1 resize-none overflow-x-hidden overflow-y-auto border-none bg-transparent p-0 text-xl font-bold leading-7 break-words text-strong outline-none placeholder:text-tertiary focus-visible:ring-0"
           />
         </div>
-        <AiDraftButton disabled={!canUseAiDraft || hasDraft} onClick={handleAiDraftClick} />
+        <AiDraftButton
+          className="mt-px"
+          hasDraft={hasDraft}
+          canGenerate={canGenerateAiDraft}
+          isGenerating={isAiDraftGenerating}
+          disabled={!canUseAiDraft}
+          onGenerate={generateDraft}
+          onDraftGenerated={handleDraftGenerated}
+        />
       </div>
 
       <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-visible">

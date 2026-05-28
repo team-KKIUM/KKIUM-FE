@@ -6,19 +6,12 @@ import type {
 } from '@/app/api/experience/types';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
+import { mapExperiencePieceTypeToCategory } from '@/app/(pages)/experience/_utils/mapExperiencePieceType';
 
-type UiExperienceType = ExperienceItem['type'];
 type CommonExperienceFields = Pick<
   ExperienceCardResponse,
   'experienceId' | 'type' | 'title' | 'oneLineIntro' | 'tags' | 'startDate' | 'endDate'
 >;
-
-const typeMap: Record<ExperiencePieceType, UiExperienceType> = {
-  ACTIVITY: 'activity',
-  CAREER: 'career',
-  EDUCATION: 'education',
-  ETC: 'etc',
-};
 
 const emptyDetail: ExperienceItem['detail'] = {
   situation: '',
@@ -92,7 +85,7 @@ function getBasicDetail(response: ExperienceDetailResponse): ExperienceItem['bas
 function mapCommonFields(response: CommonExperienceFields) {
   return {
     id: String(response.experienceId),
-    type: typeMap[response.type],
+    type: mapExperiencePieceTypeToCategory(response.type),
     title: response.title,
     description: response.oneLineIntro,
     startDate: response.startDate,

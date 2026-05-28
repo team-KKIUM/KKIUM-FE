@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import {
-  skipToken,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -17,6 +16,8 @@ import {
   getJdResume,
   parseJdOcr,
   parseJdUrl,
+  createJdResumeAiDraft,
+  saveJdResume,
   toggleJdTarget,
   updateJdResume,
   updateJdOrder,
@@ -28,6 +29,8 @@ import type {
   JdListParams,
   JdId,
   ParseJdUrlRequest,
+  CreateResumeAiDraftRequest,
+  SaveResumeRequest,
   UpdateJdResumeRequest,
   UpdateJdOrderRequest,
   UpdateJdTitleRequest,
@@ -43,6 +46,23 @@ export const applyJobPostingQueryKeys = {
   details: () => [...applyJobPostingQueryKeys.all, 'detail'] as const,
   detail: (jdId: JdId | null | undefined) =>
     [...applyJobPostingQueryKeys.details(), jdId ?? null] as const,
+  writingGuide: (
+    jdId: JdId | null | undefined,
+    questionId: number | null | undefined,
+    experienceIds: number[],
+  ) =>
+    [
+      ...applyJobPostingQueryKeys.detail(jdId),
+      'writing-guide',
+      questionId,
+      experienceIds,
+    ] as const,
+  aiDraft: (
+    jdId: JdId | null | undefined,
+    questionId: number | null | undefined,
+    experienceIds: number[],
+  ) =>
+    [...applyJobPostingQueryKeys.detail(jdId), 'ai-draft', questionId, experienceIds] as const,
 };
 
 export function useInfiniteApplyJobPostings(params?: Omit<JdListParams, 'page'>) {
@@ -67,18 +87,15 @@ export function useApplyJobPostingResume(jdId: JdId | null | undefined, enabled 
 
   const query = useQuery({
     queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
-    queryFn:
-      enabled && jdId != null
-        ? async () => {
-            const data = await getJdResume(jdId);
-            console.log('[ApplyJobPostingResume] API', {
-              jdId,
-              endpoint: 'GET /api/v1/jd/{jdId}/resume',
-              response: data,
-            });
-            return data;
-          }
-        : skipToken,
+    queryFn: async () => {
+      const data = await getJdResume(jdId!);
+      console.log('[ApplyJobPostingResume] API', {
+        jdId,
+        endpoint: 'GET /api/v1/jd/{jdId}/resume',
+        response: data,
+      });
+      return data;
+    },
     enabled: shouldQuery,
   });
 
@@ -138,7 +155,10 @@ export function useUpdateApplyJobPostingTitle() {
           };
         },
       );
-      void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.detail(jdId) });
+      void queryClient.invalidateQueries({
+        queryKey: applyJobPostingQueryKeys.detail(jdId),
+        refetchType: 'active',
+      });
     },
   });
 }
@@ -158,8 +178,46 @@ export function useUpdateApplyJobPostingResume() {
     onSuccess: (_, { jdId }) => {
       void queryClient.invalidateQueries({
         queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+        refetchType: 'active',
       });
       void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.lists() });
+    },
+  });
+}
+
+export function useSaveApplyResume() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ jdId, request }: { jdId: JdId; request: SaveResumeRequest }) =>
+      saveJdResume(jdId, request),
+    onSuccess: (_, { jdId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+        refetchType: 'active',
+      });
+    },
+  });
+}
+
+export function useCreateApplyResumeAiDraft() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      jdId,
+      questionId,
+      request,
+    }: {
+      jdId: JdId;
+      questionId: number;
+      request: CreateResumeAiDraftRequest;
+    }) => createJdResumeAiDraft(jdId, questionId, request),
+    onSuccess: (_, { jdId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+        refetchType: 'active',
+      });
     },
   });
 }
@@ -199,7 +257,10 @@ export function useToggleApplyTargetJobPosting() {
     mutationFn: toggleJdTarget,
     onSuccess: (_, jdId) => {
       void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.lists() });
-      void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.detail(jdId) });
+      void queryClient.invalidateQueries({
+        queryKey: applyJobPostingQueryKeys.detail(jdId),
+        refetchType: 'active',
+      });
     },
   });
 }
@@ -211,7 +272,10 @@ export function useDeleteApplyJobPosting() {
     mutationFn: deleteJd,
     onSuccess: (_, jdId) => {
       void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.lists() });
-      void queryClient.invalidateQueries({ queryKey: applyJobPostingQueryKeys.detail(jdId) });
+      void queryClient.invalidateQueries({
+        queryKey: applyJobPostingQueryKeys.detail(jdId),
+        refetchType: 'active',
+      });
     },
   });
 }

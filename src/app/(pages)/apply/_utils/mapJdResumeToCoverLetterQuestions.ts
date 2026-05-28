@@ -14,6 +14,7 @@ export function mapJdResumeToCoverLetterQuestions(
 
       return {
         id: `resume-q-${question.questionId}`,
+        jdQuestionId: question.questionId,
         title: prompt || `${index + 1}번 문항`,
         prompt: prompt || undefined,
         content: question.answer?.trim() ?? '',

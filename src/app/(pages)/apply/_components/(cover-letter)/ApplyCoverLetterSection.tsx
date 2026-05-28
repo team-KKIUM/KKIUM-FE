@@ -5,11 +5,13 @@ import * as React from 'react';
 import { ResizableSplit } from '../ResizableSplit';
 import {
   applyCoverLetterQuestionsMock,
-  coverLetterQuestionExperiencesMock,
   getCoverLetterQuestionDisplayText,
 } from '../../_constants/applyMockData';
 import { useApplyCoverLetterStore } from '../../_stores/useApplyCoverLetterStore';
+import { getJdQuestionIdFromCoverLetterQuestion } from '../../_utils/buildSaveResumeRequest';
 import { mapJdResumeToCoverLetterQuestions } from '../../_utils/mapJdResumeToCoverLetterQuestions';
+import { useApplyResumeQuestionExperiences } from '@/hooks/apply/useApplyResumeQuestionExperiences';
+import { useApplyResumeWritingGuide } from '@/hooks/apply/useApplyResumeWritingGuide';
 import { ApplyCoverLetterExperienceSelectModal } from './ApplyCoverLetterExperienceSelectModal';
 import { ApplyCoverLetterPanel } from './ApplyCoverLetterPanel';
 import { ApplyCoverLetterRightPanel } from './ApplyCoverLetterRightPanel';
@@ -40,6 +42,26 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
   const initializedQuestionJdIdsRef = React.useRef<Set<string>>(new Set());
 
   const activeQuestion = questions[activeQuestionIndex];
+  const activeQuestionExperienceIds = activeQuestion
+    ? (selectedExperienceIdsByQuestion[activeQuestion.id] ?? [])
+    : [];
+  const activeJdQuestionId = activeQuestion
+    ? getJdQuestionIdFromCoverLetterQuestion(activeQuestion)
+    : null;
+  const writingGuideQuery = useApplyResumeWritingGuide(
+    jdId,
+    activeJdQuestionId,
+    activeQuestionExperienceIds,
+  );
+  const shouldLoadQuestionExperiences =
+    jdId != null &&
+    activeJdQuestionId != null &&
+    (experienceModalOpen || activeQuestionExperienceIds.length > 0);
+  const questionExperiencesQuery = useApplyResumeQuestionExperiences(
+    jdId,
+    activeJdQuestionId,
+    shouldLoadQuestionExperiences,
+  );
 
   React.useEffect(() => {
     if (!jdId || !resumeQuery.data) {
@@ -67,16 +89,18 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
         return [];
       }
 
+      const experiencesById = new Map(
+        (questionExperiencesQuery.data ?? []).map(({ experience }) => [
+          experience.id,
+          experience,
+        ]),
+      );
+
       return (selectedExperienceIdsByQuestion[activeQuestion.id] ?? [])
-        .map(
-          (experienceId) =>
-            coverLetterQuestionExperiencesMock.find(
-              ({ experience }) => experience.id === experienceId,
-            )?.experience,
-        )
+        .map((experienceId) => experiencesById.get(experienceId))
         .filter((experience) => experience != null);
     },
-    [activeQuestion, selectedExperienceIdsByQuestion],
+    [activeQuestion, questionExperiencesQuery.data, selectedExperienceIdsByQuestion],
   );
 
   const handleRemoveSelectedExperience = (experienceId: string) => {
@@ -107,10 +131,14 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
               selectedExperiences={activeQuestionSelectedExperiences}
               onSelectedExperienceRemove={handleRemoveSelectedExperience}
               onSelectExperienceClick={() => setExperienceModalOpen(true)}
+              writingGuide={writingGuideQuery.data}
+              isWritingGuideLoading={writingGuideQuery.isFetching}
+              isWritingGuideError={writingGuideQuery.isError}
             />
           }
           right={
             <ApplyCoverLetterRightPanel
+              jdId={jdId}
               questions={questions}
               activeIndex={activeQuestionIndex}
               onActiveIndexChange={setActiveQuestionIndex}
@@ -125,7 +153,8 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
         <ApplyCoverLetterExperienceSelectModal
           open={experienceModalOpen}
           onOpenChange={setExperienceModalOpen}
-          questionId={activeQuestion.id}
+          jdId={jdId}
+          jdQuestionId={activeJdQuestionId}
           questionOrder={activeQuestionIndex + 1}
           questionText={getCoverLetterQuestionDisplayText(activeQuestion)}
           selectedExperienceIds={selectedExperienceIdsByQuestion[activeQuestion.id] ?? []}

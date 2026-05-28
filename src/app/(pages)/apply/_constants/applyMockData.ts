@@ -202,6 +202,7 @@ export const APPLY_COVER_LETTER_MAX_SELECTED_EXPERIENCES = 3;
 
 export type ApplyCoverLetterQuestion = {
   id: string;
+  jdQuestionId?: number;
   title: string;
   content: string;
   prompt?: string;
