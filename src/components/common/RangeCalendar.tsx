@@ -137,7 +137,7 @@ export function RangeCalendar({
       )}
       {...props}
     >
-      <div className="flex w-full items-center">
+      <div className="flex w-full items-center justify-center gap-2">
         <button
           type="button"
           aria-label="이전 달"

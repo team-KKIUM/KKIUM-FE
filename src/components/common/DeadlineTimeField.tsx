@@ -58,8 +58,8 @@ export function DeadlineTimeField({
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn(
-            'flex h-14 w-full items-center gap-2 rounded-lg border border-gray-300 bg-background-default px-4 text-left outline-none transition-colors',
-            'hover:border-gray-400 focus-visible:border-mint-main focus-visible:shadow-focus-ring',
+            'flex h-[54px] w-full items-center gap-2 rounded-lg border-[1.5px] border-border-bold bg-background-w px-4 text-left outline-none transition-colors',
+            'hover:border-gray-400 focus-visible:border-mint-main focus-visible:bg-mint-50/40 focus-visible:shadow-focus-ring',
             disabled && 'pointer-events-none cursor-not-allowed opacity-60',
             className,
           )}
@@ -84,7 +84,7 @@ export function DeadlineTimeField({
           <DropdownMenuItem
             key={option.value}
             className={cn(
-              'min-h-10 border-b border-border-bold last:border-b-0',
+              'flex min-h-10 items-center border-b border-border-bold last:border-b-0',
               value === option.value && 'bg-gray-100',
             )}
             onSelect={() => {
