@@ -68,6 +68,7 @@ export function SingleMonthRangeCalendar({
     if (defaultRange) return startOfLocalDay(defaultRange.end);
     return null;
   });
+  const [previewEnd, setPreviewEnd] = React.useState<Date | null>(null);
 
   const valueSyncKey =
     valueProp == null ? 'empty' : `${dayTime(valueProp.start)}-${dayTime(valueProp.end)}`;
@@ -105,6 +106,7 @@ export function SingleMonthRangeCalendar({
     if (!draftStart || (draftStart && draftEnd)) {
       setDraftStart(day);
       setDraftEnd(null);
+      setPreviewEnd(null);
       onChange?.(null);
       return;
     }
@@ -114,6 +116,7 @@ export function SingleMonthRangeCalendar({
     if (compareLocalDay(end, start) < 0) [start, end] = [end, start];
     setDraftStart(start);
     setDraftEnd(end);
+    setPreviewEnd(null);
     onChange?.({ start, end });
   };
 
@@ -153,7 +156,9 @@ export function SingleMonthRangeCalendar({
           month={anchor.month}
           selectionStart={draftStart}
           selectionEnd={draftEnd}
+          previewEnd={draftStart && !draftEnd ? previewEnd : null}
           onDayClick={handleDayClick}
+          onDayHover={setPreviewEnd}
         />
       </div>
     </div>

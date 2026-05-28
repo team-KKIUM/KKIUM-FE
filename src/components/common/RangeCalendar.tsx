@@ -67,6 +67,7 @@ export function RangeCalendar({
     if (defaultRange) return startOfLocalDay(defaultRange.end);
     return null;
   });
+  const [previewEnd, setPreviewEnd] = React.useState<Date | null>(null);
 
   const valueSyncKey =
     valueProp == null
@@ -92,6 +93,7 @@ export function RangeCalendar({
 
   const selectionStart = draftStart;
   const selectionEnd = draftEnd;
+  const rangePreviewEnd = selectionStart && !selectionEnd ? previewEnd : null;
 
   const commitRange = (next: CalendarDateRange | null) => {
     onChange?.(next);
@@ -114,6 +116,7 @@ export function RangeCalendar({
     if (!selectionStart || (selectionStart && selectionEnd)) {
       setDraftStart(day);
       setDraftEnd(null);
+      setPreviewEnd(null);
       commitRange(null);
       return;
     }
@@ -123,6 +126,7 @@ export function RangeCalendar({
     if (compareLocalDay(e, s) < 0) [s, e] = [e, s];
     setDraftStart(s);
     setDraftEnd(e);
+    setPreviewEnd(null);
     commitRange({ start: s, end: e });
   };
 
@@ -169,14 +173,18 @@ export function RangeCalendar({
           month={anchor.month}
           selectionStart={selectionStart}
           selectionEnd={selectionEnd}
+          previewEnd={rangePreviewEnd}
           onDayClick={(d) => handleDayClick(d, anchor.year, anchor.month)}
+          onDayHover={setPreviewEnd}
         />
         <MonthPanel
           year={second.year}
           month={second.month}
           selectionStart={selectionStart}
           selectionEnd={selectionEnd}
+          previewEnd={rangePreviewEnd}
           onDayClick={(d) => handleDayClick(d, second.year, second.month)}
+          onDayHover={setPreviewEnd}
         />
       </div>
     </div>
