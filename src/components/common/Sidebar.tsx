@@ -6,6 +6,7 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { clearAccessTokenFromSession } from '@/app/_utils/authFetch';
+import { AccountDialog } from '@/components/common/AccountDialog';
 import { ApplicationIcon } from '@/components/common/icons/ApplicationIcon';
 import { ExperienceIcon } from '@/components/common/icons/ExperienceIcon';
 import { HomeIcon } from '@/components/common/icons/HomeIcon';
@@ -49,6 +50,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const profileMenuId = React.useId();
   const profileMenuRef = React.useRef<HTMLDivElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = React.useState(false);
   const logoSrc = collapsed ? '/logo-light-mark.svg' : '/logo-light.svg';
   const logoSize = collapsed ? { width: 49, height: 49 } : { width: 136, height: 49 };
 
@@ -82,6 +84,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
 
   const handleAccountClick = () => {
     setIsProfileMenuOpen(false);
+    setIsAccountDialogOpen(true);
   };
 
   const handleLogoutClick = () => {
@@ -148,6 +151,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           ariaExpanded={isProfileMenuOpen}
           onClick={handleProfileClick}
         />
+        <AccountDialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen} />
       </div>
     </aside>
   );
