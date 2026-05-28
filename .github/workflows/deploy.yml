@@ -1,0 +1,69 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]   # dev에서도 돌리면 [main, dev]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::930611865671:role/kkium-code-deploy
+          aws-region: ap-northeast-2
+
+      - name: Start pipeline
+        id: start
+        run: |
+          EXEC_ID=$(aws codepipeline start-pipeline-execution \
+            --name kkium-pipeline \
+            --query 'pipelineExecutionId' \
+            --output text)
+          echo "execution_id=$EXEC_ID" >> $GITHUB_OUTPUT
+          echo "Started execution: $EXEC_ID"
+
+      - name: Watch pipeline status
+        run: |
+          PIPELINE_NAME="kkium-pipeline"
+          EXEC_ID="${{ steps.start.outputs.execution_id }}"
+
+          echo "Watching pipeline: $PIPELINE_NAME"
+          echo "Execution ID: $EXEC_ID"
+
+          for i in {1..120}; do
+            STATUS=$(aws codepipeline get-pipeline-execution \
+              --pipeline-name "$PIPELINE_NAME" \
+              --pipeline-execution-id "$EXEC_ID" \
+              --query 'pipelineExecution.status' \
+              --output text)
+
+            LAST_UPDATE=$(aws codepipeline get-pipeline-execution \
+              --pipeline-name "$PIPELINE_NAME" \
+              --pipeline-execution-id "$EXEC_ID" \
+              --query 'pipelineExecution.lastUpdateTime' \
+              --output text)
+
+            echo "[$i] status=$STATUS, lastUpdate=$LAST_UPDATE"
+
+            if [ "$STATUS" = "Succeeded" ]; then
+              echo "Pipeline succeeded."
+              exit 0
+            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Superseded" ] || [ "$STATUS" = "Cancelled" ]; then
+              echo "Pipeline ended with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 15
+          done
+
+          echo "Timed out waiting for pipeline completion."
+          exit 1
