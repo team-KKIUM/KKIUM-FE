@@ -80,10 +80,11 @@ function CoreQuestionField({
   number: string;
   label: string;
   placeholder: string;
-  value: string;
+  value?: string | null;
   onChange: (value: string) => void;
 }) {
-  const characterCount = value.length;
+  const fieldValue = value ?? '';
+  const characterCount = fieldValue.length;
   const isMaxLength = characterCount >= CORE_FIELD_MAX_LENGTH;
 
   return (
@@ -100,7 +101,7 @@ function CoreQuestionField({
       <TextField
         variant="textarea"
         placeholder={placeholder}
-        value={value}
+        value={fieldValue}
         maxLength={CORE_FIELD_MAX_LENGTH}
         description={false}
         onChange={(event) => onChange(event.currentTarget.value)}
