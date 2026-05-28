@@ -4,7 +4,8 @@ import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import * as React from 'react';
 
-import { bubbleChartMockData } from '@/app/_constants/bubbleChartMockData';
+import type { HomeDashboardResponse } from '@/app/api/home/types';
+import type { BubbleChartItem } from '@/app/_constants/bubbleChartMockData';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,66 @@ export interface BubbleChartProps extends Omit<React.ComponentProps<'section'>, 
   onAddClick?: () => void;
   emptyTitle?: string;
   emptyDescription?: string;
+  experienceDistribution?: HomeDashboardResponse['experienceDistribution'];
+}
+
+const BUBBLE_POSITIONS = [
+  { x: 103, y: 84 },
+  { x: 206, y: 162 },
+  { x: 34, y: 172 },
+  { x: 224, y: 67 },
+] as const;
+
+const EXPERIENCE_TYPE_LABELS: Readonly<Record<string, string>> = {
+  ACTIVITY: '학내외활동',
+  CAREER: '인턴',
+  EDUCATION: '수강/교육',
+  ETC: '기타',
+};
+
+function toBubbleLabel(type: string) {
+  return EXPERIENCE_TYPE_LABELS[type] ?? type;
+}
+
+function toBubbleData(
+  experienceDistribution: HomeDashboardResponse['experienceDistribution'] | undefined,
+): BubbleChartItem[] {
+  const filtered = (experienceDistribution ?? []).filter((item) => item.type !== 'ALL');
+  if (filtered.length === 0) return [];
+  if (filtered.length === 1) {
+    const only = filtered[0];
+    const clampedPercent = Math.max(0, Math.min(100, Math.round(only.percentage)));
+    const size = Math.round(56 + clampedPercent * 1.15);
+
+    return [
+      {
+        label: toBubbleLabel(only.type),
+        percent: clampedPercent,
+        x: 144,
+        y: 112,
+        size,
+        tone: 'gray300',
+      },
+    ];
+  }
+
+  return filtered
+    .slice(0, BUBBLE_POSITIONS.length)
+    .sort((a, b) => b.percentage - a.percentage)
+    .map((item, index) => {
+      const { x, y } = BUBBLE_POSITIONS[index];
+      const clampedPercent = Math.max(0, Math.min(100, Math.round(item.percentage)));
+      const size = Math.round(56 + clampedPercent * 1.15);
+
+      return {
+        label: toBubbleLabel(item.type),
+        percent: clampedPercent,
+        x,
+        y,
+        size,
+        tone: 'gray300',
+      };
+    });
 }
 
 export function BubbleChart({
@@ -23,12 +84,18 @@ export function BubbleChart({
   onAddClick,
   emptyTitle = '아직 생성된 경험이 없어요',
   emptyDescription = '경험을 추가해 파일을 끼워넣어볼까요?',
+  experienceDistribution,
   className,
   ...props
 }: BubbleChartProps) {
+  const bubbleData = React.useMemo(
+    () => toBubbleData(experienceDistribution),
+    [experienceDistribution],
+  );
+
   const option = React.useMemo<EChartsOption>(() => {
     const sizeRankMap = new Map<number, number>();
-    [...bubbleChartMockData]
+    [...bubbleData]
       .sort((a, b) => b.size - a.size)
       .forEach((item, index) => {
         if (!sizeRankMap.has(item.size)) {
@@ -47,7 +114,7 @@ export function BubbleChart({
         {
           type: 'scatter',
           cursor: 'default',
-          data: bubbleChartMockData.map((item) => {
+          data: bubbleData.map((item) => {
             const rank = sizeRankMap.get(item.size) ?? bubbleColors.length - 1;
             const bubbleColor = bubbleColors[Math.min(rank, bubbleColors.length - 1)];
             const isDark = rank <= 1;
@@ -84,7 +151,7 @@ export function BubbleChart({
         },
       ],
     };
-  }, []);
+  }, [bubbleData]);
 
   return (
     <section
@@ -100,7 +167,7 @@ export function BubbleChart({
         <div className="size-8" aria-hidden />
       </div>
 
-      {bubbleChartMockData.length > 0 ? (
+      {bubbleData.length > 0 ? (
         <div className="h-56 w-full max-w-72">
           <ReactECharts option={option} style={{ width: '100%', height: '100%' }} opts={{ renderer: 'svg' }} />
         </div>
