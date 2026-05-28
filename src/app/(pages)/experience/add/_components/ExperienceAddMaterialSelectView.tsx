@@ -39,8 +39,11 @@ export function ExperienceAddMaterialSelectView({
     setIsPdfDragging(false);
   };
 
-  const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>) =>
-    Array.from(event.dataTransfer.types).includes('Files');
+  const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!event.dataTransfer) return false;
+
+    return Array.from(event.dataTransfer.types).includes('Files');
+  };
 
   const addPdfFiles = (fileList: FileList | null) => {
     if (!fileList) return;
