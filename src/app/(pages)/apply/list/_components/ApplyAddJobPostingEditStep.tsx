@@ -84,7 +84,15 @@ export function ApplyAddJobPostingEditStep({
   isSaving = false,
   saveError,
 }: ApplyAddJobPostingEditStepProps) {
-  const hasCoverQuestions = coverQuestions.some((question) => question.value.trim().length > 0);
+  const hasRequiredTextFields =
+    postingTitle.trim().length > 0 &&
+    companyName.trim().length > 0 &&
+    recruitmentField.trim().length > 0 &&
+    postingBody.trim().length > 0;
+  const hasAllCoverQuestions = coverQuestions.length > 0 && coverQuestions.every(
+    (question) => question.value.trim().length > 0,
+  );
+  const canSave = hasRequiredTextFields && hasAllCoverQuestions;
 
   return (
     <>
@@ -229,7 +237,7 @@ export function ApplyAddJobPostingEditStep({
         type="button"
         variant="default"
         size="default"
-        disabled={isSaving || !hasCoverQuestions}
+        disabled={isSaving || !canSave}
         className="w-full text-base font-bold leading-6"
         onClick={onSave}
       >
