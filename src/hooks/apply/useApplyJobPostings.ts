@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import {
   skipToken,
   useInfiniteQuery,
@@ -32,6 +33,8 @@ import type {
   UpdateJdTitleRequest,
 } from '@/app/api/apply/types';
 
+import { useHasApplyApiAccess } from './useApplyAccessToken';
+
 export const applyJobPostingQueryKeys = {
   all: ['apply-job-postings'] as const,
   lists: () => [...applyJobPostingQueryKeys.all, 'list'] as const,
@@ -43,6 +46,8 @@ export const applyJobPostingQueryKeys = {
 };
 
 export function useInfiniteApplyJobPostings(params?: Omit<JdListParams, 'page'>) {
+  const hasApiAccess = useHasApplyApiAccess();
+
   return useInfiniteQuery({
     queryKey: applyJobPostingQueryKeys.infiniteList(params),
     queryFn: ({ pageParam }) =>
@@ -52,14 +57,60 @@ export function useInfiniteApplyJobPostings(params?: Omit<JdListParams, 'page'>)
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+    enabled: hasApiAccess,
   });
 }
 
 export function useApplyJobPostingResume(jdId: JdId | null | undefined, enabled = true) {
-  return useQuery({
+  const hasApiAccess = useHasApplyApiAccess();
+  const shouldQuery = enabled && jdId != null && hasApiAccess;
+
+  const query = useQuery({
     queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
-    queryFn: enabled && jdId != null ? () => getJdResume(jdId) : skipToken,
+    queryFn:
+      enabled && jdId != null
+        ? async () => {
+            const data = await getJdResume(jdId);
+            console.log('[ApplyJobPostingResume] API', {
+              jdId,
+              endpoint: 'GET /api/v1/jd/{jdId}/resume',
+              response: data,
+            });
+            return data;
+          }
+        : skipToken,
+    enabled: shouldQuery,
   });
+
+  useEffect(() => {
+    console.log('[ApplyJobPostingResume] state', {
+      jdId,
+      enabled,
+      hasApiAccess,
+      shouldQuery,
+      queryStatus: query.status,
+      fetchStatus: query.fetchStatus,
+      isPending: query.isPending,
+      isFetching: query.isFetching,
+      isError: query.isError,
+      error: query.error,
+      hasData: query.data != null,
+    });
+  }, [
+    jdId,
+    enabled,
+    hasApiAccess,
+    shouldQuery,
+    query.status,
+    query.fetchStatus,
+    query.isPending,
+    query.isFetching,
+    query.isError,
+    query.error,
+    query.data,
+  ]);
+
+  return query;
 }
 
 export function useUpdateApplyJobPostingTitle() {

@@ -374,7 +374,7 @@ function SortableApplyCard({
   return (
     <div ref={ref} className={isDragSource ? 'relative z-10 opacity-90' : undefined}>
       <ApplyCard
-        jobPostingId={card.id}
+        jdId={card.id}
         applyTitle={card.title}
         companyName={card.companyName}
         jobField={card.jobField}
