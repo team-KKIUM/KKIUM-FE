@@ -9,10 +9,8 @@ export const APPLY_COVER_LETTER_MAX_SELECTED_EXPERIENCES = 3;
 
 // --- 공고 등록 모달 ---
 
-export const JOB_POSTING_MODAL_HEIGHT_PX = 857;
-
 export const JOB_POSTING_MODAL_CONTENT_CLASS =
-  `flex h-[${JOB_POSTING_MODAL_HEIGHT_PX}px] max-h-[calc(100dvh-40px)] w-full max-w-[864px] flex-col gap-6 overflow-hidden px-[30px] py-5`;
+  'flex h-[857px] max-h-[calc(100dvh-40px)] w-full max-w-[864px] flex-col gap-6 overflow-hidden px-[30px] py-5';
 
 export const JOB_POSTING_PRIMARY_BUTTON_CLASS = 'h-12 w-full shrink-0';
 
