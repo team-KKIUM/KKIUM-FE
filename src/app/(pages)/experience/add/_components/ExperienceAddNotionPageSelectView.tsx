@@ -109,29 +109,31 @@ export function ExperienceAddNotionPageSelectView({
                 type="button"
                 aria-pressed={isSelected}
                 className={cn(
-                  'flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left',
+                  'flex w-full cursor-pointer items-center rounded-lg px-2.5 py-2 text-left',
                   'focus-visible:shadow-focus-ring focus-visible:outline-none',
                   isSelected ? 'bg-[#eefffd]' : 'bg-gray-50 hover:bg-gray-100',
                 )}
                 onClick={() => onPageToggle(page.pageId)}
               >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'flex size-10 shrink-0 items-center justify-center text-tertiary',
-                    isSelected && 'text-mint-500',
-                  )}
-                >
-                  {isSelected ? (
-                    <CheckedBoxIcon className="size-6" />
-                  ) : (
-                    <EmptyBoxIcon className="size-6" />
-                  )}
+                <span className="flex shrink-0 items-center">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'flex size-10 shrink-0 items-center justify-center text-tertiary',
+                      isSelected && 'text-mint-500',
+                    )}
+                  >
+                    {isSelected ? (
+                      <CheckedBoxIcon className="size-6" />
+                    ) : (
+                      <EmptyBoxIcon className="size-6" />
+                    )}
+                  </span>
+                  <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-background-w">
+                    <NotionPageIcon icon={page.icon} />
+                  </span>
                 </span>
-                <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-background-w">
-                  <NotionPageIcon icon={page.icon} />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="ml-3 flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate body-1-bold text-strong">{page.title}</span>
                   <span className="flex items-center gap-2.5">
                     <Tag tone={getNotionTagTone(page.type)}>{getNotionTypeLabel(page.type)}</Tag>
