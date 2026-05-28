@@ -18,6 +18,9 @@ export interface TargetPostingSectionProps {
   applyHref?: string;
 }
 
+const TARGET_POSTING_NAV_BUTTON_CLASS =
+  'flex size-8 items-center justify-center rounded text-gray-800 outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-40';
+
 function formatRecruitmentPeriod(startDate: string, endDate: string) {
   if (!startDate && !endDate) return '상시 채용';
   if (startDate && endDate) return `${startDate} ~ ${endDate}`;
@@ -41,7 +44,7 @@ export function TargetPostingSection({
           type="button"
           disabled={!canGoPrev}
           aria-label="이전 목표 공고"
-          className="flex size-8 items-center justify-center rounded text-gray-500 outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-40"
+          className={TARGET_POSTING_NAV_BUTTON_CLASS}
           onClick={onPrevPosting}
         >
           <ChevronLeftIcon className="size-6" />
@@ -51,7 +54,7 @@ export function TargetPostingSection({
           type="button"
           disabled={!canGoNext}
           aria-label="다음 목표 공고"
-          className="flex size-8 items-center justify-center rounded text-gray-800 outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-40"
+          className={TARGET_POSTING_NAV_BUTTON_CLASS}
           onClick={onNextPosting}
         >
           <ChevronRightIcon className="size-6" />
