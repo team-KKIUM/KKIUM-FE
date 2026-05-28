@@ -2,9 +2,12 @@
 
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { ChevronRightIcon } from '@/components/common/icons/ChevronRightIcon';
+import type { HomeDashboardResponse } from '@/app/api/home/types';
 
 import { ExperienceMatch } from './ExperienceMatch';
 import { NullComponent } from './NullComponent';
+
+type TargetJd = NonNullable<HomeDashboardResponse['targetJd']>;
 
 export interface TargetPostingSectionProps {
   hasMatchData: boolean;
@@ -13,6 +16,14 @@ export interface TargetPostingSectionProps {
   canGoNext: boolean;
   onPrevPosting: () => void;
   onNextPosting: () => void;
+  targetJd?: TargetJd | null;
+  applyHref?: string;
+}
+
+function formatRecruitmentPeriod(startDate: string, endDate: string) {
+  if (!startDate && !endDate) return '상시 채용';
+  if (startDate && endDate) return `${startDate} ~ ${endDate}`;
+  return startDate || endDate;
 }
 
 export function TargetPostingSection({
@@ -22,6 +33,8 @@ export function TargetPostingSection({
   canGoNext,
   onPrevPosting,
   onNextPosting,
+  targetJd,
+  applyHref,
 }: TargetPostingSectionProps) {
   return (
     <div className="flex w-full min-w-0 flex-col items-stretch gap-2">
@@ -47,7 +60,19 @@ export function TargetPostingSection({
         </button>
       </div>
 
-      {hasMatchData ? <ExperienceMatch /> : <NullComponent className="mx-auto" />}
+      {hasMatchData && targetJd ? (
+        <ExperienceMatch
+          percent={targetJd.applicationFitScore}
+          ctaHref={applyHref}
+          companyName={targetJd.companyName}
+          recruitmentField={targetJd.recruitmentField}
+          recruitmentPeriod={formatRecruitmentPeriod(targetJd.startDate, targetJd.endDate)}
+          requiredSkills={targetJd.hardSkills}
+          requiredCompetencies={targetJd.softSkills}
+        />
+      ) : (
+        <NullComponent className="mx-auto" />
+      )}
     </div>
   );
 }
