@@ -84,7 +84,7 @@ export function redirectToLoginOnUnauthorized() {
 
   clearAccessTokenFromSession();
 
-  if (isAuthExemptPath(window.location.pathname)) {
+  if (isPublicAuthPath(window.location.pathname)) {
     return;
   }
 
@@ -96,17 +96,6 @@ export function isPublicAuthPath(pathname: string) {
   const path = pathname.replace(/\/$/, '') || '/';
   return (
     path === '/login' || path.startsWith('/oauth') || path.startsWith('/auth/callback')
-  );
-}
-
-// 토큰 없이 UI 확인용 
-export function isAuthExemptPath(pathname: string) {
-  const path = pathname.replace(/\/$/, '') || '/';
-  return (
-    isPublicAuthPath(pathname) ||
-    path === '/' ||
-    path === '/apply' ||
-    path.startsWith('/apply/')
   );
 }
 
