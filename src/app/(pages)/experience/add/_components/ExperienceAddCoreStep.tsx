@@ -5,6 +5,9 @@ import {
 import type { ExperienceAddCoreInfoForm } from '@/app/(pages)/experience/add/_types/experienceAddForm';
 import { TextField } from '@/components/common/TextField';
 import { CoreTipIcon } from '@/components/common/icons/CoreTipIcon';
+import { cn } from '@/lib/utils';
+
+const CORE_FIELD_MAX_LENGTH = 1000;
 
 interface ExperienceAddCoreStepProps {
   value: ExperienceAddCoreInfoForm;
@@ -80,16 +83,25 @@ function CoreQuestionField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const characterCount = value.length;
+  const isMaxLength = characterCount >= CORE_FIELD_MAX_LENGTH;
+
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex items-start gap-0.5 title-2-bold">
-        <span className="text-mint-300">{number}</span>
-        <span className="text-strong">{label}</span>
+      <div className="flex items-end gap-3">
+        <div className="flex items-start gap-0.5 title-2-bold">
+          <span className="text-mint-300">{number}</span>
+          <span className="text-strong">{label}</span>
+        </div>
+        <p className={cn('caption-bold', isMaxLength ? 'text-danger' : 'text-quaternary')}>
+          {characterCount}자 / {CORE_FIELD_MAX_LENGTH}자
+        </p>
       </div>
       <TextField
         variant="textarea"
         placeholder={placeholder}
         value={value}
+        maxLength={CORE_FIELD_MAX_LENGTH}
         description={false}
         onChange={(event) => onChange(event.currentTarget.value)}
       />

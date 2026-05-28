@@ -10,6 +10,7 @@ import type {
 } from '@/app/(pages)/experience/add/_types/experienceAddForm';
 import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
 import { TextField } from '@/components/common/TextField';
+import { cn } from '@/lib/utils';
 
 type EditableTagGroupKey = 'skill' | 'competency';
 
@@ -34,6 +35,7 @@ const CORE_RESULT_FIELDS = [
   { name: 'result', label: 'Result (결과 및 성과)' },
   { name: 'taken', label: 'Taken (배운 점)' },
 ] as const;
+const CORE_RESULT_FIELD_MAX_LENGTH = 1000;
 
 export function ExperienceAddResultStep({
   basicInfo,
@@ -186,12 +188,21 @@ function ResultTextareaField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const characterCount = value.length;
+  const isMaxLength = characterCount >= CORE_RESULT_FIELD_MAX_LENGTH;
+
   return (
     <label className="flex w-full flex-col gap-4">
-      <span className="title-2-bold text-strong">{label}</span>
+      <span className="flex items-end gap-3">
+        <span className="title-2-bold text-strong">{label}</span>
+        <span className={cn('caption-bold', isMaxLength ? 'text-danger' : 'text-quaternary')}>
+          {characterCount}자 / {CORE_RESULT_FIELD_MAX_LENGTH}자
+        </span>
+      </span>
       <TextField
         variant="textarea"
         value={value}
+        maxLength={CORE_RESULT_FIELD_MAX_LENGTH}
         description={false}
         onChange={(event) => onChange(event.currentTarget.value)}
       />

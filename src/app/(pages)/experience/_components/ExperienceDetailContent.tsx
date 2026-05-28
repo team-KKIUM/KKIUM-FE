@@ -26,6 +26,7 @@ const detailFields = [
   ['Result', 'result'],
   ['Taken', 'taken'],
 ] as const;
+const DETAIL_FIELD_MAX_LENGTH = 1000;
 
 type EditableTagGroupKey = 'skill' | 'competency';
 type BasicDetailKey = keyof ExperienceItem['basicDetail'];
@@ -432,21 +433,29 @@ export function ExperienceDetailContent({
           scrollable && 'overflow-y-auto',
         )}
       >
-        {detailFields.map(([label, key]) => (
-          <div key={key} className="flex w-full flex-col gap-1.5">
-            <div className="flex items-center justify-between px-2">
-              <h3 className={cn('font-bold text-primary', isPage ? 'title-2-bold' : 'body-2-bold')}>
-                {label}
-              </h3>
+        {detailFields.map(([label, key]) => {
+          const characterCount = detail[key].length;
+          const isMaxLength = characterCount >= DETAIL_FIELD_MAX_LENGTH;
+
+          return (
+            <div key={key} className="flex w-full flex-col gap-1.5">
+              <div className="flex items-end gap-3 px-2">
+                <h3 className={cn('font-bold text-primary', isPage ? 'title-2-bold' : 'body-2-bold')}>
+                  {label}
+                </h3>
+                <p className={cn('caption-bold', isMaxLength ? 'text-danger' : 'text-quaternary')}>
+                  {characterCount}자 / {DETAIL_FIELD_MAX_LENGTH}자
+                </p>
+              </div>
+              <DetailInput
+                value={detail[key]}
+                maxLength={DETAIL_FIELD_MAX_LENGTH}
+                readOnly={!isEditing}
+                onChange={handleDetailChange(key)}
+              />
             </div>
-            <DetailInput
-              value={detail[key]}
-              maxLength={1000}
-              readOnly={!isEditing}
-              onChange={handleDetailChange(key)}
-            />
-          </div>
-        ))}
+          );
+        })}
       </div>
       <ErrorDialog
         open={errorMessage.length > 0}
