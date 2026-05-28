@@ -132,8 +132,6 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         {isProfileMenuOpen && (
           <div
             id={profileMenuId}
-            role="menu"
-            aria-label="프로필 메뉴"
             className={cn(
               'absolute bottom-16 z-50 flex w-[234px] flex-col gap-2 rounded-2xl bg-background-default p-2.5 shadow-md',
               collapsed ? 'left-0' : 'left-1/2 -translate-x-1/2',
@@ -201,7 +199,6 @@ function SidebarProfileMenuItem({
   return (
     <button
       type="button"
-      role="menuitem"
       className="flex h-12 w-full cursor-pointer items-center gap-4 rounded-md px-2.5 py-2 text-left body-1-bold text-primary outline-none transition-colors hover:bg-gray-200 focus-visible:shadow-focus-ring"
       onClick={onClick}
     >

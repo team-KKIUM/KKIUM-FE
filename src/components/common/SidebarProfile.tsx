@@ -27,7 +27,6 @@ export function SidebarProfile({
       data-active={active || undefined}
       aria-controls={ariaControls}
       aria-expanded={ariaExpanded}
-      aria-haspopup="menu"
       className={cn(
         'flex h-12 w-full cursor-pointer items-center rounded-md px-2.5 py-2 text-left outline-none focus-visible:shadow-focus-ring',
         active ? 'bg-gray-100' : 'hover:bg-gray-200',
