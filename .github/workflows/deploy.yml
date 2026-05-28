@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ap-northeast-2
-  AWS_DEFAULT_REGION: ap-northeast-2
+  AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
 
 jobs:
   deploy:
@@ -23,16 +23,13 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::930611865671:role/kkium-code-deploy
-          aws-region: ap-northeast-2
+          aws-region: us-east-1
 
       - name: Start pipeline
         id: start
-        env:
-          AWS_REGION: ap-northeast-2
-          AWS_DEFAULT_REGION: ap-northeast-2
         run: |
           EXEC_ID=$(aws codepipeline start-pipeline-execution \
-            --region ap-northeast-2 \
+            --region us-east-1 \
             --name kkium-pipeline \
             --query 'pipelineExecutionId' \
             --output text)
@@ -40,43 +37,22 @@ jobs:
           echo "Started execution: $EXEC_ID"
 
       - name: Watch pipeline status
-        env:
-          AWS_REGION: ap-northeast-2
-          AWS_DEFAULT_REGION: ap-northeast-2
         run: |
           PIPELINE_NAME="kkium-pipeline"
           EXEC_ID="${{ steps.start.outputs.execution_id }}"
 
-          echo "Watching pipeline: $PIPELINE_NAME (region: ap-northeast-2)"
-          echo "Execution ID: $EXEC_ID"
-
           for i in {1..120}; do
             STATUS=$(aws codepipeline get-pipeline-execution \
-              --region ap-northeast-2 \
+              --region us-east-1 \
               --pipeline-name "$PIPELINE_NAME" \
               --pipeline-execution-id "$EXEC_ID" \
               --query 'pipelineExecution.status' \
               --output text)
 
-            LAST_UPDATE=$(aws codepipeline get-pipeline-execution \
-              --region ap-northeast-2 \
-              --pipeline-name "$PIPELINE_NAME" \
-              --pipeline-execution-id "$EXEC_ID" \
-              --query 'pipelineExecution.lastUpdateTime' \
-              --output text)
+            echo "[$i] status=$STATUS"
 
-            echo "[$i] status=$STATUS, lastUpdate=$LAST_UPDATE"
-
-            if [ "$STATUS" = "Succeeded" ]; then
-              echo "Pipeline succeeded."
-              exit 0
-            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Superseded" ] || [ "$STATUS" = "Cancelled" ]; then
-              echo "Pipeline ended with status: $STATUS"
-              exit 1
-            fi
-
+            if [ "$STATUS" = "Succeeded" ]; then exit 0; fi
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Superseded" ] || [ "$STATUS" = "Cancelled" ]; then exit 1; fi
             sleep 15
           done
-
-          echo "Timed out waiting for pipeline completion."
           exit 1
