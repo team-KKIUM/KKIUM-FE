@@ -93,6 +93,8 @@ export function ExperienceBoard({
     () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
     [data],
   );
+  const keywordKey = keyword ?? '';
+  const [emptyAllKeywordKey, setEmptyAllKeywordKey] = React.useState<string | null>(null);
   const [experienceOrderMap, setExperienceOrderMap] = React.useState(() =>
     createExperienceOrderMap(experiences),
   );
@@ -134,6 +136,23 @@ export function ExperienceBoard({
       return nextOrderMap;
     });
   }, [experiences, selectedCategory]);
+
+  React.useEffect(() => {
+    if (selectedCategory !== 'all' || !data || isError || isPending) {
+      return;
+    }
+
+    const isAllExperienceEmpty =
+      !hasNextPage && data.pages.every((page) => page.experiences.length === 0);
+
+    setEmptyAllKeywordKey((currentKeywordKey) => {
+      if (isAllExperienceEmpty) {
+        return keywordKey;
+      }
+
+      return currentKeywordKey === keywordKey ? null : currentKeywordKey;
+    });
+  }, [data, hasNextPage, isError, isPending, keywordKey, selectedCategory]);
 
   React.useEffect(() => {
     if (previousKeywordRef.current === keyword) {
@@ -241,8 +260,13 @@ export function ExperienceBoard({
     panelOpen &&
     Boolean(selectedExperienceId) &&
     (isDetailPending || (isDetailFetching && !selectedExperienceDetailMatches));
+  const showKnownAllEmpty =
+    selectedCategory !== 'all' &&
+    emptyAllKeywordKey === keywordKey &&
+    filteredExperiences.length === 0;
   const showListLoading =
-    isPending || (isFetching && !isFetchingNextPage && filteredExperiences.length === 0);
+    !showKnownAllEmpty &&
+    (isPending || (isFetching && !isFetchingNextPage && filteredExperiences.length === 0));
 
   const handleCategoryChange = (category: ExperienceCategory) => {
     if (closeTimerRef.current) {
