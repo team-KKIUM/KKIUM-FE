@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { ApplicationIcon } from '@/components/common/icons/ApplicationIcon';
@@ -51,14 +52,20 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       )}
     >
       <div className="flex flex-col gap-5">
-        <Image
-          src={logoSrc}
-          alt="KKIUM"
-          width={logoSize.width}
-          height={logoSize.height}
-          priority
-          className={cn(collapsed ? 'size-[49px]' : 'h-[49px] w-[136px]')}
-        />
+        <Link
+          href="/"
+          aria-label="홈으로 이동"
+          className="w-fit rounded-sm focus-visible:shadow-focus-ring focus-visible:outline-none"
+        >
+          <Image
+            src={logoSrc}
+            alt="KKIUM"
+            width={logoSize.width}
+            height={logoSize.height}
+            priority
+            className={cn(collapsed ? 'size-[49px]' : 'h-[49px] w-[136px]')}
+          />
+        </Link>
 
         <nav aria-label="주요 메뉴" className="flex flex-col gap-2.5">
           {sidebarItems.map((item) => (
