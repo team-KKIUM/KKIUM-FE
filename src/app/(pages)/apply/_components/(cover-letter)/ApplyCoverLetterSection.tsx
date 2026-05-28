@@ -37,6 +37,7 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
   );
   const resumeQuery = useApplyJobPostingResume(jdId, jdId != null);
   const [experienceModalOpen, setExperienceModalOpen] = React.useState(false);
+  const initializedQuestionJdIdsRef = React.useRef<Set<string>>(new Set());
 
   const activeQuestion = questions[activeQuestionIndex];
 
@@ -45,8 +46,13 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
       return;
     }
 
+    if (initializedQuestionJdIdsRef.current.has(jdId)) {
+      return;
+    }
+
     const mappedQuestions = mapJdResumeToCoverLetterQuestions(resumeQuery.data);
     setQuestions(mappedQuestions.length > 0 ? mappedQuestions : applyCoverLetterQuestionsMock);
+    initializedQuestionJdIdsRef.current.add(jdId);
   }, [jdId, resumeQuery.data, setQuestions]);
 
   React.useEffect(() => {
