@@ -7,10 +7,11 @@ import type { ExperienceItem } from '@/app/(pages)/experience/_components/Experi
 import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
+import { sanitizeNumberText } from '@/app/(pages)/experience/_utils/sanitizeNumberText';
+import { DetailInput } from '@/components/common/DetailInput';
 import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { Tag } from '@/components/common/Tag';
-import { DetailInput } from '@/components/common/DetailInput';
 import {
   type SingleMonthCalendarDateRange,
   SingleMonthRangeCalendar,
@@ -472,16 +473,6 @@ function getSanitizedBasicDetailValue(key: BasicDetailKey, value: string) {
   }
 
   return value;
-}
-
-function sanitizeNumberText(value: string, maxValue: number) {
-  const numberText = value.replace(/\D/g, '');
-
-  if (!numberText) {
-    return '';
-  }
-
-  return String(Math.min(Number(numberText), maxValue));
 }
 
 type EditableDetailInfoItem =

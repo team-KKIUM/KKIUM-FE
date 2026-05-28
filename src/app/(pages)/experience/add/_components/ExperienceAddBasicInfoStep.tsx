@@ -16,6 +16,7 @@ import {
   EXPERIENCE_TYPE_OPTIONS,
 } from '@/app/(pages)/experience/add/_constants/experienceTypeOptions';
 import type { ExperienceAddBasicInfoForm } from '@/app/(pages)/experience/add/_types/experienceAddForm';
+import { sanitizeNumberText } from '@/app/(pages)/experience/_utils/sanitizeNumberText';
 import { type CalendarDateRange, RangeCalendar } from '@/components/common/RangeCalendar';
 import { TextField } from '@/components/common/TextField';
 import { cn } from '@/lib/utils';
@@ -153,16 +154,6 @@ function getSanitizedBasicInfoValue(
   }
 
   return value;
-}
-
-function sanitizeNumberText(value: string, maxValue: number) {
-  const numberText = value.replace(/\D/g, '');
-
-  if (!numberText) {
-    return '';
-  }
-
-  return String(Math.min(Number(numberText), maxValue));
 }
 
 const DATE_RANGE_PLACEHOLDER = '0000년 00월 00일 ~ 0000년 00월 00일';
