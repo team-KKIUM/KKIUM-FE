@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import type { ExperienceMaterial } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { LogoIcon } from '@/components/common/icons/LogoIcon';
@@ -29,8 +29,18 @@ export function ExperienceAddMaterialSelectView({
   onSave,
 }: ExperienceAddMaterialSelectViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfDragDepthRef = useRef(0);
+  const [isPdfDragging, setIsPdfDragging] = useState(false);
   const pdfMaterials = materials.filter((material) => material.type === 'pdf');
   const canSave = materials.length > 0;
+
+  const resetPdfDragState = () => {
+    pdfDragDepthRef.current = 0;
+    setIsPdfDragging(false);
+  };
+
+  const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>) =>
+    Array.from(event.dataTransfer.types).includes('Files');
 
   const addPdfFiles = (fileList: FileList | null) => {
     if (!fileList) return;
@@ -56,10 +66,40 @@ export function ExperienceAddMaterialSelectView({
           </h3>
 
           <div
-            className="flex h-[274px] w-full flex-col items-center justify-between rounded-lg border border-dashed border-gray-500 bg-gray-100 py-5"
-            onDragOver={(event) => event.preventDefault()}
+            className={cn(
+              'flex h-[274px] w-full flex-col items-center justify-between rounded-lg border border-dashed py-5 transition-colors',
+              isPdfDragging ? 'border-brand bg-mint-50' : 'border-gray-500 bg-gray-100',
+            )}
+            onDragEnter={(event) => {
+              event.preventDefault();
+
+              if (!isFileDragEvent(event)) return;
+
+              pdfDragDepthRef.current += 1;
+              setIsPdfDragging(true);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+
+              if (isFileDragEvent(event)) {
+                event.dataTransfer.dropEffect = 'copy';
+                setIsPdfDragging(true);
+              }
+            }}
+            onDragLeave={(event) => {
+              event.preventDefault();
+
+              if (!isFileDragEvent(event)) return;
+
+              pdfDragDepthRef.current = Math.max(0, pdfDragDepthRef.current - 1);
+
+              if (pdfDragDepthRef.current === 0) {
+                setIsPdfDragging(false);
+              }
+            }}
             onDrop={(event) => {
               event.preventDefault();
+              resetPdfDragState();
               addPdfFiles(event.dataTransfer.files);
             }}
           >
