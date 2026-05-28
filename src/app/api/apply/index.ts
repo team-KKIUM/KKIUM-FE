@@ -6,6 +6,7 @@ import {
   jdIdSchema,
   jdListParamsSchema,
   jdAnalysisResponseSchema,
+  jdExperienceAnalysisResponseSchema,
   jdListResponseSchema,
   jdMutationResponseSchema,
   jdResumeResponseSchema,
@@ -21,6 +22,7 @@ import {
   type JdListParams,
   type JdId,
   type ParseJdUrlRequest,
+  type JdExperienceAnalysisResponse,
   type UpdateJdResumeRequest,
   type UpdateJdOrderRequest,
   type UpdateJdTitleRequest,
@@ -67,6 +69,19 @@ export async function getJdAnalysisWithMatch(jdId: JdId) {
   const response = await api.get<unknown>(`/api/v1/jd/${parsedJdId}/analysis`);
 
   return jdAnalysisResponseSchema.parse(response);
+}
+
+export async function getJdExperienceAnalysis(
+  jdId: JdId,
+  experienceId: number,
+): Promise<JdExperienceAnalysisResponse> {
+  const parsedJdId = parseJdId(jdId);
+  const parsedExperienceId = jdIdSchema.parse(experienceId);
+  const response = await api.get<unknown>(
+    `/api/v1/jd/${parsedJdId}/analysis/experiences/${parsedExperienceId}`,
+  );
+
+  return jdExperienceAnalysisResponseSchema.parse(response);
 }
 
 export async function updateJdResume(jdId: JdId, request: UpdateJdResumeRequest) {

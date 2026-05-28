@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
@@ -10,6 +10,7 @@ import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { cn } from '@/lib/utils';
 
 import { isJdAnalysisFailed } from '@/app/api/apply/jdAnalysisStatus';
+import { useApplyHighlightKeywordStore } from '@/app/(pages)/apply/_stores/useApplyHighlightKeywordStore';
 import { mapJdAnalysisExperienceToApplyMatch } from '../../_utils/mapJdAnalysisExperienceToApplyMatch';
 import { ApplySectionHeader } from './ApplySectionHeader';
 import { ExperienceMatchCard } from './ExperienceMatchCard';
@@ -37,6 +38,7 @@ export interface ApplyMyExperienceProps {
 
 export function ApplyMyExperience({ jdId }: ApplyMyExperienceProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const clearHighlightKeywords = useApplyHighlightKeywordStore((state) => state.clearKeywords);
   const {
     data,
     error,
@@ -46,6 +48,12 @@ export function ApplyMyExperience({ jdId }: ApplyMyExperienceProps) {
   } = useApplyJobAnalysis(jdId);
 
   const matchedExperiences = data?.matchResult?.experiences ?? [];
+
+  useEffect(() => {
+    if (expandedId == null) {
+      clearHighlightKeywords();
+    }
+  }, [clearHighlightKeywords, expandedId]);
 
   return (
     <aside className="flex h-full w-full min-w-0 flex-col gap-5">
@@ -104,6 +112,8 @@ export function ApplyMyExperience({ jdId }: ApplyMyExperienceProps) {
             return (
               <ExperienceMatchCard
                 key={item.id}
+                jdId={jdId}
+                experienceId={Number(item.id)}
                 type={item.type}
                 title={item.title}
                 description={item.description}

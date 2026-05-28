@@ -198,6 +198,23 @@ const jdAnalysisExperienceSchema = z.object({
   usageFitScore: z.coerce.number(),
 });
 
+const jdExperienceAnalysisKeywordSchema = z.object({
+  keyword: nullableStringSchema,
+  sources: z.array(nullableStringSchema).default([]),
+});
+
+const jdExperienceAnalysisDetailSchema = z.object({
+  strengths: nullableStringSchema,
+  weaknesses: nullableStringSchema,
+  usageGuide: nullableStringSchema,
+  highlightKeywords: z.array(jdExperienceAnalysisKeywordSchema).default([]),
+});
+
+export const jdExperienceAnalysisResponseSchema = z.object({
+  experienceId: z.coerce.number(),
+  analysis: jdExperienceAnalysisDetailSchema,
+});
+
 const jdInfoSchema = z.object({
   postingTitle: optionalStringSchema,
   companyName: optionalStringSchema,
@@ -237,6 +254,7 @@ export const jdAnalysisResponseSchema = withNormalizedAnalysisStatus({
 
 export type JdAnalysisResponse = z.infer<typeof jdAnalysisResponseSchema>;
 export type JdAnalysisExperience = z.infer<typeof jdAnalysisExperienceSchema>;
+export type JdExperienceAnalysisResponse = z.infer<typeof jdExperienceAnalysisResponseSchema>;
 
 export type JdId = string | number;
 export type JdListParams = z.infer<typeof jdListParamsSchema>;

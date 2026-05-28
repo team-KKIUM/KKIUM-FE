@@ -88,6 +88,10 @@ export type ExperienceAnalysisData = {
   goodPoints: string;
   badPoints: string;
   usageGuide: string;
+  highlightKeywords?: {
+    keyword: string;
+    sources: string[];
+  }[];
 };
 
 export type ApplyMyExperienceItem = {

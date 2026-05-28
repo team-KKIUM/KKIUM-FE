@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { skipToken, useQuery } from '@tanstack/react-query';
 
-import { getJdAnalysisWithMatch } from '@/app/api/apply';
+import { getJdAnalysisWithMatch, getJdExperienceAnalysis } from '@/app/api/apply';
 import {
   isJdAnalysisTerminal,
   resolveJdAnalysisStatus,
@@ -88,4 +88,30 @@ export function useApplyJobAnalysis(jdId: JdId | null | undefined) {
     analysisStatus,
     isAnalysisLoading,
   };
+}
+
+export function useApplyExperienceAnalysis(
+  jdId: JdId | null | undefined,
+  experienceId: number | null | undefined,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: [
+      ...applyJobPostingQueryKeys.detail(jdId),
+      'analysis',
+      'experience',
+      experienceId ?? null,
+    ],
+    queryFn:
+      enabled && jdId != null && experienceId != null
+        ? () => getJdExperienceAnalysis(jdId, experienceId)
+        : skipToken,
+    enabled: enabled && jdId != null && experienceId != null,
+    // 카드 최초 펼침 시 1회 호출하고, 동일 jd/experience 조합은 캐시 재사용
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 }

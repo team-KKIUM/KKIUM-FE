@@ -4,14 +4,19 @@ import Image from 'next/image';
 import * as React from 'react';
 
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
+import { useApplyHighlightKeywordStore } from '@/app/(pages)/apply/_stores/useApplyHighlightKeywordStore';
 import { getExperienceCategoryIconSrc } from '@/app/(pages)/experience/_utils/ExperienceCategory';
+import { useApplyExperienceAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { Tag } from '@/components/common/Tag';
 import { cn } from '@/lib/utils';
 
 import type { ExperienceAnalysisData } from '../../_constants/applyMockData';
+import { mapJdExperienceAnalysisToView } from '../../_utils/mapJdExperienceAnalysisToView';
 import { ExperienceAnalysisPanel } from './ExperienceAnalysisPanel';
 
 export interface ExperienceMatchCardProps extends Omit<React.ComponentProps<'article'>, 'title'> {
+  jdId: string | null;
+  experienceId: number;
   type: Exclude<ExperienceCategory, 'all'>;
   title: string;
   description: string;
@@ -93,6 +98,8 @@ function CardBodyContent({
 }
 
 export function ExperienceMatchCard({
+  jdId,
+  experienceId,
   type,
   title,
   description,
@@ -109,8 +116,40 @@ export function ExperienceMatchCard({
   const isInteractive = Boolean(onToggle);
   const headingId = React.useId();
   const panelId = React.useId();
+  const experienceAnalysisQuery = useApplyExperienceAnalysis(jdId, experienceId, expanded);
+  const setHighlightKeywords = useApplyHighlightKeywordStore((state) => state.setKeywords);
+  const clearHighlightKeywords = useApplyHighlightKeywordStore((state) => state.clearKeywords);
+  const activeHighlightExperienceId = useApplyHighlightKeywordStore((state) => state.experienceId);
+
+  React.useEffect(() => {
+    if (!expanded || !experienceAnalysisQuery.data) {
+      return;
+    }
+
+    console.log('[ExperienceMatchCard] apply highlight keywords', {
+      jdId,
+      experienceId,
+      keywordCount: experienceAnalysisQuery.data.analysis.highlightKeywords.length,
+      highlightKeywords: experienceAnalysisQuery.data.analysis.highlightKeywords,
+    });
+
+    setHighlightKeywords(
+      experienceId,
+      experienceAnalysisQuery.data.analysis.highlightKeywords.map((item) => ({
+        keyword: item.keyword,
+        sources: item.sources,
+      })),
+    );
+  }, [expanded, experienceAnalysisQuery.data, experienceId, jdId, setHighlightKeywords]);
 
   const handleToggle = () => {
+    if (expanded && activeHighlightExperienceId === experienceId) {
+      console.log('[ExperienceMatchCard] clear highlight keywords by collapse', {
+        jdId,
+        experienceId,
+      });
+      clearHighlightKeywords();
+    }
     onToggle?.();
   };
 
@@ -168,9 +207,38 @@ export function ExperienceMatchCard({
         </div>
       </div>
 
-      {expanded && (
-        <ExperienceAnalysisPanel id={panelId} analysis={analysis} role="region" aria-labelledby={headingId} />
-      )}
+      {expanded ? (
+        experienceAnalysisQuery.isPending ? (
+          <section
+            id={panelId}
+            role="region"
+            aria-labelledby={headingId}
+            className="flex w-full items-center justify-center rounded-b-xl border-t border-border-default bg-background-w px-4 py-6"
+          >
+            <p className="body-3-regular text-gray-700">경험 분석을 불러오는 중...</p>
+          </section>
+        ) : experienceAnalysisQuery.isError ? (
+          <section
+            id={panelId}
+            role="region"
+            aria-labelledby={headingId}
+            className="flex w-full items-center justify-center rounded-b-xl border-t border-border-default bg-background-w px-4 py-6"
+          >
+            <p className="body-3-regular text-red-700">경험 분석을 불러오지 못했어요.</p>
+          </section>
+        ) : (
+          <ExperienceAnalysisPanel
+            id={panelId}
+            analysis={
+              experienceAnalysisQuery.data
+                ? mapJdExperienceAnalysisToView(experienceAnalysisQuery.data)
+                : analysis
+            }
+            role="region"
+            aria-labelledby={headingId}
+          />
+        )
+      ) : null}
     </article>
   );
 }
