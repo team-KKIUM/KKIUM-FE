@@ -84,6 +84,10 @@ export function ExperienceAddPageContent() {
   }, [isNotionConnected, router]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [currentStepIndex]);
+
+  useEffect(() => {
     const restorePdfDraft = async () => {
       try {
         const pdfMaterial = await getExperienceAddPdfDraft();
