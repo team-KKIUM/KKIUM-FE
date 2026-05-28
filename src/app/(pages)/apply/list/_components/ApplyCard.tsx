@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
+import { useApplyJobPostingStore } from '@/app/(pages)/apply/_stores/useApplyJobPostingStore';
 import { ApplyCardMenuDropdown } from '@/app/(pages)/apply/list/_components/ApplyCardMenuDropdown';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { MoreVerticalIcon } from '@/components/common/icons/MoreVerticalIcon';
@@ -11,7 +12,7 @@ import { PencilIcon } from '@/components/common/icons/PencilIcon';
 import { cn } from '@/lib/utils';
 
 export interface ApplyCardProps extends React.ComponentProps<'article'> {
-  jobPostingId: string;
+  jdId: string;
   applyTitle: string;
   companyName: string;
   jobField: string;
@@ -20,13 +21,13 @@ export interface ApplyCardProps extends React.ComponentProps<'article'> {
   menuActionDisabled?: boolean;
   selected?: boolean;
   onCardClick?: React.MouseEventHandler<HTMLElement>;
-  onUpdateTitle?: (jobPostingId: string, nextTitle: string) => void;
-  onToggleTarget?: (jobPostingId: string) => void;
-  onDelete?: (jobPostingId: string) => void;
+  onUpdateTitle?: (jdId: string, nextTitle: string) => void;
+  onToggleTarget?: (jdId: string) => void;
+  onDelete?: (jdId: string) => void;
 }
 
 export function ApplyCard({
-  jobPostingId,
+  jdId,
   applyTitle,
   companyName,
   jobField,
@@ -49,6 +50,7 @@ export function ApplyCard({
   const [titleDraft, setTitleDraft] = React.useState(applyTitle);
   const menuContainerRef = React.useRef<HTMLDivElement>(null);
   const titleInputRef = React.useRef<HTMLInputElement>(null);
+  const setJobPosting = useApplyJobPostingStore((state) => state.setJobPosting);
 
   React.useEffect(() => {
     setTitleDraft(applyTitle);
@@ -117,9 +119,26 @@ export function ApplyCard({
       return;
     }
 
-    onUpdateTitle?.(jobPostingId, nextTitle);
+    onUpdateTitle?.(jdId, nextTitle);
     setTitleDraft(nextTitle);
     setIsTitleEditing(false);
+    setJobPosting({
+      jdId,
+      title: nextTitle,
+      companyName,
+      jobField,
+      period,
+    });
+  };
+
+  const handleNavigateToApply = () => {
+    setJobPosting({
+      jdId,
+      title: applyTitle,
+      companyName,
+      jobField,
+      period,
+    });
   };
 
   return (
@@ -181,15 +200,19 @@ export function ApplyCard({
               </h3>
             )}
 
-            <div className="flex flex-col items-start gap-0.5">
-              <div className="flex items-center gap-1.5 body-1-regular text-gray-800">
-                <span>기업명</span>
-                <span className="body-1-bold">{companyName}</span>
+            <div className="flex w-full min-w-0 flex-col gap-0.5">
+              <div className="flex w-full min-w-0 items-center gap-1.5">
+                <span className="shrink-0 whitespace-nowrap body-1-regular text-gray-800">
+                  기업명
+                </span>
+                <span className="min-w-0 truncate body-1-bold text-gray-800">{companyName}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 body-1-regular text-gray-800">
-                <span>모집 분야</span>
-                <span className="body-1-bold">{jobField}</span>
+              <div className="flex w-full min-w-0 items-center gap-1.5">
+                <span className="shrink-0 whitespace-nowrap body-1-regular text-gray-800">
+                  모집 분야
+                </span>
+                <span className="min-w-0 truncate body-1-bold text-gray-800">{jobField}</span>
               </div>
             </div>
 
@@ -224,11 +247,11 @@ export function ApplyCard({
                 disabled={menuActionDisabled}
                 onEditTitle={startTitleEditing}
                 onToggleTarget={() => {
-                  onToggleTarget?.(jobPostingId);
+                  onToggleTarget?.(jdId);
                   setIsMenuOpen(false);
                 }}
                 onDelete={() => {
-                  onDelete?.(jobPostingId);
+                  onDelete?.(jdId);
                   setIsMenuOpen(false);
                 }}
               />
@@ -238,9 +261,12 @@ export function ApplyCard({
       </div>
 
       <Link
-        href="/apply"
+        href={`/apply?jdId=${encodeURIComponent(jdId)}`}
         className="inline-flex h-10 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-background-w px-3 py-1 text-gray-600 outline -outline-offset-1 outline-border-default"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleNavigateToApply();
+        }}
       >
         <PencilIcon className="size-6 text-gray-600" />
         <span className="body-1-bold text-gray-600">자기소개서 작성하기</span>

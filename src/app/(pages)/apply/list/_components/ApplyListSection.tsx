@@ -6,7 +6,6 @@ import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 
 import type { ApplyListItem } from '@/app/(pages)/apply/_constants/applyMockData';
-import { NullComponent } from '@/app/_components/NullComponent';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingLottie } from '@/components/common/LoadingLottie';
 import {
@@ -291,15 +290,15 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
 
   if (orderedCards.length === 0) {
     return (
-      <NullComponent
-        className="mx-auto h-[823px] w-full max-w-none"
+      <EmptyState
+        className="h-[823px] w-full py-64"
+        illustrationLabel={keyword ? '검색 결과 없음' : '등록된 공고 없음'}
         title={keyword ? '검색 결과가 없어요' : '아직 생성된 공고가 없어요'}
         description={
           keyword
             ? '다른 검색어로 다시 검색해보세요.'
             : '공고를 추가해 파일에 끼워넣어볼까요?'
         }
-        ctaLabel="공고 추가하기"
       />
     );
   }
@@ -375,7 +374,7 @@ function SortableApplyCard({
   return (
     <div ref={ref} className={isDragSource ? 'relative z-10 opacity-90' : undefined}>
       <ApplyCard
-        jobPostingId={card.id}
+        jdId={card.id}
         applyTitle={card.title}
         companyName={card.companyName}
         jobField={card.jobField}

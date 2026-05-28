@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { ApplyAnalysis } from './_components/(analysis)/ApplyAnalysis';
@@ -7,10 +8,13 @@ import { ApplyJobHeader, type ApplyJobTab } from './_components/(analysis)/Apply
 import { ApplyMyExperience } from './_components/(analysis)/ApplyMyExperience';
 import { ApplyCoverLetterSection } from './_components/(cover-letter)/ApplyCoverLetterSection';
 import { ResizableSplit } from './_components/ResizableSplit';
-import { applyJobMockData } from './_constants/applyMockData';
+import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
 import { cn } from '@/lib/utils';
 
 export default function ApplyPage() {
+  const searchParams = useSearchParams();
+  const jdId = searchParams.get('jdId');
+  const { jobPosting } = useApplyJobPostingSnapshot(jdId);
   const [activeTab, setActiveTab] = useState<ApplyJobTab>('analysis');
   const isCoverLetterTab = activeTab === 'cover-letter';
 
@@ -26,9 +30,9 @@ export default function ApplyPage() {
       >
         <div className="shrink-0 px-10">
           <ApplyJobHeader
-            title={applyJobMockData.title}
-            companyName={applyJobMockData.companyName}
-            jobField={applyJobMockData.jobField}
+            title={jobPosting?.title ?? ''}
+            companyName={jobPosting?.companyName ?? ''}
+            jobField={jobPosting?.jobField ?? ''}
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
@@ -38,12 +42,12 @@ export default function ApplyPage() {
           <div className="px-10">
             <ResizableSplit
               separatorAriaLabel="공고 분석과 내 경험 패널 너비 조절"
-              left={<ApplyAnalysis />}
-              right={<ApplyMyExperience />}
+              left={<ApplyAnalysis jdId={jdId} />}
+              right={<ApplyMyExperience jdId={jdId} />}
             />
           </div>
         ) : (
-          <ApplyCoverLetterSection />
+          <ApplyCoverLetterSection jdId={jdId} />
         )}
       </div>
     </section>

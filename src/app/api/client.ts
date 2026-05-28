@@ -1,4 +1,7 @@
-import { redirectToLoginOnUnauthorized } from '@/app/_utils/authFetch';
+import {
+  getAccessTokenFromSession,
+  redirectToLoginOnUnauthorized,
+} from '@/app/_utils/authFetch';
 
 import type { ApiErrorPayload, ApiResponse } from './types';
 
@@ -29,10 +32,19 @@ export class ApiError extends Error {
   }
 }
 
-// 로그인 완성 전까지 로컬 env의 임시 accessToken로 테스트 
+// sessionStorage mg_access_token 우선, 없을 때만 dev 임시 토큰 사용
 function getAccessToken() {
-  if (typeof window === 'undefined') return TEMP_ACCESS_TOKEN || null;
-  return window.sessionStorage.getItem('mg_access_token') || TEMP_ACCESS_TOKEN || null;
+  const sessionToken = getAccessTokenFromSession();
+
+  if (sessionToken) {
+    return sessionToken;
+  }
+
+  if (typeof window === 'undefined') {
+    return TEMP_ACCESS_TOKEN || null;
+  }
+
+  return TEMP_ACCESS_TOKEN || null;
 }
 
 // API 요청 보낼 최종 URL을 만들어주는 함수

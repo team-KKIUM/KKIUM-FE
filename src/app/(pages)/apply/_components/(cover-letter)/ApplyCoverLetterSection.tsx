@@ -4,15 +4,22 @@ import * as React from 'react';
 
 import { ResizableSplit } from '../ResizableSplit';
 import {
+  applyCoverLetterQuestionsMock,
   coverLetterQuestionExperiencesMock,
   getCoverLetterQuestionDisplayText,
 } from '../../_constants/applyMockData';
 import { useApplyCoverLetterStore } from '../../_stores/useApplyCoverLetterStore';
+import { mapJdResumeToCoverLetterQuestions } from '../../_utils/mapJdResumeToCoverLetterQuestions';
 import { ApplyCoverLetterExperienceSelectModal } from './ApplyCoverLetterExperienceSelectModal';
 import { ApplyCoverLetterPanel } from './ApplyCoverLetterPanel';
 import { ApplyCoverLetterRightPanel } from './ApplyCoverLetterRightPanel';
+import { useApplyJobPostingResume } from '@/hooks/apply/useApplyJobPostings';
 
-export function ApplyCoverLetterSection() {
+export interface ApplyCoverLetterSectionProps {
+  jdId: string | null;
+}
+
+export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) {
   const questions = useApplyCoverLetterStore((state) => state.questions);
   const setQuestions = useApplyCoverLetterStore((state) => state.setQuestions);
   const activeQuestionIndex = useApplyCoverLetterStore((state) => state.activeQuestionIndex);
@@ -28,9 +35,25 @@ export function ApplyCoverLetterSection() {
   const removeQuestionExperienceId = useApplyCoverLetterStore(
     (state) => state.removeQuestionExperienceId,
   );
+  const resumeQuery = useApplyJobPostingResume(jdId, jdId != null);
   const [experienceModalOpen, setExperienceModalOpen] = React.useState(false);
+  const initializedQuestionJdIdsRef = React.useRef<Set<string>>(new Set());
 
   const activeQuestion = questions[activeQuestionIndex];
+
+  React.useEffect(() => {
+    if (!jdId || !resumeQuery.data) {
+      return;
+    }
+
+    if (initializedQuestionJdIdsRef.current.has(jdId)) {
+      return;
+    }
+
+    const mappedQuestions = mapJdResumeToCoverLetterQuestions(resumeQuery.data);
+    setQuestions(mappedQuestions.length > 0 ? mappedQuestions : applyCoverLetterQuestionsMock);
+    initializedQuestionJdIdsRef.current.add(jdId);
+  }, [jdId, resumeQuery.data, setQuestions]);
 
   React.useEffect(() => {
     if (activeQuestionIndex >= questions.length) {

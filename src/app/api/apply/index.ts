@@ -1,16 +1,20 @@
-import { api } from '@/app/api/client';
+import { ApiError, api } from '@/app/api/client';
 
 import {
   createJdAiRequestSchema,
   createJdAiResponseSchema,
   jdIdSchema,
   jdListParamsSchema,
+  jdAnalysisResponseSchema,
+  jdExperienceAnalysisResponseSchema,
   jdListResponseSchema,
   jdMutationResponseSchema,
   jdResumeResponseSchema,
   parseJdOcrResponseSchema,
   parseJdUrlRequestSchema,
+  assertParseableJdUrlResponse,
   parsedJdUrlResponseSchema,
+  UNPARSEABLE_JD_URL_MESSAGE,
   updateJdResumeRequestSchema,
   updateJdOrderRequestSchema,
   updateJdTitleRequestSchema,
@@ -18,6 +22,7 @@ import {
   type JdListParams,
   type JdId,
   type ParseJdUrlRequest,
+  type JdExperienceAnalysisResponse,
   type UpdateJdResumeRequest,
   type UpdateJdOrderRequest,
   type UpdateJdTitleRequest,
@@ -58,6 +63,27 @@ export async function getJdResume(jdId: JdId) {
   return jdResumeResponseSchema.parse(response);
 }
 
+// 공고 분석 + 경험 매칭
+export async function getJdAnalysisWithMatch(jdId: JdId) {
+  const parsedJdId = parseJdId(jdId);
+  const response = await api.get<unknown>(`/api/v1/jd/${parsedJdId}/analysis`);
+
+  return jdAnalysisResponseSchema.parse(response);
+}
+
+export async function getJdExperienceAnalysis(
+  jdId: JdId,
+  experienceId: number,
+): Promise<JdExperienceAnalysisResponse> {
+  const parsedJdId = parseJdId(jdId);
+  const parsedExperienceId = jdIdSchema.parse(experienceId);
+  const response = await api.get<unknown>(
+    `/api/v1/jd/${parsedJdId}/analysis/experiences/${parsedExperienceId}`,
+  );
+
+  return jdExperienceAnalysisResponseSchema.parse(response);
+}
+
 export async function updateJdResume(jdId: JdId, request: UpdateJdResumeRequest) {
   const parsedJdId = parseJdId(jdId);
   const parsedRequest = updateJdResumeRequestSchema.parse(request);
@@ -69,6 +95,19 @@ export async function updateJdResume(jdId: JdId, request: UpdateJdResumeRequest)
 export async function parseJdUrl(request: ParseJdUrlRequest) {
   const parsedRequest = parseJdUrlRequestSchema.parse(request);
   const response = await api.post<unknown>('/api/v1/jd/url', parsedRequest);
+
+  try {
+    assertParseableJdUrlResponse(response);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : UNPARSEABLE_JD_URL_MESSAGE;
+
+    throw new ApiError({
+      status: 0,
+      code: 'JD_URL_UNPARSEABLE',
+      message,
+    });
+  }
 
   return parsedJdUrlResponseSchema.parse(response);
 }

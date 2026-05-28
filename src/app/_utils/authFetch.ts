@@ -84,19 +84,25 @@ export function redirectToLoginOnUnauthorized() {
 
   clearAccessTokenFromSession();
 
-  if (isPublicAuthPath(window.location.pathname)) {
+  if (isAuthExemptPath(window.location.pathname)) {
     return;
   }
 
   window.location.replace('/login');
 }
 
-// 로그인 없이 접근 가능한 경로
+// 로그인·OAuth 화면 (사이드바 없음)
 export function isPublicAuthPath(pathname: string) {
   const path = pathname.replace(/\/$/, '') || '/';
   return (
     path === '/login' || path.startsWith('/oauth') || path.startsWith('/auth/callback')
   );
+}
+
+// 토큰 없이 UI 확인용 
+export function isAuthExemptPath(pathname: string) {
+  const path = pathname.replace(/\/$/, '') || '/';
+  return isPublicAuthPath(pathname) || path === '/apply' || path.startsWith('/apply/');
 }
 
 export function resolveOAuthRedirectUri(provider: 'google' | 'kakao'): string {
@@ -115,10 +121,6 @@ export function resolveOAuthRedirectUri(provider: 'google' | 'kakao'): string {
 
 const inflightSocialLogins = new Map<string, Promise<SocialLoginResult>>();
 
-/**
- * Deduplicates in-flight social login for the same provider/code (e.g. React Strict Mode
- * double mount) so every subscriber receives the same result and terms UI can open.
- */
 export function requestSocialLoginOnce(provider: 'google' | 'kakao', code: string) {
   const normalizedCode = code.trim();
   const key = `${provider}:${normalizedCode}`;

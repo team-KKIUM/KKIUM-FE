@@ -110,6 +110,7 @@ export function ApplyAddJobPostingModal() {
   const applyParsedJobPosting = (data: ParsedJdUrlResponse) => {
     const startDate = parseLocalDate(data.startDate);
     const endDate = parseLocalDate(data.endDate);
+    const parsedQuestions = data.questions ?? [];
 
     setCompanyName(data.companyName);
     setPostingTitle(data.postingTitle);
@@ -118,14 +119,14 @@ export function ApplyAddJobPostingModal() {
     setRecruitmentField(parsedFieldOptions[0] ?? data.recruitmentField);
     setPostingBody(data.content);
     setCoverQuestions(
-      data.questions.length > 0
-        ? data.questions.map((question, index) => ({
+      parsedQuestions.length > 0
+        ? parsedQuestions.map((question, index) => ({
             id: `cover-${index + 1}`,
             value: question,
           }))
         : [{ id: 'cover-1', value: '' }],
     );
-    coverRowIdRef.current = Math.max(data.questions.length, 1);
+    coverRowIdRef.current = Math.max(parsedQuestions.length, 1);
 
     if (startDate && endDate) {
       setPeriodRange({ start: startDate, end: endDate });
@@ -257,6 +258,18 @@ export function ApplyAddJobPostingModal() {
           isSaving={createJobPostingMutation.isPending}
           saveError={saveError}
           onSave={() => {
+            const hasRequiredTextFields =
+              postingTitle.trim().length > 0 &&
+              companyName.trim().length > 0 &&
+              recruitmentField.trim().length > 0 &&
+              postingBody.trim().length > 0;
+            const hasAllCoverQuestions =
+              coverQuestions.length > 0 &&
+              coverQuestions.every((question) => question.value.trim().length > 0);
+            if (!hasRequiredTextFields || !hasAllCoverQuestions) {
+              return;
+            }
+
             createJobPostingMutation.mutate(buildCreateJdAiRequest(), {
               onSuccess: () => {
                 resetForm();

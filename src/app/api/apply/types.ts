@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
 export const jdIdSchema = z.coerce.number().int().positive();
-const optionalStringSchema = z.string().optional().default('');
+
+const nullableStringSchema = z
+  .union([z.string(), z.null(), z.undefined()])
+  .transform((value) => value ?? '');
+
+const optionalStringSchema = nullableStringSchema;
 
 export const jdListParamsSchema = z.object({
   page: z.number().int().min(0).optional(),
@@ -98,17 +103,17 @@ export const parseJdOcrResponseSchema = z.object({
 const jdResumeQuestionSchema = z.object({
   questionId: z.number(),
   orderNum: z.number(),
-  content: z.string(),
-  answer: z.string(),
+  content: nullableStringSchema,
+  answer: nullableStringSchema,
 });
 
 export const jdResumeResponseSchema = z.object({
   id: z.number(),
-  postingTitle: z.string(),
-  companyName: z.string(),
-  recruitmentField: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
+  postingTitle: nullableStringSchema,
+  companyName: nullableStringSchema,
+  recruitmentField: nullableStringSchema,
+  startDate: nullableStringSchema,
+  endDate: nullableStringSchema,
   questions: z.array(jdResumeQuestionSchema),
 });
 
@@ -127,15 +132,48 @@ export const updateJdResumeRequestSchema = z.object({
   ),
 });
 
+export const UNPARSEABLE_JD_URL_MESSAGE = '공고 내용을 불러오지 못했어요. 다시 시도해주세요';
+
+const parsedJdUrlCriticalFieldKeys = [
+  'postingTitle',
+  'companyName',
+  'recruitmentField',
+  'content',
+] as const;
+
+function hasNonEmptyJdUrlField(value: unknown) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+// URL 파싱 결과에 등록 가능한 값이 하나도 없을 때 (주요 필드가 모두 null/빈 값)
+export function assertParseableJdUrlResponse(data: unknown): void {
+  if (typeof data !== 'object' || data == null) {
+    throw new Error(UNPARSEABLE_JD_URL_MESSAGE);
+  }
+
+  const record = data as Record<string, unknown>;
+  const hasParseableField = parsedJdUrlCriticalFieldKeys.some((key) =>
+    hasNonEmptyJdUrlField(record[key]),
+  );
+
+  if (!hasParseableField) {
+    throw new Error(UNPARSEABLE_JD_URL_MESSAGE);
+  }
+}
+
 export const parsedJdUrlResponseSchema = z.object({
-  url: z.string(),
-  postingTitle: z.string(),
-  companyName: z.string(),
-  recruitmentField: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
-  questions: z.array(z.string()),
-  content: z.string(),
+  url: nullableStringSchema,
+  postingTitle: nullableStringSchema,
+  companyName: nullableStringSchema,
+  recruitmentField: nullableStringSchema,
+  startDate: nullableStringSchema,
+  endDate: nullableStringSchema,
+  questions: z
+    .array(z.union([z.string(), z.null(), z.undefined()]).transform((value) => value ?? ''))
+    .nullable()
+    .optional()
+    .default([]),
+  content: nullableStringSchema,
 });
 
 export const createJdAiRequestSchema = parsedJdUrlResponseSchema;
@@ -145,6 +183,78 @@ export const createJdAiResponseSchema = z.object({
 });
 
 export const jdMutationResponseSchema = z.unknown();
+
+const jdAnalysisTagSchema = z.object({
+  category: z.enum(['TECH', 'COMPETENCY']),
+  field: z.string(),
+});
+
+const jdAnalysisExperienceSchema = z.object({
+  experienceId: z.coerce.number(),
+  type: z.enum(['ACTIVITY', 'CAREER', 'EDUCATION', 'ETC']),
+  title: z.string(),
+  oneLineIntro: z.string(),
+  tags: z.array(jdAnalysisTagSchema).default([]),
+  usageFitScore: z.coerce.number(),
+});
+
+const jdExperienceAnalysisKeywordSchema = z.object({
+  keyword: nullableStringSchema,
+  sources: z.array(nullableStringSchema).default([]),
+});
+
+const jdExperienceAnalysisDetailSchema = z.object({
+  strengths: nullableStringSchema,
+  weaknesses: nullableStringSchema,
+  usageGuide: nullableStringSchema,
+  highlightKeywords: z.array(jdExperienceAnalysisKeywordSchema).default([]),
+});
+
+export const jdExperienceAnalysisResponseSchema = z.object({
+  experienceId: z.coerce.number(),
+  analysis: jdExperienceAnalysisDetailSchema,
+});
+
+const jdInfoSchema = z.object({
+  postingTitle: optionalStringSchema,
+  companyName: optionalStringSchema,
+  recruitmentField: optionalStringSchema,
+  startDate: optionalStringSchema,
+  endDate: optionalStringSchema,
+  hardSkills: z.array(z.string()).default([]),
+  softSkills: z.array(z.string()).default([]),
+  mainResponsibilities: optionalStringSchema,
+  requiredQualifications: optionalStringSchema,
+  preferredQualifications: optionalStringSchema,
+});
+
+const jdMatchResultSchema = z.object({
+  applicationFitScore: z.coerce.number(),
+  experiences: z.array(jdAnalysisExperienceSchema).default([]),
+});
+
+function withNormalizedAnalysisStatus<T extends z.ZodRawShape>(shape: T) {
+  return z
+    .object({
+      ...shape,
+      analysisStatus: z.string().optional(),
+      analysis_status: z.string().optional(),
+    })
+    .passthrough()
+    .transform((data) => ({
+      ...data,
+      analysisStatus: data.analysisStatus ?? data.analysis_status ?? 'PENDING',
+    }));
+}
+
+export const jdAnalysisResponseSchema = withNormalizedAnalysisStatus({
+  jdInfo: jdInfoSchema.optional(),
+  matchResult: jdMatchResultSchema.optional(),
+});
+
+export type JdAnalysisResponse = z.infer<typeof jdAnalysisResponseSchema>;
+export type JdAnalysisExperience = z.infer<typeof jdAnalysisExperienceSchema>;
+export type JdExperienceAnalysisResponse = z.infer<typeof jdExperienceAnalysisResponseSchema>;
 
 export type JdId = string | number;
 export type JdListParams = z.infer<typeof jdListParamsSchema>;

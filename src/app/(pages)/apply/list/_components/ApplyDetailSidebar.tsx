@@ -147,8 +147,8 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
           postingTitle: resumeQuery.data.postingTitle,
           companyName: resumeQuery.data.companyName,
           recruitmentField: resumeQuery.data.recruitmentField,
-          startDate: resumeQuery.data.startDate,
-          endDate: resumeQuery.data.endDate,
+          startDate: normalizeLocalDateTimeString(resumeQuery.data.startDate),
+          endDate: normalizeLocalDateTimeString(resumeQuery.data.endDate),
           questions: resumeQuery.data.questions
             .sort((a, b) => a.orderNum - b.orderNum)
             .map((question, index) => ({
@@ -186,7 +186,7 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
           'fixed z-50 flex flex-col overflow-hidden shadow-xl transform-gpu',
           expanded
             ? 'top-0 right-0 h-screen w-[calc(100vw-var(--app-sidebar-width))] rounded-none bg-[#FAFAFA]'
-            : 'top-0 right-0 h-screen w-[500px] bg-background-w',
+            : 'top-0 right-0 h-screen w-[500px] bg-[#FAFAFA]',
           'shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.10)]',
           'will-change-transform',
         )}
@@ -316,6 +316,20 @@ export function ApplyDetailSidebar({ open, item, onClose }: ApplyDetailSidebarPr
   );
 }
 
+function normalizeLocalDateTimeString(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  if (trimmed.includes('T')) {
+    return trimmed;
+  }
+
+  return trimmed.replace(' ', 'T');
+}
+
 function QuestionBlock({
   index,
   label,
@@ -357,15 +371,16 @@ function QuestionBlock({
           inputBackgroundClassName ?? 'bg-[#FFFFFF]',
         )}
       >
-        {editable ? (
-          <textarea
-            value={answer}
-            className="h-full min-h-28 w-full resize-none bg-transparent body-3-bold text-gray-700 outline-none"
-            onChange={(event) => onAnswerChange?.(event.currentTarget.value)}
-          />
-        ) : (
-          <p className="body-3-bold text-gray-700">{answer}</p>
-        )}
+        <textarea
+          value={answer}
+          readOnly={!editable}
+          placeholder="여기에 자기소개서를 작성해보세요."
+          className={cn(
+            'h-full min-h-28 w-full resize-none bg-transparent body-3-bold text-gray-700 outline-none placeholder:text-tertiary',
+            !editable && 'cursor-default',
+          )}
+          onChange={(event) => onAnswerChange?.(event.currentTarget.value)}
+        />
       </div>
     </div>
   );
