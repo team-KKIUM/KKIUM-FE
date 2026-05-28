@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const TEMP_ACCESS_TOKEN = process.env.NEXT_PUBLIC_TEMP_ACCESS_TOKEN?.trim();
 
 type QueryParamValue = string | number | boolean | null | undefined;
-type QueryParams = Record<string, QueryParamValue>;
+type QueryParams = Record<string, QueryParamValue | QueryParamValue[]>;
 type ApiMethodOptions = Omit<ApiRequestOptions, 'body' | 'method'>;
 
 // 함수들이 받을 요청 옵션 타입
@@ -57,6 +57,15 @@ function buildUrl(path: string, params?: QueryParams) {
 
   Object.entries(params ?? {}).forEach(([key, value]) => {
     if (value == null) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item == null) return;
+        url.searchParams.append(key, String(item));
+      });
+      return;
+    }
+
     url.searchParams.set(key, String(value));
   });
 

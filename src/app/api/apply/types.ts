@@ -132,6 +132,82 @@ export const updateJdResumeRequestSchema = z.object({
   ),
 });
 
+export const saveResumeAnswerSchema = z.object({
+  jdQuestionId: z.coerce.number().int().positive(),
+  answerText: z.string(),
+  experienceIds: z.array(z.coerce.number().int().positive()).default([]),
+});
+
+export const saveResumeRequestSchema = z.object({
+  answers: z.array(saveResumeAnswerSchema),
+});
+
+export const createResumeAiDraftRequestSchema = z.object({
+  experienceIds: z.array(z.coerce.number().int().positive()).min(1).max(3),
+});
+
+export const createResumeAiDraftResponseSchema = z.object({
+  draft: z.string(),
+});
+
+export const resumeWritingGuideParamsSchema = z.object({
+  experienceIds: z.array(z.coerce.number().int().positive()).min(1).max(3),
+});
+
+export const resumeWritingGuideResponseSchema = z.object({
+  coreKeywords: z
+    .array(z.union([z.string(), z.null(), z.undefined()]).transform((value) => value ?? ''))
+    .default([]),
+  connectionToJd: nullableStringSchema,
+  writingGuide: nullableStringSchema,
+});
+
+const resumeQuestionExperienceTypeSchema = z.enum(['ACTIVITY', 'CAREER', 'EDUCATION', 'ETC']);
+
+const resumeQuestionExperienceTypeInputSchema = z
+  .union([resumeQuestionExperienceTypeSchema, z.string(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value == null) {
+      return undefined;
+    }
+
+    const normalized = String(value).trim().toUpperCase();
+
+    if (
+      normalized === 'ACTIVITY' ||
+      normalized === 'CAREER' ||
+      normalized === 'EDUCATION' ||
+      normalized === 'ETC'
+    ) {
+      return normalized;
+    }
+
+    return undefined;
+  });
+
+export const resumeQuestionExperienceSchema = z
+  .object({
+    experienceId: z.coerce.number().int().positive(),
+    title: nullableStringSchema,
+    oneLineIntro: nullableStringSchema,
+    startDate: nullableStringSchema,
+    endDate: nullableStringSchema,
+    usageFitScore: z.coerce.number(),
+    type: resumeQuestionExperienceTypeInputSchema,
+    pieceType: resumeQuestionExperienceTypeInputSchema,
+    experienceType: resumeQuestionExperienceTypeInputSchema,
+  })
+  .transform(({ pieceType, experienceType, type, ...rest }) => ({
+    ...rest,
+    type: type ?? pieceType ?? experienceType,
+    pieceType: undefined,
+    experienceType: undefined,
+  }));
+
+export const resumeQuestionExperiencesResponseSchema = z.object({
+  experiences: z.array(resumeQuestionExperienceSchema).default([]),
+});
+
 export const UNPARSEABLE_JD_URL_MESSAGE = '공고 내용을 불러오지 못했어요. 다시 시도해주세요';
 
 const parsedJdUrlCriticalFieldKeys = [
@@ -266,6 +342,14 @@ export type ParseJdOcrResponse = z.infer<typeof parseJdOcrResponseSchema>;
 export type JdResumeResponse = z.infer<typeof jdResumeResponseSchema>;
 export type ParsedJdUrlResponse = z.infer<typeof parsedJdUrlResponseSchema>;
 export type UpdateJdResumeRequest = z.infer<typeof updateJdResumeRequestSchema>;
+export type SaveResumeRequest = z.infer<typeof saveResumeRequestSchema>;
+export type CreateResumeAiDraftRequest = z.infer<typeof createResumeAiDraftRequestSchema>;
+export type CreateResumeAiDraftResponse = z.infer<typeof createResumeAiDraftResponseSchema>;
+export type ResumeWritingGuideResponse = z.infer<typeof resumeWritingGuideResponseSchema>;
+export type ResumeQuestionExperience = z.infer<typeof resumeQuestionExperienceSchema>;
+export type ResumeQuestionExperiencesResponse = z.infer<
+  typeof resumeQuestionExperiencesResponseSchema
+>;
 export type UpdateJdOrderRequest = z.infer<typeof updateJdOrderRequestSchema>;
 export type UpdateJdTitleRequest = z.infer<typeof updateJdTitleRequestSchema>;
 export type JdMutationResponse = z.infer<typeof jdMutationResponseSchema>;
