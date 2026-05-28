@@ -12,7 +12,7 @@ export function ApplyCoverLetterExperienceEmptyState({
   return (
     <div
       data-slot="cover-letter-experience-empty"
-      className={cn('flex w-full max-w-[478px] flex-col items-center', className)}
+      className={cn('flex w-full max-w-[478px] flex-col items-center justify-center', className)}
     >
       <div className="flex h-56 w-full items-center justify-center">
         <Image
