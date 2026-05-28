@@ -158,7 +158,7 @@ export function ApplyAddJobPostingUrlStep({
             }}
           />
           <div
-            className={`relative flex h-72 w-full flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed ${
+            className={`relative flex h-72 w-full overflow-hidden rounded-lg border border-dashed ${
               isDragOver ? 'border-gray-700 bg-gray-50' : 'border-gray-500 bg-gray-100'
             }`}
             onDragEnter={(event) => {
@@ -203,7 +203,7 @@ export function ApplyAddJobPostingUrlStep({
                 </div>
               </>
             ) : (
-              <div className="flex w-full flex-col items-center justify-center gap-3 px-5 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center">
                 <Image
                   src="/null.svg"
                   alt=""
@@ -224,11 +224,9 @@ export function ApplyAddJobPostingUrlStep({
                 >
                   공고 이미지 업로드
                 </button>
+                <p className="body-1-regular text-gray-700">jpg, jpeg, png 형식만 지원해요</p>
               </div>
             )}
-            {!selectedImagePreviewUrl ? (
-              <p className="body-1-regular text-gray-700">jpg, jpeg, png 형식만 지원해요</p>
-            ) : null}
           </div>
           {fileError ? <p className="body-2-regular text-red-700">{fileError}</p> : null}
         </div>
