@@ -40,7 +40,7 @@ function AgreementItem({
         <span>{labelPrefix}</span>{' '}
         <button
           type="button"
-          className="underline outline-none focus-visible:shadow-focus-ring"
+          className="cursor-pointer underline outline-none focus-visible:shadow-focus-ring"
           onClick={onOpenDetail}
         >
           {labelAction}
@@ -68,14 +68,14 @@ function TermsDetailView({
   const text = type === 'terms' ? TERMS_DETAIL_TEXT : PRIVACY_DETAIL_TEXT;
 
   return (
-    <div className="flex h-[704px] w-[622px] flex-col gap-6 rounded-xl border border-border-default bg-background-w px-7 py-5">
+    <div className="relative flex h-[704px] w-[622px] flex-col gap-6 rounded-xl border border-border-default bg-background-w px-7 py-5">
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-        <div className="inline-flex items-start justify-between">
+        <div className="inline-flex items-start justify-between gap-3">
           <h2 className="title-1-bold flex-1 text-strong">{title}</h2>
           <button
             type="button"
             aria-label="약관 상세 닫기"
-            className="flex size-8 items-center justify-center rounded-full bg-background-w text-strong outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring"
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-background-w text-strong outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring"
             onClick={onClose}
           >
             <XIcon className="size-6" />
@@ -88,18 +88,20 @@ function TermsDetailView({
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="secondary"
-        disabled={!checked}
-        onClick={onClose}
-        className="w-full"
-      >
-        저장하기
-      </Button>
-      <div className="inline-flex items-center">
-        <CheckButton checked={checked} onCheckedChange={onCheckedChange} className="mr-1.5" />
-        <span className="body-3-bold text-primary">약관 내용에 동의합니다.</span>
+      <div className="flex shrink-0 flex-col gap-6">
+        <div className="inline-flex items-center">
+          <CheckButton checked={checked} onCheckedChange={onCheckedChange} className="mr-1.5" />
+          <span className="body-3-bold text-primary">약관 내용에 동의합니다.</span>
+        </div>
+        <Button
+          type="button"
+          variant={checked ? 'default' : 'secondary'}
+          disabled={!checked}
+          onClick={onClose}
+          className="w-full"
+        >
+          저장하기
+        </Button>
       </div>
     </div>
   );
@@ -150,7 +152,7 @@ export function TermsAgreementModal({ open, onDismiss, onComplete }: TermsAgreem
   return (
     <Dialog open={open}>
       <DialogContent
-        className="left-[calc((var(--app-content-left,0px)+100vw)/2)] flex w-auto max-w-none flex-col items-center justify-center border-none bg-transparent p-0 shadow-none ring-0 sm:max-w-none"
+        className="top-1/2 left-[calc((var(--app-content-left,0px)+100vw)/2)] flex w-auto max-w-none -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-none bg-transparent p-0 shadow-none ring-0 sm:max-w-none"
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">서비스 이용약관 및 개인정보 동의</DialogTitle>
@@ -168,20 +170,18 @@ export function TermsAgreementModal({ open, onDismiss, onComplete }: TermsAgreem
             }}
           />
         ) : (
-          <div className="flex h-[704px] w-[622px] flex-col gap-6 rounded-xl border border-border-default bg-background-w px-7 py-5">
+          <div className="relative flex h-[704px] w-[622px] flex-col gap-6 rounded-xl border border-border-default bg-background-w px-7 py-5">
+            <button
+              type="button"
+              aria-label="동의 모달 닫기"
+              className="absolute top-5 right-7 z-10 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-background-w text-strong outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring"
+              onClick={onDismiss}
+            >
+              <XIcon className="size-6" />
+            </button>
+
             <div className="flex min-h-0 flex-1 flex-col justify-between">
               <div className="flex flex-col gap-3 overflow-hidden">
-                <div className="inline-flex justify-end">
-                  <button
-                    type="button"
-                    aria-label="동의 모달 닫기"
-                    className="flex size-8 items-center justify-center rounded-full bg-background-w text-strong outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring"
-                    onClick={onDismiss}
-                  >
-                    <XIcon className="size-6" />
-                  </button>
-                </div>
-
                 <div className="inline-flex items-center gap-3">
                   <div className="flex size-20 items-center justify-center rounded-lg">
                     <Image src="/file.svg" alt="KKIUM 로고" width={64} height={44} priority />
@@ -227,7 +227,7 @@ export function TermsAgreementModal({ open, onDismiss, onComplete }: TermsAgreem
                 {errorMessage && <p className="mb-2 body-3-regular text-red-700">{errorMessage}</p>}
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant={allChecked ? 'default' : 'secondary'}
                   className="w-full"
                   disabled={!allChecked || isSaving}
                   onClick={handleSave}
