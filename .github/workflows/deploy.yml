@@ -2,8 +2,12 @@ name: deploy
 
 on:
   push:
-    branches: [main]   # dev에서도 돌리면 [main, dev]
+    branches: [main, dev]
   workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-2
+  AWS_DEFAULT_REGION: ap-northeast-2
 
 jobs:
   deploy:
@@ -23,8 +27,12 @@ jobs:
 
       - name: Start pipeline
         id: start
+        env:
+          AWS_REGION: ap-northeast-2
+          AWS_DEFAULT_REGION: ap-northeast-2
         run: |
           EXEC_ID=$(aws codepipeline start-pipeline-execution \
+            --region ap-northeast-2 \
             --name kkium-pipeline \
             --query 'pipelineExecutionId' \
             --output text)
@@ -32,21 +40,26 @@ jobs:
           echo "Started execution: $EXEC_ID"
 
       - name: Watch pipeline status
+        env:
+          AWS_REGION: ap-northeast-2
+          AWS_DEFAULT_REGION: ap-northeast-2
         run: |
           PIPELINE_NAME="kkium-pipeline"
           EXEC_ID="${{ steps.start.outputs.execution_id }}"
 
-          echo "Watching pipeline: $PIPELINE_NAME"
+          echo "Watching pipeline: $PIPELINE_NAME (region: ap-northeast-2)"
           echo "Execution ID: $EXEC_ID"
 
           for i in {1..120}; do
             STATUS=$(aws codepipeline get-pipeline-execution \
+              --region ap-northeast-2 \
               --pipeline-name "$PIPELINE_NAME" \
               --pipeline-execution-id "$EXEC_ID" \
               --query 'pipelineExecution.status' \
               --output text)
 
             LAST_UPDATE=$(aws codepipeline get-pipeline-execution \
+              --region ap-northeast-2 \
               --pipeline-name "$PIPELINE_NAME" \
               --pipeline-execution-id "$EXEC_ID" \
               --query 'pipelineExecution.lastUpdateTime' \
