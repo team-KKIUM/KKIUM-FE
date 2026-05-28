@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import * as React from 'react';
 
+import { JOB_POSTING_PRIMARY_BUTTON_CLASS } from '@/app/(pages)/apply/_constants/applyMockData';
 import { ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,15 +93,15 @@ export function ApplyAddJobPostingUrlStep({
   );
 
   return (
-    <>
-      <div className="flex w-full min-w-0 items-start justify-between pr-10">
+    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
+      <div className="flex w-full min-w-0 shrink-0 items-start justify-between pr-10">
         <div className="flex min-w-0 flex-col gap-0.5">
           <ModalTitle className="text-strong">공고 등록</ModalTitle>
           <ModalDescription>지원하고 싶은 기업의 공고 링크를 입력해주세요</ModalDescription>
         </div>
       </div>
 
-      <div className="flex w-full flex-col gap-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pr-1">
         <div className="flex w-full flex-col gap-4">
           <label htmlFor="apply-job-posting-url" className="title-2-bold text-strong">
             공고 링크
@@ -157,7 +158,7 @@ export function ApplyAddJobPostingUrlStep({
             }}
           />
           <div
-            className={`relative flex h-72 w-full flex-col items-center justify-start overflow-hidden rounded-lg border border-dashed ${
+            className={`relative flex h-72 w-full flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed ${
               isDragOver ? 'border-gray-700 bg-gray-50' : 'border-gray-500 bg-gray-100'
             }`}
             onDragEnter={(event) => {
@@ -202,7 +203,7 @@ export function ApplyAddJobPostingUrlStep({
                 </div>
               </>
             ) : (
-              <div className="flex w-full flex-col items-center justify-start gap-3 px-5 pt-0 text-center">
+              <div className="flex w-full flex-col items-center justify-center gap-3 px-5 text-center">
                 <Image
                   src="/null.svg"
                   alt=""
@@ -218,7 +219,7 @@ export function ApplyAddJobPostingUrlStep({
                 </div>
                 <button
                   type="button"
-                  className="inline-flex h-9 items-center justify-center overflow-hidden rounded-lg bg-gray-main px-2.5 py-0.5 text-xs font-bold leading-5 text-white hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-default"
+                  className="inline-flex h-10 items-center justify-center overflow-hidden rounded-lg bg-gray-main px-3 body-3-bold text-on-fill hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-default"
                   onClick={() => imageInputRef.current?.click()}
                 >
                   공고 이미지 업로드
@@ -226,7 +227,7 @@ export function ApplyAddJobPostingUrlStep({
               </div>
             )}
             {!selectedImagePreviewUrl ? (
-              <p className="mt-2 body-1-regular text-gray-700">jpg, jpeg, png 형식만 지원해요</p>
+              <p className="body-1-regular text-gray-700">jpg, jpeg, png 형식만 지원해요</p>
             ) : null}
           </div>
           {fileError ? <p className="body-2-regular text-red-700">{fileError}</p> : null}
@@ -238,11 +239,11 @@ export function ApplyAddJobPostingUrlStep({
         variant="default"
         size="default"
         disabled={disabledAnalyze}
-        className="w-full text-base font-bold leading-5"
+        className={JOB_POSTING_PRIMARY_BUTTON_CLASS}
         onClick={onAnalyze}
       >
         {isOcrAnalyzing ? '이미지 분석 중...' : isAnalyzing ? '공고 분석 중...' : '공고 분석하기'}
       </Button>
-    </>
+    </div>
   );
 }
