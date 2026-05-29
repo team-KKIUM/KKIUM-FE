@@ -53,7 +53,7 @@ export function MobileLandingResult({ name, company, score }: MobileLandingResul
       <div className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col items-center">
         <div className="flex flex-col items-center pt-[clamp(40px,7.9dvh,67px)]">
           <div className="relative aspect-244/53 w-[clamp(210px,62vw,244px)]">
-            <Image src="/logo-big.svg" alt="KKIUM" fill priority sizes="244px" />
+            <Image src="/landing-logo.svg" alt="KKIUM" fill priority sizes="244px" />
           </div>
         </div>
 

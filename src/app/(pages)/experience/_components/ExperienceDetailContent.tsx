@@ -247,7 +247,12 @@ export function ExperienceDetailContent({
                 onChange={(value) => setTitle(limitExperienceFieldText('title', value))}
               />
             ) : (
-              <h3 className={cn('text-strong', isPage ? 'heading-2-bold' : 'title-1-bold')}>
+              <h3
+                className={cn(
+                  'w-full min-w-0 wrap-break-word leading-[1.48] text-strong',
+                  isPage ? 'heading-2-bold' : 'title-1-bold',
+                )}
+              >
                 {title}
               </h3>
             )}
@@ -262,7 +267,12 @@ export function ExperienceDetailContent({
                 }
               />
             ) : (
-              <p className={cn('text-quaternary', isPage ? 'body-1-bold' : 'body-3-regular')}>
+              <p
+                className={cn(
+                  'w-full min-w-0 wrap-break-word leading-[1.48] text-quaternary',
+                  isPage ? 'body-1-bold' : 'body-3-regular',
+                )}
+              >
                 {description}
               </p>
             )}
