@@ -3,6 +3,9 @@ import Image from 'next/image';
 import { NameCompatibilityAnimation } from '@/app/_components/NameCompatibilityAnimation';
 import { Button } from '@/components/ui/button';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
+const KKIUM_DESCRIPTION = '당신의 경험이 제자리를 찾는 방식';
+
 interface MobileLandingResultProps {
   name: string;
   company: string;
@@ -10,6 +13,36 @@ interface MobileLandingResultProps {
 }
 
 export function MobileLandingResult({ name, company, score }: MobileLandingResultProps) {
+  const handleKakaoShare = () => {
+    const kakao = window.Kakao;
+
+    if (!kakao?.isInitialized() || !SITE_URL) {
+      return;
+    }
+
+    kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: 'KKIUM',
+        description: KKIUM_DESCRIPTION,
+        imageUrl: `${SITE_URL}/opengraph-image.png`,
+        link: {
+          mobileWebUrl: SITE_URL,
+          webUrl: SITE_URL,
+        },
+      },
+      buttons: [
+        {
+          title: 'KKIUM 보러가기',
+          link: {
+            mobileWebUrl: SITE_URL,
+            webUrl: SITE_URL,
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <section className="relative flex min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-[linear-gradient(180deg,var(--color-mint-300)_0%,var(--color-mint-50)_100%)]">
       <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
@@ -74,6 +107,8 @@ export function MobileLandingResult({ name, company, score }: MobileLandingResul
                 type="button"
                 variant="secondary"
                 className="h-[52px] w-full bg-[#FEE500] text-black/85 hover:bg-[#FEE500] hover:brightness-95"
+                disabled={!SITE_URL}
+                onClick={handleKakaoShare}
               >
                 <span className="inline-flex items-center gap-2">
                   <Image
