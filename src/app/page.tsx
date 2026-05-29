@@ -7,10 +7,17 @@ import { BubbleChart } from '@/app/_components/BubbleChart';
 import { ExperienceUpdateCard } from '@/app/_components/ExperienceUpdateCard';
 import { JobTypeCard } from '@/app/_components/JobTypeCard';
 import { MobileLandingPage } from '@/app/_components/MobileLandingPage';
+import { NullType } from '@/app/_components/NullType';
+import {
+  HOME_DASHBOARD_BOTTOM_GRID_CLASS,
+  HOME_DASHBOARD_CONTENT_CLASS,
+  HOME_DASHBOARD_SIDE_CARD_CLASS,
+} from '@/app/_constants/homeLayoutConstants';
 import { mapJobTypeNameToProfile } from '@/app/_constants/jobTypeCardMappingData';
 import { TargetPostingSection } from '@/app/_components/ExperienceMatchSection';
 import { getAccessTokenFromSession } from '@/app/_utils/authFetch';
 import { useHomeDashboard } from '@/hooks/home/useHomeDashboard';
+import { cn } from '@/lib/utils';
 
 const MOBILE_LANDING_MEDIA_QUERY = '(max-width: 767px)';
 
@@ -73,6 +80,7 @@ export default function Home() {
   const targetJdId = currentTargetJd?.jdId ?? currentTargetJd?.id;
   const targetApplyHref =
     targetJdId == null ? '/apply/list' : `/apply?jdid=${encodeURIComponent(String(targetJdId))}`;
+  const hasAnyExperience = (homeData?.totalExperienceCount ?? 0) > 0;
 
   const handlePrevPosting = () => {
     if (!canGoPrev) return;
@@ -97,8 +105,8 @@ export default function Home() {
   }
 
   return (
-    <section className="flex w-full min-w-0 flex-col items-stretch gap-6 px-4 pb-12 sm:px-6 lg:px-10">
-      <div className="mx-auto inline-flex w-full max-w-[1120px] flex-col items-start gap-2">
+    <section className="flex w-full min-w-0 flex-col items-stretch gap-6 pb-12">
+      <div className={cn('flex flex-col items-stretch gap-2', HOME_DASHBOARD_CONTENT_CLASS)}>
         <div className="flex flex-col items-start gap-0.5">
           <p
             className="text-base font-bold leading-6 text-gray-900 tabular-nums"
@@ -120,24 +128,29 @@ export default function Home() {
         onNextPosting={handleNextPosting}
         targetJd={currentTargetJd}
         applyHref={targetApplyHref}
+        onEmptyCtaClick={() => router.push('/apply/list')}
       />
 
-      <div className="mx-auto flex w-full min-w-0 max-w-[1048px] flex-col items-stretch gap-5 xl:flex-row">
+      <div className={cn(HOME_DASHBOARD_BOTTOM_GRID_CLASS, HOME_DASHBOARD_CONTENT_CLASS)}>
         <ExperienceUpdateCard
-          className="w-full xl:w-60 xl:shrink-0"
+          className={HOME_DASHBOARD_CONTENT_CLASS}
           totalCount={homeData?.totalExperienceCount}
           monthlyNewCount={homeData?.thisMonthExperienceCount}
           monthlyDiff={homeData?.lastMonthDiff}
           onTotalNavigate={handleMoveToExperience}
         />
-        <JobTypeCard
-          className="w-full xl:w-96 xl:shrink-0"
-          roleTypeName={mappedJobType.roleTypeName}
-          roleTypeDescription={mappedJobType.description}
-          strengths={mappedJobType.coreKeywords.slice(0, 4)}
-        />
+        {hasAnyExperience ? (
+          <JobTypeCard
+            className={HOME_DASHBOARD_SIDE_CARD_CLASS}
+            roleTypeName={mappedJobType.roleTypeName}
+            roleTypeDescription={mappedJobType.description}
+            strengths={mappedJobType.coreKeywords.slice(0, 4)}
+          />
+        ) : (
+          <NullType className={HOME_DASHBOARD_SIDE_CARD_CLASS} />
+        )}
         <BubbleChart
-          className="w-full xl:w-96 xl:shrink-0"
+          className={HOME_DASHBOARD_SIDE_CARD_CLASS}
           experienceDistribution={homeData?.experienceDistribution}
           onAddClick={handleMoveToExperience}
         />

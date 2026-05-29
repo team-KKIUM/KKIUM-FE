@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import { ExperienceMatchGauge } from '@/app/_components/ExperienceMatchChart';
+import { HOME_DASHBOARD_CONTENT_CLASS } from '@/app/_constants/homeLayoutConstants';
 import { EXPERIENCE_MATCH_MOCK } from '@/app/_constants/experienceMatchMockData';
 import { cn } from '@/lib/utils';
 
@@ -81,7 +82,8 @@ export function ExperienceMatch({
     <section
       data-slot="experience-match"
       className={cn(
-        'mx-auto inline-flex w-full min-w-0 max-w-[1048px] flex-col items-stretch gap-5 overflow-hidden rounded-xl border border-gray-300 bg-background-w p-3 xl:flex-row',
+        HOME_DASHBOARD_CONTENT_CLASS,
+        'flex flex-col items-stretch gap-5 overflow-hidden rounded-xl border border-gray-300 bg-background-w p-3 xl:flex-row xl:flex-nowrap xl:items-stretch',
         className,
       )}
       {...props}
@@ -98,28 +100,28 @@ export function ExperienceMatch({
         onCtaClick={onCtaClick}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-4 self-stretch rounded-xl bg-background-w">
-        <div className="flex w-full max-w-full flex-col items-start gap-5 rounded-lg border border-border-thick bg-background-w px-5 py-4">
-          <div className="inline-flex w-full flex-wrap items-start gap-x-12 gap-y-4">
-            <div className="inline-flex flex-col items-start gap-1">
+      <div className="flex min-w-0 flex-1 flex-col items-stretch gap-4 self-stretch overflow-hidden rounded-xl bg-background-w">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-5 rounded-lg border border-border-thick bg-background-w px-5 py-4">
+          <div className="flex w-full min-w-0 flex-wrap items-start gap-x-12 gap-y-4">
+            <div className="flex min-w-0 flex-1 basis-48 flex-col items-start gap-1">
               <span className="text-xs font-bold leading-5 text-secondary">기업</span>
               <span className="text-xl font-extrabold leading-7 text-strong">{companyName}</span>
             </div>
-            <div className="inline-flex flex-col items-start gap-1">
+            <div className="flex min-w-0 flex-1 basis-48 flex-col items-start gap-1">
               <span className="text-xs font-bold leading-5 text-secondary">모집 분야</span>
               <span className="text-xl font-extrabold leading-7 text-strong">{recruitmentField}</span>
             </div>
-            <div className="inline-flex w-full flex-col items-start gap-1">
+            <div className="flex min-w-0 flex-1 basis-48 flex-col items-start gap-1">
               <span className="text-xs font-bold leading-5 text-secondary">모집 기간</span>
               <span className="text-xl font-extrabold leading-7 text-strong">{recruitmentPeriod}</span>
             </div>
           </div>
         </div>
 
-        <div className="inline-flex w-full flex-col items-stretch gap-2.5 lg:h-[164px] lg:flex-row">
-          <div className="flex min-h-36 flex-1 flex-col gap-10 rounded-lg border border-border-thick bg-background-w px-4 py-5 lg:h-full">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2.5 sm:flex-row sm:items-stretch">
+          <div className="flex min-h-36 min-w-0 flex-1 basis-0 flex-col gap-10 rounded-lg border border-border-thick bg-background-w px-4 py-5 sm:min-h-[164px]">
             <h4 className="text-lg font-bold leading-7 text-strong">요구 기술</h4>
-            <div className="inline-flex flex-wrap items-start gap-1.5">
+            <div className="flex flex-wrap items-start gap-1.5">
               {requiredSkills.map((skill) => (
                 <span
                   key={skill}
@@ -131,9 +133,9 @@ export function ExperienceMatch({
             </div>
           </div>
 
-          <div className="flex min-h-36 flex-1 flex-col gap-10 rounded-lg border border-border-thick bg-background-w px-4 py-5 lg:h-full">
+          <div className="flex min-h-36 min-w-0 flex-1 basis-0 flex-col gap-10 rounded-lg border border-border-thick bg-background-w px-4 py-5 sm:min-h-[164px]">
             <h4 className="text-lg font-bold leading-7 text-strong">요구 역량</h4>
-            <div className="inline-flex flex-wrap items-start gap-1.5">
+            <div className="flex flex-wrap items-start gap-1.5">
               {requiredCompetencies.map((competency) => (
                 <span
                   key={competency}
