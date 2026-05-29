@@ -203,6 +203,8 @@ export type ApplyCoverLetterQuestion = {
   title: string;
   content: string;
   prompt?: string;
+  hasAiDraft?: boolean;
+  aiDraft?: string;
 };
 
 export function getCoverLetterQuestionDisplayText(question: ApplyCoverLetterQuestion) {

@@ -105,17 +105,23 @@ const jdResumeQuestionSchema = z.object({
   orderNum: z.number(),
   content: nullableStringSchema,
   answer: nullableStringSchema,
+  aiDraft: nullableStringSchema,
+  hasAiDraft: z
+    .union([z.boolean(), z.null(), z.undefined()])
+    .transform((value) => value === true),
 });
 
 export const jdResumeResponseSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number().optional(),
   postingTitle: nullableStringSchema,
   companyName: nullableStringSchema,
   recruitmentField: nullableStringSchema,
   startDate: nullableStringSchema,
   endDate: nullableStringSchema,
-  questions: z.array(jdResumeQuestionSchema),
+  questions: z.array(jdResumeQuestionSchema).default([]),
 });
+
+export type JdResumeQuestion = z.infer<typeof jdResumeQuestionSchema>;
 
 export const updateJdResumeRequestSchema = z.object({
   postingTitle: z.string().trim().min(1),

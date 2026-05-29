@@ -10,14 +10,18 @@ export function mapJdResumeToCoverLetterQuestions(
     .slice()
     .sort((a, b) => a.orderNum - b.orderNum)
     .map((question, index) => {
-      const prompt = question.content?.trim() ?? '';
+      const prompt = question.content.trim();
+      const answer = question.answer.trim();
+      const aiDraft = question.aiDraft.trim();
 
       return {
         id: `resume-q-${question.questionId}`,
         jdQuestionId: question.questionId,
         title: prompt || `${index + 1}번 문항`,
         prompt: prompt || undefined,
-        content: question.answer?.trim() ?? '',
+        content: answer,
+        hasAiDraft: question.hasAiDraft,
+        aiDraft,
       };
     });
 }
