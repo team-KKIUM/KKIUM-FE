@@ -12,6 +12,7 @@ export interface ApplyCoverLetterQuestionNavProps {
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
   onAddQuestion: () => void;
+  canAddQuestion?: boolean;
   className?: string;
 }
 
@@ -20,13 +21,15 @@ export function ApplyCoverLetterQuestionNav({
   activeIndex,
   onActiveIndexChange,
   onAddQuestion,
+  canAddQuestion: canAddQuestionProp,
   className,
 }: ApplyCoverLetterQuestionNavProps) {
   const questionIndices = React.useMemo(
     () => Array.from({ length: questionCount }, (_, index) => index),
     [questionCount],
   );
-  const canAddQuestion = questionCount < APPLY_COVER_LETTER_MAX_QUESTIONS;
+  const canAddQuestion =
+    canAddQuestionProp ?? questionCount < APPLY_COVER_LETTER_MAX_QUESTIONS;
 
   return (
     <div
@@ -63,16 +66,15 @@ export function ApplyCoverLetterQuestionNav({
         ))}
       </div>
 
-      {canAddQuestion ? (
-        <button
-          type="button"
-          aria-label="문항 추가"
-          onClick={onAddQuestion}
-          className="flex size-8 shrink-0 items-center justify-center rounded outline-none transition-colors hover:bg-gray-100 focus-visible:shadow-focus-ring"
-        >
-          <PlusIcon className="size-6 text-secondary" />
-        </button>
-      ) : null}
+      <button
+        type="button"
+        aria-label="문항 추가"
+        disabled={!canAddQuestion}
+        onClick={onAddQuestion}
+        className="flex size-8 shrink-0 items-center justify-center rounded outline-none transition-colors hover:bg-gray-100 focus-visible:shadow-focus-ring disabled:pointer-events-none disabled:opacity-40 disabled:hover:bg-transparent"
+      >
+        <PlusIcon className="size-6 text-secondary" />
+      </button>
     </div>
   );
 }

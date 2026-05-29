@@ -72,7 +72,7 @@ export function ApplyCoverLetterAiDraftPanel({
           expanded && hasDraft ? 'max-h-72' : 'max-h-0',
         )}
       >
-        <div className="relative bg-mint-50 px-10 pt-12 pb-8">
+        <div className="relative bg-mint-50 pt-12 pr-15 pb-6 pl-9">
           <button
             type="button"
             aria-expanded={expanded}

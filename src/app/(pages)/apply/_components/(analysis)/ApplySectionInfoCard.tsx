@@ -8,9 +8,12 @@ export const APPLY_SECTION_INFO_HORIZONTAL_MARGIN = 20;
 
 export type ApplySectionInfoVariant = 'job-analysis' | 'my-experience' | 'question-fit';
 
+export const EXPERIENCE_MATCH_INFO_CARD_WIDTH = APPLY_SECTION_INFO_CARD_WIDTH;
+
 export interface ApplySectionInfoCardProps {
   variant: ApplySectionInfoVariant;
   className?: string;
+  width?: number;
 }
 
 function JobAnalysisInfoBody() {
@@ -72,9 +75,9 @@ export function getInfoCardWidth(variant: ApplySectionInfoVariant) {
   return variant === 'question-fit' ? APPLY_QUESTION_FIT_INFO_CARD_WIDTH : APPLY_SECTION_INFO_CARD_WIDTH;
 }
 
-export function ApplySectionInfoCard({ variant, className }: ApplySectionInfoCardProps) {
+export function ApplySectionInfoCard({ variant, className, width }: ApplySectionInfoCardProps) {
   const content = INFO_CONTENT[variant];
-  const cardWidth = getInfoCardWidth(variant);
+  const cardWidth = width ?? getInfoCardWidth(variant);
 
   return (
     <div
