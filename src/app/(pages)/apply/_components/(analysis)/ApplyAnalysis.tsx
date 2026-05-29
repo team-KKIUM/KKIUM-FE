@@ -1,9 +1,12 @@
 'use client';
 
+import * as React from 'react';
+
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingLottie } from '@/components/common/LoadingLottie';
 import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
+import { trackEvent } from '@/lib/analytics';
 
 import { isJdAnalysisFailed } from '@/app/api/apply/jdAnalysisStatus';
 import { useApplyHighlightKeywordStore } from '@/app/(pages)/apply/_stores/useApplyHighlightKeywordStore';
@@ -20,6 +23,7 @@ export interface ApplyAnalysisProps {
 
 const HARD_SKILL_SOURCES = new Set(['hardSkill', 'hardSkills']);
 const SOFT_SKILL_SOURCES = new Set(['softSkill', 'softSkills']);
+const trackedJobAnalysisIds = new Set<string>();
 
 function normalizeKeyword(value: string) {
   return value.trim().toLowerCase();
@@ -39,6 +43,21 @@ export function ApplyAnalysis({ jdId }: ApplyAnalysisProps) {
   } = useApplyJobAnalysis(jdId);
   const { jobPosting } = useApplyJobPostingSnapshot(jdId);
   const highlightKeywords = useApplyHighlightKeywordStore((state) => state.keywords);
+
+  React.useEffect(() => {
+    if (!jdId || !result || isAnalysisLoading || isJdAnalysisFailed(analysisStatus)) {
+      return;
+    }
+
+    if (trackedJobAnalysisIds.has(jdId)) {
+      return;
+    }
+
+    trackedJobAnalysisIds.add(jdId);
+    trackEvent('job_analysis_complete', {
+      source: 'apply_analysis',
+    });
+  }, [analysisStatus, isAnalysisLoading, jdId, result]);
 
   if (!jdId) {
     return (
