@@ -7,6 +7,7 @@ import { Tag } from '@/components/common/Tag';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_MAX_TAG_COUNT = 4;
+const DEFAULT_MAX_TAG_LENGTH = 15;
 
 interface TagSetProps {
   label: string;
@@ -15,6 +16,7 @@ interface TagSetProps {
   className?: string;
   placeholder?: string;
   maxTagCount?: number;
+  maxTagLength?: number;
   onChange?: (tags: string[]) => void;
   onRequestClose?: () => void;
 }
@@ -26,6 +28,7 @@ export function TagSet({
   className,
   placeholder = `적용하고 싶은 ${label}을 작성해주세요`,
   maxTagCount = DEFAULT_MAX_TAG_COUNT,
+  maxTagLength = DEFAULT_MAX_TAG_LENGTH,
   onChange,
   onRequestClose,
 }: TagSetProps) {
@@ -118,10 +121,11 @@ export function TagSet({
           value={inputValue}
           aria-label={`${label} 태그 입력`}
           placeholder={placeholder}
+          maxLength={maxTagLength}
           className="h-full min-w-0 flex-1 bg-transparent px-5 py-4 body-2-bold text-strong outline-none placeholder:text-quaternary"
           onBlur={addTag}
           onChange={(event) => {
-            setInputValue(event.target.value);
+            setInputValue(event.target.value.slice(0, maxTagLength));
             setErrorMessage('');
           }}
           onKeyDown={handleInputKeyDown}
