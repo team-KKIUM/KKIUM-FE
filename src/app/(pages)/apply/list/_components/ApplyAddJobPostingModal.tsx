@@ -13,6 +13,7 @@ import {
   useParseApplyJobPostingUrl,
 } from '@/hooks/apply/useApplyJobPostings';
 import { useJobPostingUrlField } from '@/hooks/apply/useJobPostingUrlField';
+import { trackEvent } from '@/lib/analytics';
 
 import { JOB_POSTING_MODAL_CONTENT_CLASS } from '@/app/(pages)/apply/_constants/applyConstants';
 
@@ -98,6 +99,7 @@ export function ApplyAddJobPostingModal() {
   const [periodRange, setPeriodRange] = useState<CalendarDateRange | null>(null);
   const [deadlineTime, setDeadlineTime] = useState('');
   const [noRecruitmentPeriod, setNoRecruitmentPeriod] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const errorId = 'apply-job-posting-url-error';
   const analyzeError =
     (parseJobPostingUrlMutation.error instanceof Error
@@ -155,13 +157,14 @@ export function ApplyAddJobPostingModal() {
     setRecruitmentField('');
     setRecruitmentFieldOptions([]);
     setPostingBody('');
+    setSelectedImageFile(null);
     parseJobPostingUrlMutation.reset();
     parseJobPostingOcrMutation.reset();
     createJobPostingMutation.reset();
   };
 
   const buildCreateJdAiRequest = (): CreateJdAiRequest => ({
-    url: validation.ok ? validation.value : url.trim(),
+    ...(validation.ok ? { url: validation.value } : {}),
     postingTitle: postingTitle.trim(),
     companyName: companyName.trim(),
     recruitmentField: recruitmentField.trim(),
@@ -207,14 +210,18 @@ export function ApplyAddJobPostingModal() {
           isAnalyzing={parseJobPostingUrlMutation.isPending}
           isOcrAnalyzing={parseJobPostingOcrMutation.isPending}
           analyzeError={analyzeError}
-          onImageFileSelected={(file) => {
-            parseJobPostingOcrMutation.mutate(file, {
-              onSuccess: ({ text }) => {
-                setPostingBody(text);
-              },
-            });
-          }}
+          onImageFileChange={setSelectedImageFile}
           onAnalyze={() => {
+            if (selectedImageFile) {
+              parseJobPostingOcrMutation.mutate(selectedImageFile, {
+                onSuccess: ({ text }) => {
+                  setPostingBody(text);
+                  setStep('result');
+                },
+              });
+              return;
+            }
+
             if (!validation.ok) {
               markTouched();
               return;
@@ -277,6 +284,9 @@ export function ApplyAddJobPostingModal() {
 
             createJobPostingMutation.mutate(buildCreateJdAiRequest(), {
               onSuccess: () => {
+                trackEvent('application_create', {
+                  source: 'apply_add_modal',
+                });
                 resetForm();
                 setOpen(false);
               },

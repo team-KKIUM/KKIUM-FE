@@ -35,6 +35,8 @@ function createEmptyQuestion(index: number): ApplyCoverLetterQuestion {
     id: createQuestionId(),
     title: `${index}번 문항`,
     content: '',
+    hasAiDraft: false,
+    aiDraft: '',
   };
 }
 
@@ -93,6 +95,22 @@ export function ApplyCoverLetterRightPanel({
     );
   };
 
+  const handleAiDraftChange = (aiDraft: string) => {
+    const trimmedDraft = aiDraft.trim();
+
+    setQuestions((prev) =>
+      prev.map((question, index) =>
+        index === activeIndex
+          ? {
+              ...question,
+              aiDraft: trimmedDraft,
+              hasAiDraft: trimmedDraft.length > 0,
+            }
+          : question,
+      ),
+    );
+  };
+
   React.useEffect(() => {
     if (activeIndex < questions.length) {
       return;
@@ -131,6 +149,9 @@ export function ApplyCoverLetterRightPanel({
         value={activeQuestion.content}
         onChange={handleContentChange}
         onTitleChange={handleTitleChange}
+        hasAiDraft={activeQuestion.hasAiDraft ?? false}
+        aiDraft={activeQuestion.aiDraft ?? ''}
+        onAiDraftChange={handleAiDraftChange}
         jdId={jdId}
         jdQuestionId={getJdQuestionIdFromCoverLetterQuestion(activeQuestion)}
         selectedExperienceIds={selectedExperienceIdsByQuestion[activeQuestion.id] ?? []}

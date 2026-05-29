@@ -18,6 +18,9 @@ export interface ApplyCoverLetterQuestionEditorProps {
   onChange: (value: string) => void;
   onTitleChange: (title: string) => void;
   hasSelectedExperiences?: boolean;
+  hasAiDraft?: boolean;
+  aiDraft?: string;
+  onAiDraftChange?: (aiDraft: string) => void;
   jdId?: JdId | null;
   jdQuestionId?: number | null;
   selectedExperienceIds?: string[];
@@ -35,6 +38,9 @@ export function ApplyCoverLetterQuestionEditor({
   onChange,
   onTitleChange,
   hasSelectedExperiences = false,
+  hasAiDraft = false,
+  aiDraft = '',
+  onAiDraftChange,
   jdId,
   jdQuestionId,
   selectedExperienceIds = [],
@@ -48,21 +54,44 @@ export function ApplyCoverLetterQuestionEditor({
     isGenerating: isAiDraftGenerating,
   } = useApplyResumeAiDraft(jdId, jdQuestionId, selectedExperienceIds);
 
-  React.useEffect(() => {
-    setAiDraftOpen(false);
+  const storedDraftText = aiDraft.trim();
+  const hasStoredAiDraft = hasAiDraft && storedDraftText.length > 0;
 
-    if (!hasSelectedExperiences) {
+  React.useEffect(() => {
+    if (!hasSelectedExperiences && !hasStoredAiDraft) {
+      setAiDraftOpen(false);
       setDraftContent('');
       return;
     }
 
-    setDraftContent(cachedDraft);
-  }, [order, cachedDraft, hasSelectedExperiences]);
+    if (hasStoredAiDraft) {
+      setDraftContent(storedDraftText);
+      setAiDraftOpen(true);
+      return;
+    }
 
-  const canUseAiDraft = hasSelectedExperiences;
-  const hasDraft = canUseAiDraft && draftContent.length > 0;
+    setAiDraftOpen(false);
+
+    const resolvedDraft = cachedDraft.trim();
+    setDraftContent(resolvedDraft);
+
+    if (resolvedDraft.length > 0) {
+      setAiDraftOpen(true);
+    }
+  }, [
+    order,
+    storedDraftText,
+    hasStoredAiDraft,
+    cachedDraft,
+    hasSelectedExperiences,
+  ]);
+
+  const canUseAiDraft = hasSelectedExperiences || hasStoredAiDraft;
+  const hasDraft = draftContent.trim().length > 0;
+  const showAiDraftPanel = hasDraft && canUseAiDraft;
   const canGenerateAiDraft =
-    canUseAiDraft &&
+    hasSelectedExperiences &&
+    !hasStoredAiDraft &&
     jdId != null &&
     jdQuestionId != null &&
     selectedExperienceIds.length > 0;
@@ -70,6 +99,7 @@ export function ApplyCoverLetterQuestionEditor({
   const handleDraftGenerated = (draft: string) => {
     setDraftContent(draft);
     setAiDraftOpen(true);
+    onAiDraftChange?.(draft);
   };
 
   const handleExpandedChange = (expanded: boolean) => {
@@ -99,10 +129,10 @@ export function ApplyCoverLetterQuestionEditor({
         </div>
         <AiDraftButton
           className="mt-px"
-          hasDraft={hasDraft}
+          hasDraft={hasDraft || hasStoredAiDraft}
           canGenerate={canGenerateAiDraft}
           isGenerating={isAiDraftGenerating}
-          disabled={!canUseAiDraft}
+          disabled={!canUseAiDraft || hasStoredAiDraft}
           onGenerate={generateDraft}
           onDraftGenerated={handleDraftGenerated}
         />
@@ -116,12 +146,12 @@ export function ApplyCoverLetterQuestionEditor({
           aria-label={`${formatQuestionOrder(order)} ${title} 답변`}
           className={cn(
             'h-full min-h-0 flex-1 resize-none border-none bg-transparent p-0 body-1-regular leading-6 text-strong shadow-none placeholder:text-tertiary focus-visible:border-none focus-visible:bg-transparent focus-visible:ring-0',
-            canUseAiDraft && hasDraft && 'pb-11',
-            canUseAiDraft && aiDraftOpen && hasDraft && 'pb-56',
+            showAiDraftPanel && 'pb-11',
+            showAiDraftPanel && aiDraftOpen && hasDraft && 'pb-56',
           )}
         />
 
-        {canUseAiDraft && hasDraft && (
+        {showAiDraftPanel && (
           <ApplyCoverLetterAiDraftPanel
             expanded={aiDraftOpen}
             onExpandedChange={handleExpandedChange}

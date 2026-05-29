@@ -1,9 +1,12 @@
 'use client';
 
+import * as React from 'react';
+
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingLottie } from '@/components/common/LoadingLottie';
 import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
+import { trackEvent } from '@/lib/analytics';
 
 import { isJdAnalysisFailed } from '@/app/api/apply/jdAnalysisStatus';
 import { useApplyHighlightKeywordStore } from '@/app/(pages)/apply/_stores/useApplyHighlightKeywordStore';
@@ -39,6 +42,22 @@ export function ApplyAnalysis({ jdId }: ApplyAnalysisProps) {
   } = useApplyJobAnalysis(jdId);
   const { jobPosting } = useApplyJobPostingSnapshot(jdId);
   const highlightKeywords = useApplyHighlightKeywordStore((state) => state.keywords);
+  const trackedJobAnalysisIdRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (!jdId || !result || isAnalysisLoading || isJdAnalysisFailed(analysisStatus)) {
+      return;
+    }
+
+    if (trackedJobAnalysisIdRef.current === jdId) {
+      return;
+    }
+
+    trackedJobAnalysisIdRef.current = jdId;
+    trackEvent('job_analysis_complete', {
+      source: 'apply_analysis',
+    });
+  }, [analysisStatus, isAnalysisLoading, jdId, result]);
 
   if (!jdId) {
     return (

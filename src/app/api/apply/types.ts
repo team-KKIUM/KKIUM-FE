@@ -105,17 +105,23 @@ const jdResumeQuestionSchema = z.object({
   orderNum: z.number(),
   content: nullableStringSchema,
   answer: nullableStringSchema,
+  aiDraft: nullableStringSchema,
+  hasAiDraft: z
+    .union([z.boolean(), z.null(), z.undefined()])
+    .transform((value) => value === true),
 });
 
 export const jdResumeResponseSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number().optional(),
   postingTitle: nullableStringSchema,
   companyName: nullableStringSchema,
   recruitmentField: nullableStringSchema,
   startDate: nullableStringSchema,
   endDate: nullableStringSchema,
-  questions: z.array(jdResumeQuestionSchema),
+  questions: z.array(jdResumeQuestionSchema).default([]),
 });
+
+export type JdResumeQuestion = z.infer<typeof jdResumeQuestionSchema>;
 
 export const updateJdResumeRequestSchema = z.object({
   postingTitle: z.string().trim().min(1),
@@ -252,7 +258,19 @@ export const parsedJdUrlResponseSchema = z.object({
   content: nullableStringSchema,
 });
 
-export const createJdAiRequestSchema = parsedJdUrlResponseSchema;
+const createJdAiUrlSchema = z.preprocess(
+  (value) => {
+    if (value == null) return undefined;
+    const trimmed = String(value).trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  },
+  z.string().url('공고 링크 형식이 올바르지 않습니다.').optional(),
+);
+
+// 공고 등록 — url은 선택(OCR 링크 없음)
+export const createJdAiRequestSchema = parsedJdUrlResponseSchema.omit({ url: true }).extend({
+  url: createJdAiUrlSchema,
+});
 
 export const createJdAiResponseSchema = z.object({
   jdId: z.number(),

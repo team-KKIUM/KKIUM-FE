@@ -7,8 +7,12 @@ import { JOB_POSTING_PRIMARY_BUTTON_CLASS } from '@/app/(pages)/apply/_constants
 import { ModalDescription, ModalTitle } from '@/components/common/Modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import type { JobPostingUrlValidation } from '@/hooks/apply/useJobPostingUrlField';
+
+const IMAGE_PREVIEW_ACTION_BUTTON_CLASS =
+  'inline-flex h-9 items-center justify-center gap-1 overflow-hidden rounded-lg border border-border-default bg-background-w px-2.5 py-0.5 body-3-bold outline-none transition-colors hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-border-default';
 
 export interface ApplyAddJobPostingUrlStepProps {
   url: string;
@@ -24,7 +28,7 @@ export interface ApplyAddJobPostingUrlStepProps {
   isAnalyzing?: boolean;
   analyzeError?: string | null;
   isOcrAnalyzing?: boolean;
-  onImageFileSelected?: (file: File) => void;
+  onImageFileChange?: (file: File | null) => void;
 }
 
 export function ApplyAddJobPostingUrlStep({
@@ -41,7 +45,7 @@ export function ApplyAddJobPostingUrlStep({
   isAnalyzing = false,
   analyzeError,
   isOcrAnalyzing = false,
-  onImageFileSelected,
+  onImageFileChange,
 }: ApplyAddJobPostingUrlStepProps) {
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = React.useState<string | null>(null);
@@ -79,6 +83,7 @@ export function ApplyAddJobPostingUrlStep({
           return null;
         });
         setFileError('jpg, jpeg, png 형식만 업로드할 수 있어요.');
+        onImageFileChange?.(null);
         return;
       }
 
@@ -87,10 +92,19 @@ export function ApplyAddJobPostingUrlStep({
         return URL.createObjectURL(file);
       });
       setFileError(null);
-      onImageFileSelected?.(file);
+      onImageFileChange?.(file);
     },
-    [isSupportedImageFile, onImageFileSelected],
+    [isSupportedImageFile, onImageFileChange],
   );
+
+  const handleImageRemove = React.useCallback(() => {
+    setSelectedImagePreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setFileError(null);
+    onImageFileChange?.(null);
+  }, [onImageFileChange]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
@@ -158,9 +172,15 @@ export function ApplyAddJobPostingUrlStep({
             }}
           />
           <div
-            className={`relative flex h-72 w-full overflow-hidden rounded-lg border border-dashed ${
-              isDragOver ? 'border-gray-700 bg-gray-50' : 'border-gray-500 bg-gray-100'
-            }`}
+            className={cn(
+              'relative h-72 w-full overflow-hidden rounded-lg',
+              hasSelectedImage
+                ? 'outline-1 -outline-offset-1 outline-gray-500'
+                : cn(
+                    'border border-dashed',
+                    isDragOver ? 'border-gray-700 bg-gray-50' : 'border-gray-500 bg-gray-100',
+                  ),
+            )}
             onDragEnter={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -192,10 +212,21 @@ export function ApplyAddJobPostingUrlStep({
                   unoptimized
                   className="object-cover"
                 />
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-end bg-black/45 px-4 py-3">
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-b from-neutral-700/0 to-neutral-700/60"
+                  aria-hidden
+                />
+                <div className="absolute right-4 bottom-4 flex items-center gap-2">
                   <button
                     type="button"
-                    className="inline-flex h-10 items-center justify-center overflow-hidden rounded-lg bg-background-w px-3 text-base font-bold leading-6 text-strong hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background-w"
+                    className={cn(IMAGE_PREVIEW_ACTION_BUTTON_CLASS, 'text-red-300')}
+                    onClick={handleImageRemove}
+                  >
+                    이미지 제거
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(IMAGE_PREVIEW_ACTION_BUTTON_CLASS, 'text-tertiary')}
                     onClick={() => imageInputRef.current?.click()}
                   >
                     이미지 변경
