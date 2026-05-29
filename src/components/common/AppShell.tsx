@@ -3,7 +3,10 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { getAccessTokenFromSession, isPublicAuthPath } from '@/app/_utils/authFetch';
+import {
+  getAccessTokenFromSession,
+  isPublicAuthPath,
+} from '@/app/_utils/authFetch';
 import { Sidebar } from '@/components/common/Sidebar';
 
 const SIDEBAR_WIDTH = {
@@ -38,7 +41,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (isPublicAuthPath(pathname)) {
-      setIsAuthenticated(false);
       setCanRender(true);
       return;
     }

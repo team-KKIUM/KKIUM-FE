@@ -180,7 +180,10 @@ export async function parseJdOcr(file: File) {
 
 export async function createJdAi(request: CreateJdAiRequest) {
   const parsedRequest = createJdAiRequestSchema.parse(request);
-  const response = await api.post<unknown>('/api/v1/jd/ai', parsedRequest);
+  const { url, ...rest } = parsedRequest;
+  const body = url ? { ...rest, url } : rest;
+
+  const response = await api.post<unknown>('/api/v1/jd/ai', body);
 
   return createJdAiResponseSchema.parse(response);
 }

@@ -252,7 +252,19 @@ export const parsedJdUrlResponseSchema = z.object({
   content: nullableStringSchema,
 });
 
-export const createJdAiRequestSchema = parsedJdUrlResponseSchema;
+const createJdAiUrlSchema = z.preprocess(
+  (value) => {
+    if (value == null) return undefined;
+    const trimmed = String(value).trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  },
+  z.string().url('공고 링크 형식이 올바르지 않습니다.').optional(),
+);
+
+// 공고 등록 — url은 선택(OCR 링크 없음)
+export const createJdAiRequestSchema = parsedJdUrlResponseSchema.omit({ url: true }).extend({
+  url: createJdAiUrlSchema,
+});
 
 export const createJdAiResponseSchema = z.object({
   jdId: z.number(),

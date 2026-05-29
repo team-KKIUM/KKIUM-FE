@@ -97,6 +97,7 @@ export function ApplyAddJobPostingEditStep({
     (question) => question.value.trim().length > 0,
   );
   const canSave = hasRequiredTextFields && hasAllCoverQuestions;
+  const showRecruitmentFieldDropdown = step === 'result' && recruitmentFieldOptions.length > 0;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
@@ -134,7 +135,7 @@ export function ApplyAddJobPostingEditStep({
         </LabeledField>
 
         <LabeledField label="모집 분야">
-          {step === 'result' ? (
+          {showRecruitmentFieldDropdown ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
