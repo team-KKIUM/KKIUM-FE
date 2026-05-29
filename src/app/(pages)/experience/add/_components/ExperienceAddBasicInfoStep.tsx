@@ -16,6 +16,10 @@ import {
   EXPERIENCE_TYPE_OPTIONS,
 } from '@/app/(pages)/experience/add/_constants/experienceTypeOptions';
 import type { ExperienceAddBasicInfoForm } from '@/app/(pages)/experience/add/_types/experienceAddForm';
+import {
+  getExperienceFieldMaxLength,
+  limitExperienceFieldText,
+} from '@/app/(pages)/experience/_utils/experienceFieldLimits';
 import { sanitizeNumberText } from '@/app/(pages)/experience/_utils/sanitizeNumberText';
 import { type CalendarDateRange, RangeCalendar } from '@/components/common/RangeCalendar';
 import { TextField } from '@/components/common/TextField';
@@ -119,6 +123,7 @@ export function ExperienceAddBasicInfoStep({ value, onChange }: ExperienceAddBas
                           variant="input"
                           placeholder={field.placeholder}
                           value={value[field.name]}
+                          maxLength={getExperienceFieldMaxLength(field.name)}
                           description={false}
                           onChange={handleInputChange(field.name)}
                         />
@@ -131,6 +136,7 @@ export function ExperienceAddBasicInfoStep({ value, onChange }: ExperienceAddBas
                       variant="input"
                       placeholder={fieldGroup.fields[0].placeholder}
                       value={value[fieldGroup.fields[0].name]}
+                      maxLength={getExperienceFieldMaxLength(fieldGroup.fields[0].name)}
                       description={false}
                       onChange={handleInputChange(fieldGroup.fields[0].name)}
                     />
@@ -153,7 +159,7 @@ function getSanitizedBasicInfoValue(
     return sanitizeNumberText(value, 100);
   }
 
-  return value;
+  return limitExperienceFieldText(fieldName, value);
 }
 
 const DATE_RANGE_PLACEHOLDER = '0000년 00월 00일 ~ 0000년 00월 00일';

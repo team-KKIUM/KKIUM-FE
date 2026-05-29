@@ -25,15 +25,8 @@ export const StateMatrix: Story = {
   render: () => (
     <div className="flex w-fit flex-col gap-7 bg-background-default p-6">
       <SearchBar placeholder="경험을 검색해주세요" />
-      <SearchBar
-        placeholder="검색"
-        className="shadow-[0_0_0_3px_var(--color-mint-main)]"
-      />
-      <SearchBar
-        value="타이핑중"
-        onChange={() => {}}
-        className="shadow-[0_0_0_3px_var(--color-mint-main)]"
-      />
+      <SearchBar placeholder="검색" />
+      <SearchBar value="타이핑중" onChange={() => {}} />
     </div>
   ),
 };

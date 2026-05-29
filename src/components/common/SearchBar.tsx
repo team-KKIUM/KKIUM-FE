@@ -70,7 +70,7 @@ export function SearchBar({
         className,
       )}
     >
-      {showSearchIcon && <SearchIcon className="size-8 shrink-0 p-1 text-tertiary" />}
+      {showSearchIcon && <SearchIcon className="size-8 shrink-0 p-1 text-quaternary" />}
       <input
         ref={inputRef}
         type="text"
@@ -81,7 +81,7 @@ export function SearchBar({
         placeholder={placeholder}
         disabled={disabled}
         readOnly={readOnly}
-        className="h-8 min-w-0 flex-1 bg-transparent body-1-bold text-tertiary outline-none placeholder:text-tertiary"
+        className="h-8 min-w-0 flex-1 bg-transparent body-1-bold text-tertiary outline-none placeholder:text-quaternary"
         {...props}
       />
       {canClear && (

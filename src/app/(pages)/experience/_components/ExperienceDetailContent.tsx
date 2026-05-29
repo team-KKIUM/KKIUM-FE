@@ -6,6 +6,11 @@ import * as React from 'react';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
+import {
+  EXPERIENCE_FIELD_MAX_LENGTHS,
+  getExperienceFieldMaxLength,
+  limitExperienceFieldText,
+} from '@/app/(pages)/experience/_utils/experienceFieldLimits';
 import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
 import { sanitizeNumberText } from '@/app/(pages)/experience/_utils/sanitizeNumberText';
 import { DetailInput } from '@/components/common/DetailInput';
@@ -237,8 +242,9 @@ export function ExperienceDetailContent({
               <InlineTextArea
                 value={title}
                 ariaLabel="제목"
+                maxLength={EXPERIENCE_FIELD_MAX_LENGTHS.title}
                 className={cn('text-strong', isPage ? 'heading-2-bold' : 'title-1-bold')}
-                onChange={setTitle}
+                onChange={(value) => setTitle(limitExperienceFieldText('title', value))}
               />
             ) : (
               <h3 className={cn('text-strong', isPage ? 'heading-2-bold' : 'title-1-bold')}>
@@ -249,8 +255,11 @@ export function ExperienceDetailContent({
               <InlineTextArea
                 value={description}
                 ariaLabel="한 줄 설명"
+                maxLength={EXPERIENCE_FIELD_MAX_LENGTHS.description}
                 className={cn('text-quaternary', isPage ? 'body-1-bold' : 'body-3-regular')}
-                onChange={setDescription}
+                onChange={(value) =>
+                  setDescription(limitExperienceFieldText('description', value))
+                }
               />
             ) : (
               <p className={cn('text-quaternary', isPage ? 'body-1-bold' : 'body-3-regular')}>
@@ -364,6 +373,7 @@ export function ExperienceDetailContent({
                     <InlineTextArea
                       value={item.value}
                       ariaLabel={item.label}
+                      maxLength={getExperienceFieldMaxLength(item.name)}
                       className="text-secondary"
                       onChange={(value) => updateBasicDetail(item.name, value)}
                     />
@@ -473,7 +483,7 @@ function getSanitizedBasicDetailValue(key: BasicDetailKey, value: string) {
     return sanitizeNumberText(value, 100);
   }
 
-  return value;
+  return limitExperienceFieldText(key, value);
 }
 
 type EditableDetailInfoItem =
@@ -569,11 +579,13 @@ function getDetailInfoItems(
 function InlineTextArea({
   value,
   ariaLabel,
+  maxLength,
   className,
   onChange,
 }: {
   value: string;
   ariaLabel: string;
+  maxLength?: number;
   className?: string;
   onChange: (value: string) => void;
 }) {
@@ -593,12 +605,13 @@ function InlineTextArea({
       ref={textareaRef}
       value={value}
       aria-label={ariaLabel}
+      maxLength={maxLength}
       rows={1}
       className={cn(
         'block min-h-[1.48em] w-full min-w-0 resize-none overflow-hidden bg-transparent p-0 leading-[1.48] outline-none',
         className,
       )}
-      onChange={(event) => onChange(event.currentTarget.value)}
+      onChange={(event) => onChange(event.currentTarget.value.slice(0, maxLength))}
     />
   );
 }
