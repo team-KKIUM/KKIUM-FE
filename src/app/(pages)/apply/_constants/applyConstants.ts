@@ -9,6 +9,9 @@ export const APPLY_COVER_LETTER_MAX_SELECTED_EXPERIENCES = 3;
 
 // --- 공고 등록 모달 ---
 
+export const JOB_POSTING_BODY_MAX_LENGTH = 10_000;
+export const JOB_POSTING_COVER_QUESTION_MAX_LENGTH = 300;
+
 export const JOB_POSTING_MODAL_CONTENT_CLASS =
   'flex h-[857px] max-h-[calc(100dvh-40px)] w-full max-w-[864px] flex-col gap-6 overflow-hidden px-[30px] py-5';
 
