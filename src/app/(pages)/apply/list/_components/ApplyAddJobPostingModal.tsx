@@ -13,6 +13,7 @@ import {
   useParseApplyJobPostingUrl,
 } from '@/hooks/apply/useApplyJobPostings';
 import { useJobPostingUrlField } from '@/hooks/apply/useJobPostingUrlField';
+import { trackEvent } from '@/lib/analytics';
 
 import { JOB_POSTING_MODAL_CONTENT_CLASS } from '@/app/(pages)/apply/_constants/applyConstants';
 
@@ -283,6 +284,9 @@ export function ApplyAddJobPostingModal() {
 
             createJobPostingMutation.mutate(buildCreateJdAiRequest(), {
               onSuccess: () => {
+                trackEvent('application_create', {
+                  source: 'apply_add_modal',
+                });
                 resetForm();
                 setOpen(false);
               },

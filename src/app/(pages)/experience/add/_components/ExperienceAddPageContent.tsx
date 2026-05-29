@@ -40,6 +40,7 @@ import {
   useAnalyzeExperiencePdf,
   useCreateExperience,
 } from '@/hooks/experience/useExperienceAdd';
+import { trackEvent } from '@/lib/analytics';
 
 export function ExperienceAddPageContent() {
   const router = useRouter();
@@ -171,6 +172,9 @@ export function ExperienceAddPageContent() {
               resultInfo,
             }),
           );
+          trackEvent('experience_create', {
+            source: 'experience_add',
+          });
         } catch (error) {
           setErrorMessage(
             error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.',

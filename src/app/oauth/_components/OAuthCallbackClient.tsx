@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { consumeOAuthState, requestSocialLoginOnce } from '@/app/_utils/authFetch';
 import { TermsAgreementModal } from '@/app/oauth/_components/TermsAgreementModal';
+import { trackEvent } from '@/lib/analytics';
 
 export type OAuthProvider = 'google' | 'kakao';
 
@@ -62,6 +63,9 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
         router.replace('/login');
       }}
       onComplete={() => {
+        trackEvent('sign_up', {
+          method: provider,
+        });
         setShowTermsAgreement(false);
         router.replace('/');
       }}
