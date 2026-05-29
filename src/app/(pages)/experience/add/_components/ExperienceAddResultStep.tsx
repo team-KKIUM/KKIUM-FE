@@ -29,7 +29,7 @@ interface ExperienceAddResultStepProps {
 
 const BASIC_RESULT_FIELDS = [
   { name: 'title', label: '제목' },
-  { name: 'oneLineIntro', label: '한 줄 소개' },
+  { name: 'oneLineIntro', label: '한 줄 설명' },
 ] as const;
 
 const CORE_RESULT_FIELDS = [

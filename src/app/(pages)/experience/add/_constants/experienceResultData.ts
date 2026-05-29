@@ -4,7 +4,7 @@ export const RESULT_BASIC_FIELDS = [
     value: '브랜드 마케팅 전략을 수립하고 실행하여 전환율 20% 향상을 달성한 프로젝트',
   },
   {
-    label: '한 줄 소개',
+    label: '한 줄 설명',
     value: '브랜드 마케팅 전략을 수립하고 실행하여 전환율 20% 향상을 달성한 프로젝트',
   },
 ] as const;
