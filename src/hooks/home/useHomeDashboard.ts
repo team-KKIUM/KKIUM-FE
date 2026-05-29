@@ -9,9 +9,10 @@ export const homeQueryKeys = {
   dashboard: () => [...homeQueryKeys.all, 'dashboard'] as const,
 };
 
-export function useHomeDashboard() {
+export function useHomeDashboard(enabled = true) {
   return useQuery({
     queryKey: homeQueryKeys.dashboard(),
     queryFn: () => getHomeDashboard(),
+    enabled,
   });
 }
