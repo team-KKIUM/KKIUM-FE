@@ -54,6 +54,7 @@ export function AccountDialog({
   const [selectedIllustrateId, setSelectedIllustrateId] = React.useState(
     currentProfileOption.illustrateId,
   );
+  const previewProfileOption = getProfileOptionByIllustrateId(selectedIllustrateId);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState('');
   const hasProfileChange = selectedIllustrateId !== currentProfileOption.illustrateId;
   const canDeleteAccount = deleteConfirmText === DELETE_CONFIRM_TEXT && !isAccountDeleting;
@@ -171,7 +172,7 @@ export function AccountDialog({
               </header>
 
               <div className="flex h-[116px] items-center gap-6">
-                <ProfileImage src={currentProfileOption.src} size={114} priority />
+                <ProfileImage src={previewProfileOption.src} size={114} priority />
                 <p className="text-[22px] leading-[1.48] font-extrabold text-primary">{name}</p>
               </div>
             </div>
