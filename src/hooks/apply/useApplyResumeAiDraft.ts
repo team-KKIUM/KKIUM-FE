@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { parseExperienceIds } from '@/app/(pages)/apply/_utils/buildSaveResumeRequest';
 import { createJdResumeAiDraft } from '@/app/api/apply';
 import type { JdId } from '@/app/api/apply/types';
+import { trackEvent } from '@/lib/analytics';
 
 import {
   APPLY_RESUME_CACHE_QUERY_OPTIONS,
@@ -54,6 +55,13 @@ export function useApplyResumeAiDraft(
       queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
       refetchType: 'active',
     });
+
+    if (data.draft.trim()) {
+      trackEvent('coverletter_create', {
+        source: 'cover_letter_ai_draft',
+        experience_count: parsedExperienceIds.length,
+      });
+    }
 
     return data.draft;
   }, [canFetch, jdId, parsedExperienceIds, questionId, queryClient, queryKey]);
