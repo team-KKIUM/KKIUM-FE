@@ -15,36 +15,60 @@ interface AccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   name?: string;
+  illustrateId?: number | null;
+  isProfileUpdating?: boolean;
+  isAccountDeleting?: boolean;
+  onProfileColorChange?: (illustrateId: number) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }
 
 const DELETE_CONFIRM_TEXT = '계정을 삭제합니다';
 
-const defaultProfileOptions = [
-  { src: '/profile-default-1.svg', label: '기본 프로필 이미지 1' },
-  { src: '/profile-default-2.svg', label: '기본 프로필 이미지 2' },
-  { src: '/profile-default-3.svg', label: '기본 프로필 이미지 3' },
-  { src: '/profile-default-4.svg', label: '기본 프로필 이미지 4' },
-  { src: '/profile-default-5.svg', label: '기본 프로필 이미지 5' },
+export const defaultProfileOptions = [
+  { illustrateId: 0, src: '/profile-default-1.svg', label: '기본 프로필 이미지 1' },
+  { illustrateId: 1, src: '/profile-default-2.svg', label: '기본 프로필 이미지 2' },
+  { illustrateId: 2, src: '/profile-default-3.svg', label: '기본 프로필 이미지 3' },
+  { illustrateId: 3, src: '/profile-default-4.svg', label: '기본 프로필 이미지 4' },
+  { illustrateId: 4, src: '/profile-default-5.svg', label: '기본 프로필 이미지 5' },
 ] as const;
+
+export function getProfileOptionByIllustrateId(illustrateId: number | null | undefined) {
+  return (
+    defaultProfileOptions.find((option) => option.illustrateId === illustrateId) ??
+    defaultProfileOptions[0]
+  );
+}
 
 export function AccountDialog({
   open,
   onOpenChange,
   name = 'KKIUM',
+  illustrateId,
+  isProfileUpdating = false,
+  isAccountDeleting = false,
+  onProfileColorChange,
   onDelete,
 }: AccountDialogProps) {
   const [view, setView] = React.useState<'account' | 'profile' | 'delete'>('account');
-  const [profileSrc, setProfileSrc] = React.useState<string>(defaultProfileOptions[0].src);
-  const [selectedProfileSrc, setSelectedProfileSrc] = React.useState<string>(profileSrc);
+  const currentProfileOption = getProfileOptionByIllustrateId(illustrateId);
+  const [selectedIllustrateId, setSelectedIllustrateId] = React.useState(
+    currentProfileOption.illustrateId,
+  );
+  const previewProfileOption = getProfileOptionByIllustrateId(selectedIllustrateId);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState('');
-  const hasProfileChange = selectedProfileSrc !== profileSrc;
-  const canDeleteAccount = deleteConfirmText === DELETE_CONFIRM_TEXT;
+  const hasProfileChange = selectedIllustrateId !== currentProfileOption.illustrateId;
+  const canDeleteAccount = deleteConfirmText === DELETE_CONFIRM_TEXT && !isAccountDeleting;
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    setSelectedIllustrateId(currentProfileOption.illustrateId);
+  }, [currentProfileOption.illustrateId, open]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setView('account');
-      setSelectedProfileSrc(profileSrc);
+      setSelectedIllustrateId(currentProfileOption.illustrateId);
       setDeleteConfirmText('');
     }
 
@@ -52,18 +76,24 @@ export function AccountDialog({
   };
 
   const openProfileView = () => {
-    setSelectedProfileSrc(profileSrc);
+    setSelectedIllustrateId(currentProfileOption.illustrateId);
     setView('profile');
   };
 
   const closeProfileView = () => {
-    setSelectedProfileSrc(profileSrc);
+    setSelectedIllustrateId(currentProfileOption.illustrateId);
     setView('account');
   };
 
-  const saveProfile = () => {
-    setProfileSrc(selectedProfileSrc);
-    setView('account');
+  const saveProfile = async () => {
+    if (!hasProfileChange || isProfileUpdating) return;
+
+    try {
+      await onProfileColorChange?.(selectedIllustrateId);
+      setView('account');
+    } catch (error) {
+      console.error('Failed to update profile color:', error);
+    }
   };
 
   const openDeleteView = () => {
@@ -96,7 +126,7 @@ export function AccountDialog({
         <>
           <AccountSummary
             name={name}
-            profileSrc={profileSrc}
+            profileSrc={currentProfileOption.src}
             onProfileChangeClick={openProfileView}
           />
 
@@ -115,6 +145,7 @@ export function AccountDialog({
             <DeleteAccountPanel
               value={deleteConfirmText}
               canDelete={canDeleteAccount}
+              isDeleting={isAccountDeleting}
               onChange={setDeleteConfirmText}
               onCancel={closeDeleteView}
               onDelete={handleDeleteAccount}
@@ -141,7 +172,7 @@ export function AccountDialog({
               </header>
 
               <div className="flex h-[116px] items-center gap-6">
-                <ProfileImage src={profileSrc} size={114} priority />
+                <ProfileImage src={previewProfileOption.src} size={114} priority />
                 <p className="text-[22px] leading-[1.48] font-extrabold text-primary">{name}</p>
               </div>
             </div>
@@ -154,11 +185,11 @@ export function AccountDialog({
               </h2>
               <div className="flex gap-8">
                 {defaultProfileOptions.map((option) => {
-                  const selected = selectedProfileSrc === option.src;
+                  const selected = selectedIllustrateId === option.illustrateId;
 
                   return (
                     <button
-                      key={option.src}
+                      key={option.illustrateId}
                       type="button"
                       aria-label={option.label}
                       aria-pressed={selected}
@@ -166,7 +197,7 @@ export function AccountDialog({
                         'size-[88px] cursor-pointer overflow-hidden rounded-full transition-opacity focus-visible:shadow-focus-ring focus-visible:outline-none',
                         hasProfileChange && !selected && 'opacity-40',
                       )}
-                      onClick={() => setSelectedProfileSrc(option.src)}
+                      onClick={() => setSelectedIllustrateId(option.illustrateId)}
                     >
                       <Image
                         src={option.src}
@@ -182,7 +213,12 @@ export function AccountDialog({
             </section>
           </div>
 
-          <Button type="button" className="w-full" disabled={!hasProfileChange} onClick={saveProfile}>
+          <Button
+            type="button"
+            className="w-full"
+            disabled={!hasProfileChange || isProfileUpdating}
+            onClick={() => void saveProfile()}
+          >
             프로필 변경하기
           </Button>
         </>
@@ -237,12 +273,14 @@ function AccountSummary({
 function DeleteAccountPanel({
   value,
   canDelete,
+  isDeleting,
   onChange,
   onCancel,
   onDelete,
 }: {
   value: string;
   canDelete: boolean;
+  isDeleting: boolean;
   onChange: (value: string) => void;
   onCancel: () => void;
   onDelete: () => Promise<void> | void;
@@ -266,7 +304,7 @@ function DeleteAccountPanel({
           <Button
             type="button"
             variant="danger"
-            disabled={!canDelete}
+            disabled={!canDelete || isDeleting}
             className="w-[87px]"
             onClick={() => void onDelete()}
           >

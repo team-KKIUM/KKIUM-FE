@@ -6,7 +6,10 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { clearAccessTokenFromSession } from '@/app/_utils/authFetch';
-import { AccountDialog } from '@/components/common/AccountDialog';
+import {
+  AccountDialog,
+  getProfileOptionByIllustrateId,
+} from '@/components/common/AccountDialog';
 import { ApplicationIcon } from '@/components/common/icons/ApplicationIcon';
 import { ExperienceIcon } from '@/components/common/icons/ExperienceIcon';
 import { HomeIcon } from '@/components/common/icons/HomeIcon';
@@ -14,6 +17,11 @@ import { LogoutIcon } from '@/components/common/icons/LogoutIcon';
 import { SettingsIcon } from '@/components/common/icons/SettingsIcon';
 import { SidebarMenuItem, type SidebarMenuItemIcon } from '@/components/common/SidebarMenuItem';
 import { SidebarProfile } from '@/components/common/SidebarProfile';
+import {
+  useDeleteUserAccount,
+  useUpdateUserProfileColor,
+  useUserProfile,
+} from '@/hooks/user/useUserProfile';
 import { cn } from '@/lib/utils';
 
 export type SidebarItem = {
@@ -51,6 +59,11 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const profileMenuRef = React.useRef<HTMLDivElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = React.useState(false);
+  const userProfileQuery = useUserProfile();
+  const updateProfileColorMutation = useUpdateUserProfileColor();
+  const deleteUserAccountMutation = useDeleteUserAccount();
+  const profileOption = getProfileOptionByIllustrateId(userProfileQuery.data?.illustrateId);
+  const profileName = userProfileQuery.data?.name ?? 'KKIUM';
   const logoSrc = collapsed ? '/logo-light-mark.svg' : '/logo-light.svg';
   const logoSize = collapsed ? { width: 49, height: 49 } : { width: 136, height: 49 };
 
@@ -90,6 +103,18 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   const handleLogoutClick = () => {
     clearAccessTokenFromSession();
     setIsProfileMenuOpen(false);
+    router.replace('/login');
+  };
+
+  const handleProfileColorChange = async (illustrateId: number) => {
+    await updateProfileColorMutation.mutateAsync({ illustrateId });
+  };
+
+  const handleDeleteAccount = async () => {
+    await deleteUserAccountMutation.mutateAsync();
+    clearAccessTokenFromSession();
+    setIsProfileMenuOpen(false);
+    setIsAccountDialogOpen(false);
     router.replace('/login');
   };
 
@@ -145,11 +170,22 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         <SidebarProfile
           collapsed={collapsed}
           active={isProfileMenuOpen}
+          name={profileName}
+          profileSrc={profileOption.src}
           ariaControls={profileMenuId}
           ariaExpanded={isProfileMenuOpen}
           onClick={handleProfileClick}
         />
-        <AccountDialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen} />
+        <AccountDialog
+          open={isAccountDialogOpen}
+          onOpenChange={setIsAccountDialogOpen}
+          name={profileName}
+          illustrateId={userProfileQuery.data?.illustrateId}
+          isProfileUpdating={updateProfileColorMutation.isPending}
+          isAccountDeleting={deleteUserAccountMutation.isPending}
+          onProfileColorChange={handleProfileColorChange}
+          onDelete={handleDeleteAccount}
+        />
       </div>
     </aside>
   );

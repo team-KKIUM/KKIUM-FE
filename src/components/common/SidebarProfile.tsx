@@ -7,6 +7,7 @@ interface SidebarProfileProps {
   collapsed?: boolean;
   active?: boolean;
   name?: string;
+  profileSrc?: string;
   ariaControls?: string;
   ariaExpanded?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
@@ -16,6 +17,7 @@ export function SidebarProfile({
   collapsed = false,
   active = false,
   name = 'KKIUM',
+  profileSrc = '/profile.svg',
   ariaControls,
   ariaExpanded,
   onClick,
@@ -34,7 +36,7 @@ export function SidebarProfile({
       )}
       onClick={onClick}
     >
-      <Image src="/profile.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
+      <Image src={profileSrc} alt="" width={32} height={32} className="size-8 shrink-0" />
       <span className={cn('min-w-0 flex-1 truncate body-3-bold text-primary', collapsed && 'sr-only')}>
         {name}
       </span>
