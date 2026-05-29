@@ -87,8 +87,12 @@ export function AccountDialog({
   const saveProfile = async () => {
     if (!hasProfileChange || isProfileUpdating) return;
 
-    await onProfileColorChange?.(selectedIllustrateId);
-    setView('account');
+    try {
+      await onProfileColorChange?.(selectedIllustrateId);
+      setView('account');
+    } catch (error) {
+      console.error('Failed to update profile color:', error);
+    }
   };
 
   const openDeleteView = () => {
