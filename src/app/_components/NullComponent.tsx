@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 
+import { HOME_DASHBOARD_CONTENT_CLASS } from '@/app/_constants/homeLayoutConstants';
 import { ExternalLinkIcon } from '@/components/common/icons/ExternalLinkIcon';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,8 @@ export function NullComponent({
     <div
       data-slot="null-component"
       className={cn(
-        'flex h-90 w-full max-w-[1028px] items-center justify-center gap-6 rounded-xl border border-border-bold bg-background-w p-3',
+        'flex h-90 items-center justify-center gap-6 rounded-xl border border-border-bold bg-background-w p-3',
+        HOME_DASHBOARD_CONTENT_CLASS,
         className,
       )}
     >

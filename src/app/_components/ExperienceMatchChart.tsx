@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Info } from 'lucide-react';
 import * as React from 'react';
+
+import { ExperienceMatchGaugeInfo } from '@/app/_components/ExperienceMatchGaugeInfo';
 import { cn } from '@/lib/utils';
 
 type Point = { x: number; y: number };
@@ -34,16 +35,16 @@ export function ExperienceMatchGauge({
   const progressGradientId = React.useId().replace(/:/g, '');
 
   return (
-    <div className="inline-flex w-96 shrink-0 self-stretch flex-col items-center gap-0 overflow-hidden rounded-base bg-mint-50 p-5">
-      <div className="relative h-[360px] w-80 overflow-hidden">
-        <div className="absolute inset-x-0 top-0 inline-flex items-center justify-between">
+    <div className="flex w-full max-w-96 shrink-0 flex-col items-stretch gap-0 self-stretch overflow-hidden rounded-base bg-mint-50 p-5 xl:w-96 xl:min-w-96">
+      <div className="relative mx-auto h-[360px] w-full max-w-80 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between">
           <h3 className="text-xl font-bold leading-8 text-strong">{title}</h3>
-          <Info className="size-5 text-secondary" aria-hidden />
+          <ExperienceMatchGaugeInfo />
         </div>
 
         <svg
           viewBox="0 0 320 300"
-          className="pointer-events-none absolute left-0 top-[6px] h-[300px] w-80"
+          className="pointer-events-none absolute top-[6px] left-1/2 h-[300px] w-80 -translate-x-1/2"
           aria-hidden
         >
           <defs>
