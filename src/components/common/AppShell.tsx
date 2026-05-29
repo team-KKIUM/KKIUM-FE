@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import {
   getAccessTokenFromSession,
-  isAuthExemptPath,
   isPublicAuthPath,
 } from '@/app/_utils/authFetch';
 import { Sidebar } from '@/components/common/Sidebar';
@@ -42,7 +41,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (isPublicAuthPath(pathname)) {
-      setIsAuthenticated(false);
       setCanRender(true);
       return;
     }
