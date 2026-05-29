@@ -52,6 +52,9 @@ export function ApplyAddJobPostingUrlStep({
   const [fileError, setFileError] = React.useState<string | null>(null);
   const imageInputRef = React.useRef<HTMLInputElement>(null);
   const hasSelectedImage = selectedImagePreviewUrl != null;
+  const hasUrl = url.trim().length > 0;
+  const isUrlInputDisabled = hasSelectedImage;
+  const isImageUploadDisabled = hasUrl;
   const shouldShowUrlError = showError && !validation.ok && !hasSelectedImage;
   const canSubmitAnalyze = canAnalyze || hasSelectedImage;
   const disabledAnalyze = !canSubmitAnalyze || isAnalyzing || isOcrAnalyzing;
@@ -68,36 +71,13 @@ export function ApplyAddJobPostingUrlStep({
     const lowerName = file.name.toLowerCase();
     const hasSupportedExtension =
       lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg') || lowerName.endsWith('.png');
-    const hasSupportedMimeType = file.type === '' || file.type === 'image/jpeg' || file.type === 'image/png';
+    const hasSupportedMimeType =
+      file.type === '' || file.type === 'image/jpeg' || file.type === 'image/png';
 
     return hasSupportedExtension && hasSupportedMimeType;
   }, []);
 
-  const handleImageFileSelect = React.useCallback(
-    (file: File | null) => {
-      if (!file) return;
-
-      if (!isSupportedImageFile(file)) {
-        setSelectedImagePreviewUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return null;
-        });
-        setFileError('jpg, jpeg, png 형식만 업로드할 수 있어요.');
-        onImageFileChange?.(null);
-        return;
-      }
-
-      setSelectedImagePreviewUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return URL.createObjectURL(file);
-      });
-      setFileError(null);
-      onImageFileChange?.(file);
-    },
-    [isSupportedImageFile, onImageFileChange],
-  );
-
-  const handleImageRemove = React.useCallback(() => {
+  const clearSelectedImage = React.useCallback(() => {
     setSelectedImagePreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -105,6 +85,35 @@ export function ApplyAddJobPostingUrlStep({
     setFileError(null);
     onImageFileChange?.(null);
   }, [onImageFileChange]);
+
+  const handleImageFileSelect = React.useCallback(
+    (file: File | null) => {
+      if (!file) return;
+
+      if (!isSupportedImageFile(file)) {
+        clearSelectedImage();
+        setFileError('jpg, jpeg, png 형식만 업로드할 수 있어요.');
+        return;
+      }
+
+      setUrl('');
+      setSelectedImagePreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
+      setFileError(null);
+      onImageFileChange?.(file);
+    },
+    [clearSelectedImage, isSupportedImageFile, onImageFileChange, setUrl],
+  );
+
+  const handleUrlChange = (value: string) => {
+    setUrl(value);
+
+    if (value.trim()) {
+      clearSelectedImage();
+    }
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden">
@@ -116,7 +125,7 @@ export function ApplyAddJobPostingUrlStep({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pr-1">
-        <div className="flex w-full flex-col gap-4">
+        <div className="flex w-full shrink-0 flex-col gap-4">
           <label htmlFor="apply-job-posting-url" className="title-2-bold text-strong">
             공고 링크
           </label>
@@ -129,12 +138,18 @@ export function ApplyAddJobPostingUrlStep({
               autoComplete="url"
               value={url}
               maxLength={maxLength}
+              disabled={isUrlInputDisabled}
               aria-invalid={shouldShowUrlError}
               aria-describedby={shouldShowUrlError ? errorId : undefined}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => handleUrlChange(e.target.value)}
               onBlur={markTouched}
               placeholder="링크를 입력해주세요"
             />
+            {isUrlInputDisabled ? (
+              <p className="body-3-regular text-tertiary">
+                이미지를 업로드하면 링크 입력은 사용할 수 없어요.
+              </p>
+            ) : null}
             {shouldShowUrlError ? (
               <p id={errorId} className="body-3-regular text-red-700" role="alert">
                 {validation.error}
@@ -148,7 +163,7 @@ export function ApplyAddJobPostingUrlStep({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <span className="body-1-bold text-quaternary">공고 링크가 없나요?</span>
           <button
             type="button"
@@ -159,13 +174,19 @@ export function ApplyAddJobPostingUrlStep({
           </button>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-4">
+        <div className="flex w-full shrink-0 flex-col gap-3">
           <h3 className="title-2-bold text-strong">공고 이미지 추가</h3>
+          {isImageUploadDisabled ? (
+            <p className="body-3-regular text-tertiary">
+              링크를 입력하면 이미지 업로드는 사용할 수 없어요.
+            </p>
+          ) : null}
           <input
             ref={imageInputRef}
             type="file"
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             className="hidden"
+            disabled={isImageUploadDisabled}
             onChange={(event) => {
               handleImageFileSelect(event.currentTarget.files?.[0] ?? null);
               event.currentTarget.value = '';
@@ -173,20 +194,23 @@ export function ApplyAddJobPostingUrlStep({
           />
           <div
             className={cn(
-              'relative h-72 w-full overflow-hidden rounded-lg',
+              'relative flex h-72 w-full overflow-hidden rounded-lg',
               hasSelectedImage
                 ? 'outline-1 -outline-offset-1 outline-gray-500'
                 : cn(
-                    'border border-dashed',
+                    'items-center justify-center border border-dashed',
                     isDragOver ? 'border-gray-700 bg-gray-50' : 'border-gray-500 bg-gray-100',
+                    isImageUploadDisabled && 'pointer-events-none opacity-50',
                   ),
             )}
             onDragEnter={(event) => {
+              if (isImageUploadDisabled) return;
               event.preventDefault();
               event.stopPropagation();
               setIsDragOver(true);
             }}
             onDragOver={(event) => {
+              if (isImageUploadDisabled) return;
               event.preventDefault();
               event.stopPropagation();
               setIsDragOver(true);
@@ -197,6 +221,7 @@ export function ApplyAddJobPostingUrlStep({
               setIsDragOver(false);
             }}
             onDrop={(event) => {
+              if (isImageUploadDisabled) return;
               event.preventDefault();
               event.stopPropagation();
               setIsDragOver(false);
@@ -220,7 +245,7 @@ export function ApplyAddJobPostingUrlStep({
                   <button
                     type="button"
                     className={cn(IMAGE_PREVIEW_ACTION_BUTTON_CLASS, 'text-red-300')}
-                    onClick={handleImageRemove}
+                    onClick={clearSelectedImage}
                   >
                     이미지 제거
                   </button>
@@ -234,7 +259,7 @@ export function ApplyAddJobPostingUrlStep({
                 </div>
               </>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center">
+              <div className="flex w-full flex-col items-center justify-center gap-3 px-5 text-center">
                 <Image
                   src="/null.svg"
                   alt=""
@@ -250,7 +275,8 @@ export function ApplyAddJobPostingUrlStep({
                 </div>
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center overflow-hidden rounded-lg bg-gray-main px-3 body-3-bold text-on-fill hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-default"
+                  disabled={isImageUploadDisabled}
+                  className="inline-flex h-10 items-center justify-center overflow-hidden rounded-lg bg-gray-main px-3 body-3-bold text-on-fill hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-default disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => imageInputRef.current?.click()}
                 >
                   공고 이미지 업로드

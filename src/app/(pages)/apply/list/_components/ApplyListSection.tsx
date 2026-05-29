@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { arrayMove } from '@dnd-kit/helpers';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
@@ -20,9 +21,12 @@ import { ApplyDetailSidebar } from './ApplyDetailSidebar';
 
 export interface ApplyListSectionProps {
   keyword?: string;
+  initialSelectedJdId?: string | null;
 }
 
-export function ApplyListSection({ keyword }: ApplyListSectionProps) {
+export function ApplyListSection({ keyword, initialSelectedJdId }: ApplyListSectionProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const isDragDisabled = Boolean(keyword?.trim());
   const listParams = React.useMemo(
     () => ({
@@ -54,7 +58,10 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
   const [orderedCards, setOrderedCards] = React.useState<ApplyListItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [sidebarAnimated, setSidebarAnimated] = React.useState(false);
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasAppliedInitialSelectionRef = React.useRef(false);
+  const previousKeywordRef = React.useRef(keyword);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const updateTitleMutation = useUpdateApplyJobPostingTitle();
   const updateOrderMutation = useUpdateApplyJobPostingOrder();
@@ -71,6 +78,12 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
   }, [cards]);
 
   React.useEffect(() => {
+    if (previousKeywordRef.current === keyword) {
+      return;
+    }
+
+    previousKeywordRef.current = keyword;
+
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -78,8 +91,40 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
 
     setSidebarOpen(false);
     setActiveId(null);
+    setSidebarAnimated(false);
     setTitleOverrides({});
-  }, [keyword]);
+    hasAppliedInitialSelectionRef.current = false;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('selected');
+    params.delete('view');
+
+    router.replace(params.size > 0 ? `/apply/list?${params.toString()}` : '/apply/list', {
+      scroll: false,
+    });
+  }, [keyword, router, searchParams]);
+
+  React.useEffect(() => {
+    if (hasAppliedInitialSelectionRef.current || !initialSelectedJdId) {
+      return;
+    }
+
+    const initialSelectedCard = orderedCards.find((card) => card.id === initialSelectedJdId);
+
+    if (!initialSelectedCard) {
+      return;
+    }
+
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setActiveId(initialSelectedCard.id);
+    setSidebarAnimated(false);
+    setSidebarOpen(true);
+    hasAppliedInitialSelectionRef.current = true;
+  }, [initialSelectedJdId, orderedCards]);
 
   React.useEffect(() => {
     const loadMoreElement = loadMoreRef.current;
@@ -124,6 +169,13 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
       setActiveId(null);
       closeTimerRef.current = null;
     }, 560);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('selected');
+    params.delete('view');
+    router.replace(params.size > 0 ? `/apply/list?${params.toString()}` : '/apply/list', {
+      scroll: false,
+    });
   }
 
   function handleCardOpen(cardId: string) {
@@ -132,7 +184,13 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
       closeTimerRef.current = null;
     }
     setActiveId(cardId);
+    setSidebarAnimated(true);
     setSidebarOpen(true);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('selected', cardId);
+    params.delete('view');
+    router.replace(`/apply/list?${params.toString()}`, { scroll: false });
   }
 
   function handleUpdateTitle(cardId: string, nextTitle: string) {
@@ -299,7 +357,12 @@ export function ApplyListSection({ keyword }: ApplyListSectionProps) {
         </div>
       ) : null}
 
-      <ApplyDetailSidebar open={sidebarOpen} item={activeItem} onClose={handleClose} />
+      <ApplyDetailSidebar
+        open={sidebarOpen}
+        item={activeItem}
+        animated={sidebarAnimated}
+        onClose={handleClose}
+      />
     </>
   );
 }

@@ -3,7 +3,10 @@
 import { ChevronDownIcon } from 'lucide-react';
 
 import {
+  APPLY_COVER_LETTER_MAX_QUESTIONS,
   JOB_EDIT_STEP_HEADER,
+  JOB_POSTING_BODY_MAX_LENGTH,
+  JOB_POSTING_COVER_QUESTION_MAX_LENGTH,
   JOB_POSTING_PRIMARY_BUTTON_CLASS,
   RESULT_RECRUITMENT_FIELD_OPTIONS,
 } from '@/app/(pages)/apply/_constants/applyConstants';
@@ -49,6 +52,7 @@ export interface ApplyAddJobPostingEditStepProps {
   onAddCoverQuestion: () => void;
   onSave: () => void;
   onBack: () => void;
+  onRequestManual?: () => void;
   isSaving?: boolean;
   saveError?: string | null;
 }
@@ -85,6 +89,7 @@ export function ApplyAddJobPostingEditStep({
   onAddCoverQuestion,
   onSave,
   onBack,
+  onRequestManual,
   isSaving = false,
   saveError,
 }: ApplyAddJobPostingEditStepProps) {
@@ -96,7 +101,14 @@ export function ApplyAddJobPostingEditStep({
   const hasAllCoverQuestions = coverQuestions.length > 0 && coverQuestions.every(
     (question) => question.value.trim().length > 0,
   );
-  const canSave = hasRequiredTextFields && hasAllCoverQuestions;
+  const isWithinFieldLimits =
+    postingBody.length <= JOB_POSTING_BODY_MAX_LENGTH &&
+    coverQuestions.every(
+      (question) => question.value.length <= JOB_POSTING_COVER_QUESTION_MAX_LENGTH,
+    ) &&
+    coverQuestions.length <= APPLY_COVER_LETTER_MAX_QUESTIONS;
+  const canSave = hasRequiredTextFields && hasAllCoverQuestions && isWithinFieldLimits;
+  const canAddCoverQuestion = coverQuestions.length < APPLY_COVER_LETTER_MAX_QUESTIONS;
   const showRecruitmentFieldDropdown = step === 'result' && recruitmentFieldOptions.length > 0;
 
   return (
@@ -117,6 +129,19 @@ export function ApplyAddJobPostingEditStep({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pr-1">
+        {step === 'result' && onRequestManual ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <span className="body-1-bold text-quaternary">분석 결과가 맞지 않나요?</span>
+            <button
+              type="button"
+              className="body-1-bold text-secondary underline underline-offset-4 hover:text-strong"
+              onClick={onRequestManual}
+            >
+              공고 직접 등록하기
+            </button>
+          </div>
+        ) : null}
+
         <LabeledField label="공고 제목">
           <Input
             value={postingTitle}
@@ -197,6 +222,7 @@ export function ApplyAddJobPostingEditStep({
         <LabeledField label="공고 본문">
           <Textarea
             value={postingBody}
+            maxLength={JOB_POSTING_BODY_MAX_LENGTH}
             onChange={(e) => onPostingBodyChange(e.target.value)}
             className="min-h-36 resize-y"
           />
@@ -220,6 +246,7 @@ export function ApplyAddJobPostingEditStep({
                 <Input
                   className="min-w-0 flex-1"
                   value={row.value}
+                  maxLength={JOB_POSTING_COVER_QUESTION_MAX_LENGTH}
                   onChange={(e) => onCoverQuestionChange(row.id, e.target.value)}
                   placeholder={`${index + 1}번 문항`}
                   aria-label={`${index + 1}번 문항`}
@@ -229,7 +256,8 @@ export function ApplyAddJobPostingEditStep({
           </div>
           <button
             type="button"
-            className="inline-flex h-12 w-full shrink-0 items-center justify-center gap-1 overflow-hidden rounded-lg bg-gray-200 px-3 body-1-bold text-tertiary outline-none transition-colors hover:bg-gray-300 focus-visible:shadow-focus-ring"
+            disabled={!canAddCoverQuestion}
+            className="inline-flex h-12 w-full shrink-0 items-center justify-center gap-1 overflow-hidden rounded-lg bg-gray-200 px-3 body-1-bold text-tertiary outline-none transition-colors hover:bg-gray-300 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-200"
             onClick={onAddCoverQuestion}
           >
             <span className="flex size-8 shrink-0 items-center justify-center">
