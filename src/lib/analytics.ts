@@ -8,6 +8,7 @@ export type AnalyticsEventName =
   | 'coverletter_create';
 
 export type AnalyticsEventParams = Record<string, string | number | boolean | null | undefined>;
+const IS_GA_DEBUG_MODE = process.env.NODE_ENV === 'development';
 
 declare global {
   interface Window {
@@ -38,8 +39,15 @@ function removeEmptyParams(params: AnalyticsEventParams) {
   );
 }
 
+function getEventParams(params: AnalyticsEventParams) {
+  return removeEmptyParams({
+    ...params,
+    debug_mode: IS_GA_DEBUG_MODE,
+  });
+}
+
 export function trackEvent(eventName: AnalyticsEventName, params: AnalyticsEventParams = {}) {
   if (!canUseGtag()) return;
 
-  window.gtag?.('event', eventName, removeEmptyParams(params));
+  window.gtag?.('event', eventName, getEventParams(params));
 }
