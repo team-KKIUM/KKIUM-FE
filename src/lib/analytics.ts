@@ -17,10 +17,12 @@ declare global {
   }
 }
 
+function canUseAnalytics() {
+  return Boolean(GA_MEASUREMENT_ID && typeof window !== 'undefined');
+}
+
 function canUseGtag() {
-  return Boolean(
-    GA_MEASUREMENT_ID && typeof window !== 'undefined' && typeof window.gtag === 'function',
-  );
+  return canUseAnalytics() && typeof window.gtag === 'function';
 }
 
 export function trackPageView(pathname: string) {
@@ -49,7 +51,15 @@ function getEventParams(params: AnalyticsEventParams) {
 }
 
 export function trackEvent(eventName: AnalyticsEventName, params: AnalyticsEventParams = {}) {
-  if (!canUseGtag()) return;
+  if (!canUseAnalytics()) return;
 
-  window.gtag?.('event', eventName, getEventParams(params));
+  const eventParams = getEventParams(params);
+
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, eventParams);
+    return;
+  }
+
+  window.dataLayer = window.dataLayer ?? [];
+  window.dataLayer.push(['event', eventName, eventParams]);
 }
