@@ -49,7 +49,7 @@ export function useApplyResumeAiDraft(
           experienceIds: parsedExperienceIds,
         });
 
-        if (nextData.draft.trim()) {
+        if (nextData.draft?.trim()) {
           trackEvent('coverletter_create', {
             source: 'cover_letter_ai_draft',
             experience_count: parsedExperienceIds.length,
@@ -66,7 +66,7 @@ export function useApplyResumeAiDraft(
       refetchType: 'active',
     });
 
-    return data.draft;
+    return data.draft ?? '';
   }, [canFetch, jdId, parsedExperienceIds, questionId, queryClient, queryKey]);
 
   return {
