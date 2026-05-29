@@ -84,7 +84,7 @@ export function ApplyJobHeader({
               type="button"
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 border-b-2 py-0.5 pr-1.5 transition-colors',
+                'relative -mb-px flex items-center gap-3 border-b-2 py-0.5 pr-1.5 transition-colors',
                 isActive ? 'border-strong text-strong' : 'border-transparent text-tertiary',
               )}
               onClick={() => onTabChange(id)}

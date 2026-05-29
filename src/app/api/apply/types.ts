@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { formatDateTimeDisplay } from '@/app/_utils/formatDateTimeDisplay';
+
 export const jdIdSchema = z.coerce.number().int().positive();
 
 const nullableStringSchema = z
@@ -148,6 +150,10 @@ export const saveResumeRequestSchema = z.object({
   answers: z.array(saveResumeAnswerSchema),
 });
 
+export const createJdResumeQuestionRequestSchema = z.object({
+  content: z.string().trim().min(1),
+});
+
 export const createResumeAiDraftRequestSchema = z.object({
   experienceIds: z.array(z.coerce.number().int().positive()).min(1).max(3),
 });
@@ -268,9 +274,17 @@ const createJdAiUrlSchema = z.preprocess(
 );
 
 // 공고 등록 — url은 선택(OCR 링크 없음)
-export const createJdAiRequestSchema = parsedJdUrlResponseSchema.omit({ url: true }).extend({
-  url: createJdAiUrlSchema,
-});
+export const createJdAiRequestSchema = parsedJdUrlResponseSchema
+  .omit({ url: true, questions: true, content: true })
+  .extend({
+    url: createJdAiUrlSchema,
+    questions: z
+      .array(z.string().max(300, '자기소개서 문항은 300자까지 입력할 수 있어요.'))
+      .max(5, '자기소개서 문항은 최대 5개까지 등록할 수 있어요.'),
+    content: z
+      .string()
+      .max(10_000, '공고 본문은 10,000자까지 입력할 수 있어요.'),
+  });
 
 export const createJdAiResponseSchema = z.object({
   jdId: z.number(),
@@ -361,6 +375,7 @@ export type JdResumeResponse = z.infer<typeof jdResumeResponseSchema>;
 export type ParsedJdUrlResponse = z.infer<typeof parsedJdUrlResponseSchema>;
 export type UpdateJdResumeRequest = z.infer<typeof updateJdResumeRequestSchema>;
 export type SaveResumeRequest = z.infer<typeof saveResumeRequestSchema>;
+export type CreateJdResumeQuestionRequest = z.infer<typeof createJdResumeQuestionRequestSchema>;
 export type CreateResumeAiDraftRequest = z.infer<typeof createResumeAiDraftRequestSchema>;
 export type CreateResumeAiDraftResponse = z.infer<typeof createResumeAiDraftResponseSchema>;
 export type ResumeWritingGuideResponse = z.infer<typeof resumeWritingGuideResponseSchema>;
@@ -416,26 +431,5 @@ function formatJdPeriod(startDate: string, endDate: string) {
 }
 
 function formatJdDate(value: string) {
-  if (!value) {
-    return '';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  const hasExplicitTime = /t\d{2}:\d{2}/i.test(value);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const dateText = `${date.getFullYear()}.${month}.${day}`;
-
-  if (!hasExplicitTime) {
-    return dateText;
-  }
-
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${dateText} ${hours}:${minutes}`;
+  return formatDateTimeDisplay(value);
 }

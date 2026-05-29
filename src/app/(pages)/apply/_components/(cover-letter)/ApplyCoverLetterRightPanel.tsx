@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { APPLY_COVER_LETTER_MAX_QUESTIONS } from '../../_constants/applyConstants';
+import { APPLY_COVER_LETTER_MAX_QUESTIONS, APPLY_COVER_LETTER_RIGHT_PANEL_PADDING } from '../../_constants/applyConstants';
 import {
   applyCoverLetterQuestionsMock,
   type ApplyCoverLetterQuestion,
@@ -71,8 +71,13 @@ export function ApplyCoverLetterRightPanel({
   };
 
   const activeQuestion = questions[activeIndex];
+  const canAddQuestion = questions.length < APPLY_COVER_LETTER_MAX_QUESTIONS;
 
   const handleAddQuestion = () => {
+    if (!canAddQuestion) {
+      return;
+    }
+
     setQuestions((prev) => {
       if (prev.length >= APPLY_COVER_LETTER_MAX_QUESTIONS) {
         return prev;
@@ -133,14 +138,19 @@ export function ApplyCoverLetterRightPanel({
   return (
     <section
       data-slot="cover-letter-right-panel"
-      className={cn('flex h-full min-h-0 w-full min-w-0 flex-col gap-6', className)}
+      className={cn(
+        'flex h-full min-h-0 w-full min-w-0 flex-col gap-6',
+        APPLY_COVER_LETTER_RIGHT_PANEL_PADDING,
+        className,
+      )}
     >
       <ApplyCoverLetterQuestionNav
-        className="mt-6 shrink-0"
+        className="shrink-0"
         questionCount={questions.length}
         activeIndex={activeIndex}
         onActiveIndexChange={setActiveIndex}
         onAddQuestion={handleAddQuestion}
+        canAddQuestion={canAddQuestion}
       />
 
       <ApplyCoverLetterQuestionEditor

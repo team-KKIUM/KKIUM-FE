@@ -1,8 +1,20 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 import type { CreateJdAiRequest, ParsedJdUrlResponse } from '@/app/api/apply/types';
+import {
+  APPLY_COVER_LETTER_MAX_QUESTIONS,
+  JOB_POSTING_BODY_MAX_LENGTH,
+  JOB_POSTING_COVER_QUESTION_MAX_LENGTH,
+  JOB_POSTING_MODAL_CONTENT_CLASS,
+} from '@/app/(pages)/apply/_constants/applyConstants';
+import { useApplyJobPostingStore } from '@/app/(pages)/apply/_stores/useApplyJobPostingStore';
+import {
+  limitJobPostingBodyText,
+  limitJobPostingCoverQuestionText,
+} from '@/app/(pages)/apply/_utils/limitJobPostingFieldText';
 import { Modal } from '@/components/common/Modal';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { type CalendarDateRange } from '@/components/common/RangeCalendar';
@@ -14,8 +26,6 @@ import {
 } from '@/hooks/apply/useApplyJobPostings';
 import { useJobPostingUrlField } from '@/hooks/apply/useJobPostingUrlField';
 import { trackEvent } from '@/lib/analytics';
-
-import { JOB_POSTING_MODAL_CONTENT_CLASS } from '@/app/(pages)/apply/_constants/applyConstants';
 
 import {
   ApplyAddJobPostingEditStep,
@@ -40,6 +50,25 @@ function formatJdDate(date: Date, time = '00:00') {
   nextDate.setHours(hours, minutes, 0, 0);
 
   return nextDate.toISOString();
+}
+
+function formatJobPostingPeriod(
+  periodRange: CalendarDateRange | null,
+  deadlineTime: string,
+  noRecruitmentPeriod: boolean,
+) {
+  if (noRecruitmentPeriod || !periodRange) {
+    return '상시 채용';
+  }
+
+  const formatDate = (date: Date) => {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}.${month}.${day}`;
+  };
+
+  const endTime = deadlineTime || '23:59';
+  return `${formatDate(periodRange.start)}~${formatDate(periodRange.end)} ${endTime}`;
 }
 
 function parseRecruitmentFieldOptions(value: string) {
@@ -80,7 +109,13 @@ function parseRecruitmentFieldOptions(value: string) {
   return options.length > 0 ? Array.from(new Set(options)) : [value.trim()].filter(Boolean);
 }
 
+function createEmptyCoverQuestions(): CoverQuestionRow[] {
+  return [{ id: 'cover-1', value: '' }];
+}
+
 export function ApplyAddJobPostingModal() {
+  const router = useRouter();
+  const setJobPosting = useApplyJobPostingStore((state) => state.setJobPosting);
   const { url, setUrl, validation, showError, markTouched, reset, maxLength } = useJobPostingUrlField();
   const parseJobPostingUrlMutation = useParseApplyJobPostingUrl();
   const parseJobPostingOcrMutation = useParseApplyJobPostingOcr();
@@ -93,9 +128,7 @@ export function ApplyAddJobPostingModal() {
   const [recruitmentFieldOptions, setRecruitmentFieldOptions] = useState<string[]>([]);
   const [postingBody, setPostingBody] = useState('');
   const coverRowIdRef = useRef(1);
-  const [coverQuestions, setCoverQuestions] = useState<CoverQuestionRow[]>([
-    { id: 'cover-1', value: '' },
-  ]);
+  const [coverQuestions, setCoverQuestions] = useState<CoverQuestionRow[]>(createEmptyCoverQuestions);
   const [periodRange, setPeriodRange] = useState<CalendarDateRange | null>(null);
   const [deadlineTime, setDeadlineTime] = useState('');
   const [noRecruitmentPeriod, setNoRecruitmentPeriod] = useState(false);
@@ -111,6 +144,19 @@ export function ApplyAddJobPostingModal() {
   const saveError =
     createJobPostingMutation.error instanceof Error ? createJobPostingMutation.error.message : null;
 
+  const resetEditFields = () => {
+    coverRowIdRef.current = 1;
+    setCoverQuestions(createEmptyCoverQuestions());
+    setPeriodRange(null);
+    setDeadlineTime('');
+    setNoRecruitmentPeriod(false);
+    setPostingTitle('');
+    setCompanyName('');
+    setRecruitmentField('');
+    setRecruitmentFieldOptions([]);
+    setPostingBody('');
+  };
+
   const applyParsedJobPosting = (data: ParsedJdUrlResponse) => {
     const startDate = parseLocalDate(data.startDate);
     const endDate = parseLocalDate(data.endDate);
@@ -121,16 +167,19 @@ export function ApplyAddJobPostingModal() {
     const parsedFieldOptions = parseRecruitmentFieldOptions(data.recruitmentField);
     setRecruitmentFieldOptions(parsedFieldOptions);
     setRecruitmentField(parsedFieldOptions[0] ?? data.recruitmentField);
-    setPostingBody(data.content);
+    setPostingBody(limitJobPostingBodyText(data.content ?? ''));
     setCoverQuestions(
       parsedQuestions.length > 0
-        ? parsedQuestions.map((question, index) => ({
+        ? parsedQuestions.slice(0, APPLY_COVER_LETTER_MAX_QUESTIONS).map((question, index) => ({
             id: `cover-${index + 1}`,
-            value: question,
+            value: limitJobPostingCoverQuestionText(question),
           }))
-        : [{ id: 'cover-1', value: '' }],
+        : createEmptyCoverQuestions(),
     );
-    coverRowIdRef.current = Math.max(parsedQuestions.length, 1);
+    coverRowIdRef.current = Math.max(
+      Math.min(parsedQuestions.length, APPLY_COVER_LETTER_MAX_QUESTIONS),
+      1,
+    );
 
     if (startDate && endDate) {
       setPeriodRange({ start: startDate, end: endDate });
@@ -147,20 +196,18 @@ export function ApplyAddJobPostingModal() {
   const resetForm = () => {
     reset();
     setStep('url');
-    coverRowIdRef.current = 1;
-    setCoverQuestions([{ id: 'cover-1', value: '' }]);
-    setPeriodRange(null);
-    setDeadlineTime('');
-    setNoRecruitmentPeriod(false);
-    setPostingTitle('');
-    setCompanyName('');
-    setRecruitmentField('');
-    setRecruitmentFieldOptions([]);
-    setPostingBody('');
+    resetEditFields();
     setSelectedImageFile(null);
     parseJobPostingUrlMutation.reset();
     parseJobPostingOcrMutation.reset();
     createJobPostingMutation.reset();
+  };
+
+  const handleRequestManual = () => {
+    resetEditFields();
+    setSelectedImageFile(null);
+    reset();
+    setStep('manual');
   };
 
   const buildCreateJdAiRequest = (): CreateJdAiRequest => ({
@@ -173,19 +220,27 @@ export function ApplyAddJobPostingModal() {
       !noRecruitmentPeriod && periodRange
         ? formatJdDate(periodRange.end, deadlineTime || '23:59')
         : '',
-    questions: coverQuestions.map((question) => question.value.trim()).filter(Boolean),
-    content: postingBody.trim(),
+    questions: coverQuestions
+      .map((question) => limitJobPostingCoverQuestionText(question.value.trim()))
+      .filter(Boolean)
+      .slice(0, APPLY_COVER_LETTER_MAX_QUESTIONS),
+    content: limitJobPostingBodyText(postingBody.trim()),
   });
+
+  const isWithinFieldLimits =
+    postingBody.length <= JOB_POSTING_BODY_MAX_LENGTH &&
+    coverQuestions.every((question) => question.value.length <= JOB_POSTING_COVER_QUESTION_MAX_LENGTH) &&
+    coverQuestions.length <= APPLY_COVER_LETTER_MAX_QUESTIONS;
 
   return (
     <Modal
       open={open}
       showCloseButton
       contentClassName={JOB_POSTING_MODAL_CONTENT_CLASS}
-      onOpenChange={(open) => {
-        setOpen(open);
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
 
-        if (!open) {
+        if (!nextOpen) {
           resetForm();
         }
       }}
@@ -196,104 +251,124 @@ export function ApplyAddJobPostingModal() {
       }
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {step === 'url' ? (
-        <ApplyAddJobPostingUrlStep
-          url={url}
-          setUrl={setUrl}
-          validation={validation}
-          showError={showError}
-          markTouched={markTouched}
-          maxLength={maxLength}
-          errorId={errorId}
-          onRequestManual={() => setStep('manual')}
-          canAnalyze={validation.ok}
-          isAnalyzing={parseJobPostingUrlMutation.isPending}
-          isOcrAnalyzing={parseJobPostingOcrMutation.isPending}
-          analyzeError={analyzeError}
-          onImageFileChange={setSelectedImageFile}
-          onAnalyze={() => {
-            if (selectedImageFile) {
-              parseJobPostingOcrMutation.mutate(selectedImageFile, {
-                onSuccess: ({ text }) => {
-                  setPostingBody(text);
-                  setStep('result');
+        {step === 'url' ? (
+          <ApplyAddJobPostingUrlStep
+            url={url}
+            setUrl={setUrl}
+            validation={validation}
+            showError={showError}
+            markTouched={markTouched}
+            maxLength={maxLength}
+            errorId={errorId}
+            onRequestManual={handleRequestManual}
+            canAnalyze={validation.ok}
+            isAnalyzing={parseJobPostingUrlMutation.isPending}
+            isOcrAnalyzing={parseJobPostingOcrMutation.isPending}
+            analyzeError={analyzeError}
+            onImageFileChange={setSelectedImageFile}
+            onAnalyze={() => {
+              if (selectedImageFile) {
+                parseJobPostingOcrMutation.mutate(selectedImageFile, {
+                  onSuccess: ({ text }) => {
+                    setPostingBody(limitJobPostingBodyText(text));
+                    setStep('result');
+                  },
+                });
+                return;
+              }
+
+              if (!validation.ok) {
+                markTouched();
+                return;
+              }
+
+              parseJobPostingUrlMutation.mutate(
+                { linkUrl: validation.value },
+                {
+                  onSuccess: applyParsedJobPosting,
+                },
+              );
+            }}
+          />
+        ) : (
+          <ApplyAddJobPostingEditStep
+            step={step}
+            onBack={() => setStep('url')}
+            onRequestManual={step === 'result' ? handleRequestManual : undefined}
+            postingTitle={postingTitle}
+            onPostingTitleChange={setPostingTitle}
+            companyName={companyName}
+            onCompanyNameChange={setCompanyName}
+            recruitmentField={recruitmentField}
+            recruitmentFieldOptions={recruitmentFieldOptions}
+            onRecruitmentFieldChange={setRecruitmentField}
+            postingBody={postingBody}
+            onPostingBodyChange={(value) => setPostingBody(limitJobPostingBodyText(value))}
+            periodRange={periodRange}
+            onPeriodRangeChange={setPeriodRange}
+            deadlineTime={deadlineTime}
+            onDeadlineTimeChange={setDeadlineTime}
+            noRecruitmentPeriod={noRecruitmentPeriod}
+            onNoRecruitmentPeriodChange={setNoRecruitmentPeriod}
+            coverQuestions={coverQuestions}
+            onCoverQuestionChange={(id, value) =>
+              setCoverQuestions((prev) =>
+                prev.map((row) =>
+                  row.id === id ? { ...row, value: limitJobPostingCoverQuestionText(value) } : row,
+                ),
+              )
+            }
+            onRemoveCoverQuestion={(id) =>
+              setCoverQuestions((prev) => prev.filter((row) => row.id !== id))
+            }
+            onAddCoverQuestion={() =>
+              setCoverQuestions((prev) => {
+                if (prev.length >= APPLY_COVER_LETTER_MAX_QUESTIONS) {
+                  return prev;
+                }
+
+                coverRowIdRef.current += 1;
+                return [...prev, { id: `cover-${coverRowIdRef.current}`, value: '' }];
+              })
+            }
+            isSaving={createJobPostingMutation.isPending}
+            saveError={saveError}
+            onSave={() => {
+              const hasRequiredTextFields =
+                postingTitle.trim().length > 0 &&
+                companyName.trim().length > 0 &&
+                recruitmentField.trim().length > 0 &&
+                postingBody.trim().length > 0;
+              const hasAllCoverQuestions =
+                coverQuestions.length > 0 &&
+                coverQuestions.every((question) => question.value.trim().length > 0);
+
+              if (!hasRequiredTextFields || !hasAllCoverQuestions || !isWithinFieldLimits) {
+                return;
+              }
+
+              const request = buildCreateJdAiRequest();
+
+              createJobPostingMutation.mutate(request, {
+                onSuccess: (response) => {
+                  const jdId = String(response.jdId);
+
+                  setJobPosting({
+                    jdId,
+                    title: request.postingTitle ?? '',
+                    companyName: request.companyName ?? '',
+                    jobField: request.recruitmentField ?? '',
+                    period: formatJobPostingPeriod(periodRange, deadlineTime, noRecruitmentPeriod),
+                  });
+
+                  resetForm();
+                  setOpen(false);
+                  router.push(`/apply?jdId=${encodeURIComponent(jdId)}`);
                 },
               });
-              return;
-            }
-
-            if (!validation.ok) {
-              markTouched();
-              return;
-            }
-
-            parseJobPostingUrlMutation.mutate(
-              { linkUrl: validation.value },
-              {
-                onSuccess: applyParsedJobPosting,
-              },
-            );
-          }}
-        />
-      ) : (
-        <ApplyAddJobPostingEditStep
-          step={step}
-          onBack={() => setStep('url')}
-          postingTitle={postingTitle}
-          onPostingTitleChange={setPostingTitle}
-          companyName={companyName}
-          onCompanyNameChange={setCompanyName}
-          recruitmentField={recruitmentField}
-          recruitmentFieldOptions={recruitmentFieldOptions}
-          onRecruitmentFieldChange={setRecruitmentField}
-          postingBody={postingBody}
-          onPostingBodyChange={setPostingBody}
-          periodRange={periodRange}
-          onPeriodRangeChange={setPeriodRange}
-          deadlineTime={deadlineTime}
-          onDeadlineTimeChange={setDeadlineTime}
-          noRecruitmentPeriod={noRecruitmentPeriod}
-          onNoRecruitmentPeriodChange={setNoRecruitmentPeriod}
-          coverQuestions={coverQuestions}
-          onCoverQuestionChange={(id, value) =>
-            setCoverQuestions((prev) => prev.map((r) => (r.id === id ? { ...r, value } : r)))
-          }
-          onRemoveCoverQuestion={(id) =>
-            setCoverQuestions((prev) => prev.filter((r) => r.id !== id))
-          }
-          onAddCoverQuestion={() =>
-            setCoverQuestions((prev) => {
-              coverRowIdRef.current += 1;
-              return [...prev, { id: `cover-${coverRowIdRef.current}`, value: '' }];
-            })
-          }
-          isSaving={createJobPostingMutation.isPending}
-          saveError={saveError}
-          onSave={() => {
-            const hasRequiredTextFields =
-              postingTitle.trim().length > 0 &&
-              companyName.trim().length > 0 &&
-              recruitmentField.trim().length > 0 &&
-              postingBody.trim().length > 0;
-            const hasAllCoverQuestions =
-              coverQuestions.length > 0 &&
-              coverQuestions.every((question) => question.value.trim().length > 0);
-            if (!hasRequiredTextFields || !hasAllCoverQuestions) {
-              return;
-            }
-
-            createJobPostingMutation.mutate(buildCreateJdAiRequest(), {
-              onSuccess: () => {
-                trackEvent('application_create', {
-                  source: 'apply_add_modal',
-                });
-                resetForm();
-                setOpen(false);
-              },
-            });
-          }}
-        />
-      )}
+            }}
+          />
+        )}
       </div>
     </Modal>
   );

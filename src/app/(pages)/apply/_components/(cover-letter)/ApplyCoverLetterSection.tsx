@@ -3,7 +3,16 @@
 import * as React from 'react';
 
 import { ResizableSplit } from '../ResizableSplit';
-import { APPLY_PAGE_HORIZONTAL_PADDING } from '../../_constants/applyConstants';
+import {
+  APPLY_COVER_LETTER_LEFT_PANEL_INSET,
+  APPLY_COVER_LETTER_RIGHT_PANEL_BG,
+  APPLY_COVER_LETTER_SECTION_EXTEND,
+  APPLY_COVER_LETTER_SPLIT_BLEED,
+} from '../../_constants/applyConstants';
+import {
+  APPLY_COVER_LETTER_SPLIT_MIN_LEFT_WIDTH,
+  APPLY_COVER_LETTER_SPLIT_MIN_RIGHT_WIDTH,
+} from '../../_constants/resizableSplitConstants';
 import {
   applyCoverLetterQuestionsMock,
   getCoverLetterQuestionDisplayText,
@@ -123,11 +132,23 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
 
   return (
     <>
-      <div className={cn('flex min-h-0 flex-1 flex-col', APPLY_PAGE_HORIZONTAL_PADDING)}>
+      <div
+        className={cn(
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-x-visible',
+          APPLY_COVER_LETTER_SECTION_EXTEND,
+        )}
+      >
         <ResizableSplit
-          className="min-h-0 flex-1"
+          className={cn('min-h-0 flex-1', APPLY_COVER_LETTER_SPLIT_BLEED)}
           separatorAriaLabel="자기소개서 작성 패널 너비 조절"
-          rightClassName="bg-background-w"
+          separatorClassName="-mt-px"
+          leftClassName="pt-3"
+          rightClassName={APPLY_COVER_LETTER_RIGHT_PANEL_BG}
+          layout={{
+            minLeftWidth: APPLY_COVER_LETTER_SPLIT_MIN_LEFT_WIDTH,
+            minRightWidth: APPLY_COVER_LETTER_SPLIT_MIN_RIGHT_WIDTH,
+            leftPanelInset: APPLY_COVER_LETTER_LEFT_PANEL_INSET,
+          }}
           left={
             <ApplyCoverLetterPanel
               selectedExperiences={activeQuestionSelectedExperiences}

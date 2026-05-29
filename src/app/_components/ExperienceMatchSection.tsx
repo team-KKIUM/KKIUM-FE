@@ -3,6 +3,10 @@
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { ChevronRightIcon } from '@/components/common/icons/ChevronRightIcon';
 import type { HomeTargetJd } from '@/app/api/home/types';
+import { HOME_DASHBOARD_CONTENT_CLASS } from '@/app/_constants/homeLayoutConstants';
+import { formatRecruitmentPeriod } from '@/app/_utils/formatRecruitmentPeriod';
+
+import { cn } from '@/lib/utils';
 
 import { ExperienceMatch } from './ExperienceMatch';
 import { NullComponent } from './NullComponent';
@@ -16,16 +20,11 @@ export interface TargetPostingSectionProps {
   onNextPosting: () => void;
   targetJd?: HomeTargetJd | null;
   applyHref?: string;
+  onEmptyCtaClick?: () => void;
 }
 
 const TARGET_POSTING_NAV_BUTTON_CLASS =
   'flex size-8 items-center justify-center rounded text-gray-800 outline-none hover:bg-gray-100 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-40';
-
-function formatRecruitmentPeriod(startDate: string, endDate: string) {
-  if (!startDate && !endDate) return '상시 채용';
-  if (startDate && endDate) return `${startDate} ~ ${endDate}`;
-  return startDate || endDate;
-}
 
 export function TargetPostingSection({
   hasMatchData,
@@ -36,10 +35,11 @@ export function TargetPostingSection({
   onNextPosting,
   targetJd,
   applyHref,
+  onEmptyCtaClick,
 }: TargetPostingSectionProps) {
   return (
     <div className="flex w-full min-w-0 flex-col items-stretch gap-2">
-      <div className="mx-auto inline-flex h-8 w-full max-w-[1048px] items-center justify-start gap-3">
+      <div className={cn('flex h-8 items-center justify-start gap-3', HOME_DASHBOARD_CONTENT_CLASS)}>
         <button
           type="button"
           disabled={!canGoPrev}
@@ -63,6 +63,7 @@ export function TargetPostingSection({
 
       {hasMatchData && targetJd ? (
         <ExperienceMatch
+          className="w-full"
           percent={targetJd.applicationFitScore}
           ctaHref={applyHref}
           companyName={targetJd.companyName}
@@ -72,7 +73,7 @@ export function TargetPostingSection({
           requiredCompetencies={targetJd.softSkills}
         />
       ) : (
-        <NullComponent className="mx-auto" />
+        <NullComponent className={HOME_DASHBOARD_CONTENT_CLASS} onCtaClick={onEmptyCtaClick} />
       )}
     </div>
   );

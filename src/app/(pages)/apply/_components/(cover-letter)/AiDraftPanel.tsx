@@ -72,7 +72,7 @@ export function ApplyCoverLetterAiDraftPanel({
           expanded && hasDraft ? 'max-h-72' : 'max-h-0',
         )}
       >
-        <div className="relative bg-mint-50 px-6 pt-12 pb-6">
+        <div className="relative bg-mint-50 pt-12 pr-15 pb-6 pl-9">
           <button
             type="button"
             aria-expanded={expanded}
@@ -113,13 +113,15 @@ export function ApplyCoverLetterAiDraftPanel({
           aria-label="AI 초안 펼치기"
           onClick={() => onExpandedChange(true)}
           className={cn(
-            'relative z-10 -mt-px flex h-9 w-full items-start justify-center border-t-0 bg-mint-50 outline-none transition-colors',
+            'relative z-10 flex h-9 w-full shrink-0 items-center justify-center bg-mint-50 text-gray-main outline-none',
             'focus-visible:shadow-focus-ring',
           )}
         >
-          <span className="absolute left-1/2 -top-4 flex h-5 w-28 -translate-x-1/2 items-center justify-center bg-mint-50 text-brand [clip-path:polygon(14%_0,86%_0,100%_100%,0_100%)]">
-            <ChevronUpIcon className="size-6" />
-          </span>
+          <span
+            aria-hidden
+            className="absolute bottom-full left-1/2 h-[11px] w-[7.5rem] -translate-x-1/2 bg-mint-50 [clip-path:polygon(10%_0,90%_0,100%_100%,0_100%)]"
+          />
+          <ChevronUpIcon className="size-5 shrink-0" aria-hidden />
         </button>
       )}
       <ToastMessage open={toastOpen} message="복사되었습니다" />

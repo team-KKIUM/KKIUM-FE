@@ -17,6 +17,7 @@ import {
   UNPARSEABLE_JD_URL_MESSAGE,
   updateJdResumeRequestSchema,
   saveResumeRequestSchema,
+  createJdResumeQuestionRequestSchema,
   createResumeAiDraftRequestSchema,
   createResumeAiDraftResponseSchema,
   resumeWritingGuideParamsSchema,
@@ -31,6 +32,7 @@ import {
   type ParseJdUrlRequest,
   type JdExperienceAnalysisResponse,
   type SaveResumeRequest,
+  type CreateJdResumeQuestionRequest,
   type UpdateJdResumeRequest,
   type UpdateJdOrderRequest,
   type UpdateJdTitleRequest,
@@ -106,6 +108,13 @@ export async function saveJdResume(jdId: JdId, request: SaveResumeRequest) {
   const response = await api.post<unknown>(`/api/v1/resume/${parsedJdId}`, parsedRequest);
 
   return jdMutationResponseSchema.parse(response);
+}
+
+export async function createJdResumeQuestion(jdId: JdId, request: CreateJdResumeQuestionRequest) {
+  const parsedJdId = parseJdId(jdId);
+  const parsedRequest = createJdResumeQuestionRequestSchema.parse(request);
+
+  await api.post<unknown>(`/api/v1/jd/${parsedJdId}/resume/questions`, parsedRequest);
 }
 
 export async function createJdResumeAiDraft(

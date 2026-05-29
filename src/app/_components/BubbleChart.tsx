@@ -157,12 +157,12 @@ export function BubbleChart({
     <section
       data-slot="bubble-chart"
       className={cn(
-        'inline-flex h-[336px] min-w-0 flex-col items-center justify-between overflow-hidden rounded-xl border border-gray-300 bg-white p-5',
+        'flex h-[336px] min-w-0 w-full flex-col items-stretch justify-between overflow-hidden rounded-xl border border-gray-300 bg-white px-4 py-5',
         className,
       )}
       {...props}
     >
-      <div className="inline-flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <h3 className="text-xl font-extrabold leading-7 text-black">{title}</h3>
         <div className="size-8" aria-hidden />
       </div>
@@ -172,7 +172,7 @@ export function BubbleChart({
           <ReactECharts option={option} style={{ width: '100%', height: '100%' }} opts={{ renderer: 'svg' }} />
         </div>
       ) : (
-        <NullBubble className="h-56 w-full" title={emptyTitle} description={emptyDescription} />
+        <NullBubble title={emptyTitle} description={emptyDescription} />
       )}
 
       <Button type="button" variant="line" size="default" onClick={onAddClick} leftIcon={<PlusIcon className="text-tertiary" />} className="w-full">
