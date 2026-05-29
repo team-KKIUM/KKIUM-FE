@@ -44,10 +44,20 @@ export function useApplyResumeAiDraft(
 
     const data = await queryClient.fetchQuery({
       queryKey,
-      queryFn: () =>
-        createJdResumeAiDraft(jdId!, questionId!, {
+      queryFn: async () => {
+        const nextData = await createJdResumeAiDraft(jdId!, questionId!, {
           experienceIds: parsedExperienceIds,
-        }),
+        });
+
+        if (nextData.draft.trim()) {
+          trackEvent('coverletter_create', {
+            source: 'cover_letter_ai_draft',
+            experience_count: parsedExperienceIds.length,
+          });
+        }
+
+        return nextData;
+      },
       ...APPLY_RESUME_CACHE_QUERY_OPTIONS,
     });
 
@@ -55,13 +65,6 @@ export function useApplyResumeAiDraft(
       queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
       refetchType: 'active',
     });
-
-    if (data.draft.trim()) {
-      trackEvent('coverletter_create', {
-        source: 'cover_letter_ai_draft',
-        experience_count: parsedExperienceIds.length,
-      });
-    }
 
     return data.draft;
   }, [canFetch, jdId, parsedExperienceIds, questionId, queryClient, queryKey]);
