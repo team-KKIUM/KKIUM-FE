@@ -17,6 +17,9 @@ type ApplyCoverLetterState = {
   setActiveQuestionIndex: (index: number) => void;
   setQuestionExperienceIds: (questionId: string, experienceIds: string[]) => void;
   removeQuestionExperienceId: (questionId: string, experienceId: string) => void;
+  setSelectedExperienceIdsByQuestion: (
+    selectedExperienceIdsByQuestion: SelectedExperienceIdsByQuestion,
+  ) => void;
 };
 
 export const useApplyCoverLetterStore = create<ApplyCoverLetterState>((set) => ({
@@ -41,4 +44,6 @@ export const useApplyCoverLetterStore = create<ApplyCoverLetterState>((set) => (
         ),
       },
     })),
+  setSelectedExperienceIdsByQuestion: (selectedExperienceIdsByQuestion) =>
+    set({ selectedExperienceIdsByQuestion }),
 }));
