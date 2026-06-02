@@ -85,7 +85,7 @@ export function removeExperienceFromOrderMap(
   experienceId: string,
 ): ExperienceOrderMap {
   return EXPERIENCE_ORDER_CATEGORIES.reduce<ExperienceOrderMap>((nextOrderMap, category) => {
-    nextOrderMap[category] = orderMap[category].filter((id) => id !== experienceId);
+    nextOrderMap[category] = (orderMap[category] ?? []).filter((id) => id !== experienceId);
     return nextOrderMap;
   }, createEmptyExperienceOrderMap());
 }
