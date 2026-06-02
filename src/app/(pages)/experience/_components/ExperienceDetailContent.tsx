@@ -5,25 +5,26 @@ import * as React from 'react';
 
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import { EditableTagGroup } from '@/app/(pages)/experience/_components/EditableTagGroup';
+import {
+  type BasicDetailKey,
+  type ExperienceDetailSaveValue as ExperienceDetailSaveValueType,
+  useExperienceDetailForm,
+} from '@/app/(pages)/experience/_hooks/useExperienceDetailForm';
 import { getExperienceCategoryMeta } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import {
   EXPERIENCE_FIELD_MAX_LENGTHS,
   getExperienceFieldMaxLength,
-  limitExperienceFieldText,
 } from '@/app/(pages)/experience/_utils/experienceFieldLimits';
-import { formatExperiencePeriod } from '@/app/(pages)/experience/_utils/formatExperiencePeriod';
-import { sanitizeNumberText } from '@/app/(pages)/experience/_utils/sanitizeNumberText';
 import { DetailInput } from '@/components/common/DetailInput';
 import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { CalendarIcon } from '@/components/common/icons/CalendarIcon';
 import { Tag } from '@/components/common/Tag';
-import {
-  type SingleMonthCalendarDateRange,
-  SingleMonthRangeCalendar,
-} from '@/components/common/SingleMonthRangeCalendar';
-import { type CalendarDateRange, RangeCalendar } from '@/components/common/RangeCalendar';
+import { SingleMonthRangeCalendar } from '@/components/common/SingleMonthRangeCalendar';
+import { RangeCalendar } from '@/components/common/RangeCalendar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+export type { ExperienceDetailSaveValue } from '@/app/(pages)/experience/_hooks/useExperienceDetailForm';
 
 const detailFields = [
   ['Situation', 'situation'],
@@ -34,26 +35,12 @@ const detailFields = [
 ] as const;
 const DETAIL_FIELD_MAX_LENGTH = 1000;
 
-type EditableTagGroupKey = 'skill' | 'competency';
-type BasicDetailKey = keyof ExperienceItem['basicDetail'];
-export type ExperienceDetailSaveValue = Pick<
-  ExperienceItem,
-  | 'title'
-  | 'description'
-  | 'basicDetail'
-  | 'detail'
-  | 'skillTags'
-  | 'competencyTags'
-  | 'startDate'
-  | 'endDate'
->;
-
 export interface ExperienceDetailContentProps extends React.ComponentProps<'div'> {
   experience: ExperienceItem;
   variant?: 'panel' | 'page';
   defaultEditing?: boolean;
   onEdit?: () => void;
-  onSave?: (experience: ExperienceDetailSaveValue) => Promise<void> | void;
+  onSave?: (experience: ExperienceDetailSaveValueType) => Promise<void> | void;
 }
 
 export function ExperienceDetailContent({
@@ -67,163 +54,41 @@ export function ExperienceDetailContent({
 }: ExperienceDetailContentProps) {
   const category = getExperienceCategoryMeta(experience.type);
   const isPage = variant === 'page';
-  const [title, setTitle] = React.useState(experience.title);
-  const [description, setDescription] = React.useState(experience.description);
-  const [detail, setDetail] = React.useState(experience.detail);
-  const [basicDetail, setBasicDetail] = React.useState(experience.basicDetail);
-  const [startDate, setStartDate] = React.useState(experience.startDate);
-  const [endDate, setEndDate] = React.useState(experience.endDate);
-  const [skillTags, setSkillTags] = React.useState(experience.skillTags);
-  const [competencyTags, setCompetencyTags] = React.useState(experience.competencyTags);
-  const [isEditing, setIsEditing] = React.useState(defaultEditing);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [editingTagGroup, setEditingTagGroup] = React.useState<EditableTagGroupKey | null>(null);
-  const [datePickerOpen, setDatePickerOpen] = React.useState(false);
-  const [datePickerTop, setDatePickerTop] = React.useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const datePickerRootRef = React.useRef<HTMLDivElement>(null);
-  const datePickerButtonRef = React.useRef<HTMLButtonElement>(null);
-  const previousExperienceIdRef = React.useRef(experience.id);
-
-  React.useEffect(() => {
-    const isSameExperience = previousExperienceIdRef.current === experience.id;
-
-    if (isSameExperience && isEditing) {
-      return;
-    }
-
-    previousExperienceIdRef.current = experience.id;
-    setTitle(experience.title);
-    setDescription(experience.description);
-    setDetail(experience.detail);
-    setBasicDetail(experience.basicDetail);
-    setStartDate(experience.startDate);
-    setEndDate(experience.endDate);
-    setSkillTags(experience.skillTags);
-    setCompetencyTags(experience.competencyTags);
-    setIsEditing(defaultEditing);
-    setIsSaving(false);
-    setEditingTagGroup(null);
-    setDatePickerOpen(false);
-    setDatePickerTop(null);
-  }, [
-    defaultEditing,
-    experience.basicDetail,
-    experience.competencyTags,
-    experience.description,
-    experience.detail,
-    experience.endDate,
-    experience.id,
-    experience.skillTags,
-    experience.startDate,
-    experience.title,
+  const {
+    title,
+    description,
+    detail,
+    basicDetail,
+    skillTags,
+    competencyTags,
     isEditing,
-  ]);
-
-  React.useEffect(() => {
-    if (!datePickerOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const root = datePickerRootRef.current;
-
-      if (root && !root.contains(event.target as Node)) {
-        setDatePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown, true);
-    };
-  }, [datePickerOpen]);
-
-  React.useEffect(() => {
-    if (!datePickerOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setDatePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [datePickerOpen]);
-
-  const selectedDateRange = React.useMemo<
-    CalendarDateRange | SingleMonthCalendarDateRange | null
-  >(() => {
-    const parsedStartDate = parseDateValue(startDate);
-    const parsedEndDate = parseDateValue(endDate);
-
-    if (!parsedStartDate || !parsedEndDate) return null;
-
-    return { start: parsedStartDate, end: parsedEndDate };
-  }, [endDate, startDate]);
-
-  const handleDetailChange =
-    (key: keyof ExperienceItem['detail']): React.ChangeEventHandler<HTMLTextAreaElement> =>
-    (event) => {
-      setDetail((prev) => ({
-        ...prev,
-        [key]: event.target.value,
-      }));
-    };
-
-  const updateBasicDetail = (key: BasicDetailKey, value: string) => {
-    const nextValue = getSanitizedBasicDetailValue(key, value);
-
-    setBasicDetail((currentBasicDetail) => ({
-      ...currentBasicDetail,
-      [key]: nextValue,
-    }));
-  };
-
-  const handleEditClick = () => {
-    onEdit?.();
-    setIsEditing(true);
-    setEditingTagGroup(null);
-  };
-
-  const handleSaveEdit = async () => {
-    try {
-      setIsSaving(true);
-      await onSave?.({
-        title,
-        description,
-        detail,
-        basicDetail,
-        startDate,
-        endDate,
-        skillTags,
-        competencyTags,
-      });
-      setIsEditing(false);
-      setEditingTagGroup(null);
-      setDatePickerOpen(false);
-      setDatePickerTop(null);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '경험 수정 중 오류가 발생했습니다.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const toggleDatePicker = () => {
-    const buttonRect = datePickerButtonRef.current?.getBoundingClientRect();
-
-    if (buttonRect) {
-      setDatePickerTop(buttonRect.bottom + 8);
-    }
-
-    setDatePickerOpen((open) => !open);
-  };
-
-  const periodLabel = formatExperiencePeriod(startDate, endDate);
+    isSaving,
+    editingTagGroup,
+    datePickerOpen,
+    datePickerTop,
+    errorMessage,
+    datePickerRootRef,
+    datePickerButtonRef,
+    selectedDateRange,
+    periodLabel,
+    setSkillTags,
+    setCompetencyTags,
+    setEditingTagGroup,
+    updateTitle,
+    updateDescription,
+    handleDetailChange,
+    updateBasicDetail,
+    handleEditClick,
+    handleSaveEdit,
+    toggleDatePicker,
+    handleDateRangeChange,
+    handleErrorDialogOpenChange,
+  } = useExperienceDetailForm({
+    experience,
+    defaultEditing,
+    onEdit,
+    onSave,
+  });
   const detailInfoItems = React.useMemo(
     () => getDetailInfoItems(experience.type, basicDetail, periodLabel),
     [basicDetail, experience.type, periodLabel],
@@ -244,12 +109,12 @@ export function ExperienceDetailContent({
                 ariaLabel="제목"
                 maxLength={EXPERIENCE_FIELD_MAX_LENGTHS.title}
                 className={cn('text-strong', isPage ? 'heading-2-bold' : 'title-1-bold')}
-                onChange={(value) => setTitle(limitExperienceFieldText('title', value))}
+                onChange={updateTitle}
               />
             ) : (
               <h3
                 className={cn(
-                  'w-full min-w-0 wrap-break-word leading-[1.48] text-strong',
+                  'w-full min-w-0 leading-[1.48] wrap-break-word text-strong',
                   isPage ? 'heading-2-bold' : 'title-1-bold',
                 )}
               >
@@ -262,14 +127,12 @@ export function ExperienceDetailContent({
                 ariaLabel="한 줄 설명"
                 maxLength={EXPERIENCE_FIELD_MAX_LENGTHS.description}
                 className={cn('text-quaternary', isPage ? 'body-1-bold' : 'body-3-regular')}
-                onChange={(value) =>
-                  setDescription(limitExperienceFieldText('description', value))
-                }
+                onChange={updateDescription}
               />
             ) : (
               <p
                 className={cn(
-                  'w-full min-w-0 wrap-break-word leading-[1.48] text-quaternary',
+                  'w-full min-w-0 leading-[1.48] wrap-break-word text-quaternary',
                   isPage ? 'body-1-bold' : 'body-3-regular',
                 )}
               >
@@ -354,25 +217,13 @@ export function ExperienceDetailContent({
                             <RangeCalendar
                               value={selectedDateRange}
                               defaultVisibleMonth={selectedDateRange?.start ?? new Date()}
-                              onChange={(nextRange) => {
-                                if (!nextRange) return;
-
-                                setStartDate(formatDateValue(nextRange.start));
-                                setEndDate(formatDateValue(nextRange.end));
-                                setDatePickerOpen(false);
-                              }}
+                              onChange={handleDateRangeChange}
                             />
                           ) : (
                             <SingleMonthRangeCalendar
                               value={selectedDateRange}
                               defaultVisibleMonth={selectedDateRange?.start ?? new Date()}
-                              onChange={(nextRange) => {
-                                if (!nextRange) return;
-
-                                setStartDate(formatDateValue(nextRange.start));
-                                setEndDate(formatDateValue(nextRange.end));
-                                setDatePickerOpen(false);
-                              }}
+                              onChange={handleDateRangeChange}
                             />
                           )}
                         </div>
@@ -388,7 +239,9 @@ export function ExperienceDetailContent({
                       onChange={(value) => updateBasicDetail(item.name, value)}
                     />
                   ) : (
-                    !isEditing && <span>{item.type === 'field' ? item.displayValue : item.value}</span>
+                    !isEditing && (
+                      <span>{item.type === 'field' ? item.displayValue : item.value}</span>
+                    )
                   )}
                 </dd>
               </div>
@@ -426,7 +279,7 @@ export function ExperienceDetailContent({
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-1">
               {skillTags.map((tag, index) => (
-                <Tag key={`skill-${tag}-${index}`} tone="skill" size='large'>
+                <Tag key={`skill-${tag}-${index}`} tone="skill" size="large">
                   {tag}
                 </Tag>
               ))}
@@ -434,11 +287,7 @@ export function ExperienceDetailContent({
 
             <div className="flex flex-wrap gap-1">
               {competencyTags.map((tag, index) => (
-                <Tag
-                  key={`competency-${tag}-${index}`}
-                  tone="competency"
-                  size='large'
-                >
+                <Tag key={`competency-${tag}-${index}`} tone="competency" size="large">
                   {tag}
                 </Tag>
               ))}
@@ -458,7 +307,9 @@ export function ExperienceDetailContent({
           return (
             <div key={key} className="flex w-full flex-col gap-1.5">
               <div className="flex items-end gap-3 px-2">
-                <h3 className={cn('font-bold text-primary', isPage ? 'title-2-bold' : 'body-2-bold')}>
+                <h3
+                  className={cn('font-bold text-primary', isPage ? 'title-2-bold' : 'body-2-bold')}
+                >
                   {label}
                 </h3>
                 <p className={cn('caption-bold', isMaxLength ? 'text-danger' : 'text-quaternary')}>
@@ -478,22 +329,10 @@ export function ExperienceDetailContent({
       <ErrorDialog
         open={errorMessage.length > 0}
         message={errorMessage}
-        onOpenChange={(open) => {
-          if (!open) {
-            setErrorMessage('');
-          }
-        }}
+        onOpenChange={handleErrorDialogOpenChange}
       />
     </div>
   );
-}
-
-function getSanitizedBasicDetailValue(key: BasicDetailKey, value: string) {
-  if (key === 'teamNum' || key === 'contributionRate') {
-    return sanitizeNumberText(value, 100);
-  }
-
-  return limitExperienceFieldText(key, value);
 }
 
 type EditableDetailInfoItem =
@@ -624,20 +463,4 @@ function InlineTextArea({
       onChange={(event) => onChange(event.currentTarget.value.slice(0, maxLength))}
     />
   );
-}
-
-function parseDateValue(value: string) {
-  if (!value) return null;
-
-  const date = new Date(`${value}T00:00:00`);
-
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function formatDateValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 }
