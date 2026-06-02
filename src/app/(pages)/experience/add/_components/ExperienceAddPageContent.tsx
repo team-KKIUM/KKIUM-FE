@@ -1,16 +1,15 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ExperienceAddMaterialModalView } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import { ExperienceAddProgress } from '@/app/(pages)/experience/add/_components/ExperienceAddProgress';
 import { ExperienceAddStepContent } from '@/app/(pages)/experience/add/_components/ExperienceAddStepContent';
+import { useExperienceAddActions } from '@/app/(pages)/experience/add/_hooks/useExperienceAddActions';
 import { useExperienceAddForm } from '@/app/(pages)/experience/add/_hooks/useExperienceAddForm';
 import { useExperienceAddMaterials } from '@/app/(pages)/experience/add/_hooks/useExperienceAddMaterials';
 import { useExperienceAddStep } from '@/app/(pages)/experience/add/_hooks/useExperienceAddStep';
-import { mapExperienceAddFormToCreateRequest } from '@/app/(pages)/experience/add/_utils/mapExperienceAddFormToCreateRequest';
-import { clearExperienceAddPdfDraft } from '@/app/(pages)/experience/add/_utils/experienceAddPdfDraftStorage';
 import {
   isBasicInfoComplete,
   isCoreInfoComplete,
@@ -19,13 +18,6 @@ import {
 import { ErrorDialog } from '@/components/common/ErrorDialog';
 import { ChevronLeftIcon } from '@/components/common/icons/ChevronLeftIcon';
 import { Button } from '@/components/ui/button';
-import {
-  useAnalyzeExperienceMaterials,
-  useAnalyzeExperienceNotion,
-  useAnalyzeExperiencePdf,
-  useCreateExperience,
-} from '@/hooks/experience/useExperienceAdd';
-import { trackEvent } from '@/lib/analytics';
 
 export function ExperienceAddPageContent() {
   const router = useRouter();
@@ -56,17 +48,18 @@ export function ExperienceAddPageContent() {
     applyAnalyzeResponse,
     resetForm,
   } = useExperienceAddForm();
-  const [errorMessage, setErrorMessage] = useState('');
-  const isProcessingRef = useRef(false);
-  const analyzePdfMutation = useAnalyzeExperiencePdf();
-  const analyzeNotionMutation = useAnalyzeExperienceNotion();
-  const analyzeMaterialsMutation = useAnalyzeExperienceMaterials();
-  const createExperienceMutation = useCreateExperience();
-  const isAnalyzing =
-    analyzePdfMutation.isPending ||
-    analyzeNotionMutation.isPending ||
-    analyzeMaterialsMutation.isPending;
-  const isSaving = createExperienceMutation.isPending;
+  const { isAnalyzing, isSaving, errorMessage, setErrorMessage, handleNextStep } =
+    useExperienceAddActions({
+      currentStepIndex,
+      isResultStep,
+      materials,
+      basicInfo,
+      coreInfo,
+      resultInfo,
+      applyAnalyzeResponse,
+      resetForm,
+      goToNextStep,
+    });
   const isNextStepDisabled =
     isAnalyzing ||
     isSaving ||
@@ -79,73 +72,6 @@ export function ExperienceAddPageContent() {
 
     router.replace('/experience/add', { scroll: false });
   }, [isNotionConnected, router]);
-
-  const goNextStep = async () => {
-    if (isProcessingRef.current) return;
-
-    isProcessingRef.current = true;
-
-    try {
-      if (currentStepIndex === 0) {
-        const pdfMaterial = materials.find((material) => material.type === 'pdf');
-        const notionMaterial = materials.find((material) => material.type === 'notion');
-
-        try {
-          if (pdfMaterial && notionMaterial) {
-            const analyzeResponse = await analyzeMaterialsMutation.mutateAsync({
-              file: pdfMaterial?.file,
-              pageId: notionMaterial?.pageId,
-            });
-
-            applyAnalyzeResponse(analyzeResponse);
-            void clearExperienceAddPdfDraft().catch((error: unknown) => {
-              console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
-            });
-          } else if (pdfMaterial) {
-            const analyzeResponse = await analyzePdfMutation.mutateAsync(pdfMaterial.file);
-            applyAnalyzeResponse(analyzeResponse);
-            void clearExperienceAddPdfDraft().catch((error: unknown) => {
-              console.warn('PDF 임시 저장 데이터를 삭제하지 못했습니다.', error);
-            });
-          } else if (notionMaterial) {
-            const analyzeResponse = await analyzeNotionMutation.mutateAsync(notionMaterial.pageId);
-            applyAnalyzeResponse(analyzeResponse);
-          } else {
-            resetForm();
-          }
-        } catch (error) {
-          setErrorMessage(
-            error instanceof Error ? error.message : '자료 분석 중 오류가 발생했습니다.',
-          );
-          return;
-        }
-      }
-
-      if (isResultStep) {
-        try {
-          await createExperienceMutation.mutateAsync(
-            mapExperienceAddFormToCreateRequest({
-              basicInfo,
-              coreInfo,
-              resultInfo,
-            }),
-          );
-          trackEvent('experience_create', {
-            source: 'experience_add',
-          });
-        } catch (error) {
-          setErrorMessage(
-            error instanceof Error ? error.message : '경험 저장 중 오류가 발생했습니다.',
-          );
-          return;
-        }
-      }
-
-      goToNextStep();
-    } finally {
-      isProcessingRef.current = false;
-    }
-  };
 
   return (
     <div className="flex min-h-dvh flex-col py-5">
@@ -194,7 +120,12 @@ export function ExperienceAddPageContent() {
               이전
             </Button>
           )}
-          <Button type="button" className="w-40" disabled={isNextStepDisabled} onClick={goNextStep}>
+          <Button
+            type="button"
+            className="w-40"
+            disabled={isNextStepDisabled}
+            onClick={handleNextStep}
+          >
             {isResultStep ? '저장하기' : '다음'}
           </Button>
         </footer>
