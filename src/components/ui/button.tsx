@@ -5,7 +5,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'group/button inline-flex shrink-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none enabled:cursor-pointer focus-visible:shadow-focus-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-6',
+  'group/button inline-flex shrink-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none enabled:cursor-pointer focus-visible:shadow-focus-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -22,10 +22,10 @@ const buttonVariants = cva(
         ai: 'bg-[radial-gradient(ellipse_62.5%_47.95%_at_51.28%_107.81%,var(--color-brand)_0%,var(--color-mint-300)_100%)] text-on-fill shadow-[inset_0px_0px_4.2px_1px_rgba(255,255,255,0.4)] hover:brightness-105 focus-visible:brightness-105 disabled:opacity-60',
       },
       size: {
-        default: 'body-1-bold h-10 px-3 py-1',
+        default: 'body-1-bold h-11 px-3 py-1',
         medium: 'body-1-bold h-9 px-2 py-0.5',
         small: 'body-3-bold h-8 px-2 py-1',
-        icon: 'size-10 p-0',
+        icon: 'size-10 p-0 [&_svg]:size-6',
       },
     },
     defaultVariants: {
@@ -95,8 +95,8 @@ function ButtonIcon({
     <span
       data-slot="button-icon"
       className={cn(
-        'flex shrink-0 items-center justify-center [&_svg]:size-6',
-        size === 'small' ? 'size-6' : 'size-8',
+        'flex shrink-0 items-center justify-center',
+        size === 'medium' || size === 'small' ? 'size-5 [&_svg]:size-5' : 'size-6 [&_svg]:size-6',
       )}
     >
       {children}
