@@ -200,6 +200,10 @@ function isSidebarItemActive(item: SidebarItem, pathname: string | null) {
     return pathname === '/';
   }
 
+  if (item.href === '/apply/list') {
+    return pathname === '/apply' || pathname.startsWith('/apply/');
+  }
+
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 

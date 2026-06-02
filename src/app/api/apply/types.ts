@@ -356,8 +356,9 @@ function withNormalizedAnalysisStatus<T extends z.ZodRawShape>(shape: T) {
 }
 
 export const jdAnalysisResponseSchema = withNormalizedAnalysisStatus({
-  jdInfo: jdInfoSchema.optional(),
-  matchResult: jdMatchResultSchema.optional(),
+  // Pending일때 null 허용 
+  jdInfo: jdInfoSchema.nullish(),
+  matchResult: jdMatchResultSchema.nullish(),
 });
 
 export type JdAnalysisResponse = z.infer<typeof jdAnalysisResponseSchema>;

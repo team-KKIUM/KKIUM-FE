@@ -1,8 +1,9 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ErrorDialog } from '@/components/common/ErrorDialog';
 
 import {
   APPLY_PAGE_HORIZONTAL_PADDING,
@@ -16,6 +17,8 @@ import { ApplyCoverLetterSection } from './_components/(cover-letter)/ApplyCover
 import { useApplyCoverLetterStore } from './_stores/useApplyCoverLetterStore';
 import { ResizableSplit } from './_components/ResizableSplit';
 import { ToastMessage } from '@/components/ui/ToastMessage';
+import { isJdAnalysisInProgress } from '@/app/api/apply/jdAnalysisStatus';
+import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
 import { useSaveApplyCoverLetter } from '@/hooks/apply/useApplyJobPostings';
 import { cn } from '@/lib/utils';
@@ -24,6 +27,7 @@ export default function ApplyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jdId = searchParams.get('jdid') ?? searchParams.get('jdId');
+  const { analysisStatus, isAnalysisLoading } = useApplyJobAnalysis(jdId);
   const { jobPosting } = useApplyJobPostingSnapshot(jdId);
   const [activeTab, setActiveTab] = useState<ApplyJobTab>('analysis');
   const questions = useApplyCoverLetterStore((state) => state.questions);
@@ -38,6 +42,18 @@ export default function ApplyPage() {
   const [saveToastOpen, setSaveToastOpen] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState('저장되었습니다');
   const saveToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingAnalysisTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingAnalysisTimeoutFiredRef = useRef(false);
+  const [pendingAnalysisDialogOpen, setPendingAnalysisDialogOpen] = useState(false);
+
+  const clearPendingAnalysisTimer = () => {
+    if (!pendingAnalysisTimerRef.current) {
+      return;
+    }
+
+    clearTimeout(pendingAnalysisTimerRef.current);
+    pendingAnalysisTimerRef.current = null;
+  };
 
   const showSaveToast = (message: string) => {
     setSaveToastMessage(message);
@@ -79,6 +95,48 @@ export default function ApplyPage() {
       },
     );
   };
+
+  const handlePendingAnalysisDialogOpenChange = (open: boolean) => {
+    setPendingAnalysisDialogOpen(open);
+    if (!open) {
+      router.push('/apply/list');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearPendingAnalysisTimer();
+    };
+  }, []);
+
+  useEffect(() => {
+    pendingAnalysisTimeoutFiredRef.current = false;
+    clearPendingAnalysisTimer();
+  }, [jdId]);
+
+  useEffect(() => {
+    const shouldWatchPending =
+      jdId != null &&
+      activeTab === 'analysis' &&
+      isAnalysisLoading &&
+      isJdAnalysisInProgress(analysisStatus) &&
+      !pendingAnalysisTimeoutFiredRef.current;
+
+    if (!shouldWatchPending) {
+      clearPendingAnalysisTimer();
+      return;
+    }
+
+    if (pendingAnalysisTimerRef.current) {
+      return;
+    }
+
+    pendingAnalysisTimerRef.current = setTimeout(() => {
+      pendingAnalysisTimeoutFiredRef.current = true;
+      pendingAnalysisTimerRef.current = null;
+      setPendingAnalysisDialogOpen(true);
+    }, 30_000);
+  }, [activeTab, analysisStatus, isAnalysisLoading, jdId]);
 
   return (
     <section
@@ -127,6 +185,19 @@ export default function ApplyPage() {
       </div>
 
       <ToastMessage open={saveToastOpen} message={saveToastMessage} />
+      <ErrorDialog
+        open={pendingAnalysisDialogOpen}
+        title="분석 지연"
+        message={
+          <>
+            <span className="whitespace-nowrap">공고 분석 중 문제가 발생했어요.</span>
+            <br />
+            <span className="whitespace-nowrap">잠시 후 다시 시도해주세요.</span>
+          </>
+        }
+        confirmLabel="확인"
+        onOpenChange={handlePendingAnalysisDialogOpenChange}
+      />
     </section>
   );
 }
