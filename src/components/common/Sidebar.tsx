@@ -28,7 +28,6 @@ export type SidebarItem = {
   label: string;
   icon: SidebarMenuItemIcon;
   href: string;
-  isActive?: (pathname: string) => boolean;
 };
 
 export interface SidebarProps {
@@ -50,7 +49,6 @@ const sidebarItems: SidebarItem[] = [
     label: '지원 관리',
     icon: ApplicationIcon,
     href: '/apply/list',
-    isActive: (pathname) => pathname === '/apply' || pathname.startsWith('/apply/'),
   },
 ];
 
@@ -198,12 +196,12 @@ function isSidebarItemActive(item: SidebarItem, pathname: string | null) {
     return false;
   }
 
-  if (item.isActive) {
-    return item.isActive(pathname);
-  }
-
   if (item.href === '/') {
     return pathname === '/';
+  }
+
+  if (item.href === '/apply/list') {
+    return pathname === '/apply' || pathname.startsWith('/apply/');
   }
 
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
