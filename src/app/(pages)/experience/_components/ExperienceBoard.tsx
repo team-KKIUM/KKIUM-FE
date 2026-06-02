@@ -11,6 +11,7 @@ import { ExperienceCategoryTabs } from '@/app/(pages)/experience/_components/Exp
 import type { ExperienceDetailSaveValue } from '@/app/(pages)/experience/_components/ExperienceDetailContent';
 import { ExperienceDetailPanel } from '@/app/(pages)/experience/_components/ExperienceDetailPanel';
 import { useExperienceBoardInfiniteScroll } from '@/app/(pages)/experience/_hooks/useExperienceBoardInfiniteScroll';
+import { useExperienceBoardListState } from '@/app/(pages)/experience/_hooks/useExperienceBoardListState';
 import { useExperienceBoardSelection } from '@/app/(pages)/experience/_hooks/useExperienceBoardSelection';
 import {
   mapExperienceCardToItem,
@@ -99,8 +100,6 @@ export function ExperienceBoard({
     () => data?.pages.flatMap((page) => page.experiences.map(mapExperienceCardToItem)) ?? [],
     [data],
   );
-  const keywordKey = keyword ?? '';
-  const [emptyAllKeywordKey, setEmptyAllKeywordKey] = React.useState<string | null>(null);
   const [experienceOrderMap, setExperienceOrderMap] = React.useState(() =>
     createExperienceOrderMap(experiences),
   );
@@ -143,23 +142,6 @@ export function ExperienceBoard({
     });
   }, [experiences, selectedCategory]);
 
-  React.useEffect(() => {
-    if (selectedCategory !== 'all' || !data || isError || isPending) {
-      return;
-    }
-
-    const isAllExperienceEmpty =
-      !hasNextPage && data.pages.every((page) => page.experiences.length === 0);
-
-    setEmptyAllKeywordKey((currentKeywordKey) => {
-      if (isAllExperienceEmpty) {
-        return keywordKey;
-      }
-
-      return currentKeywordKey === keywordKey ? null : currentKeywordKey;
-    });
-  }, [data, hasNextPage, isError, isPending, keywordKey, selectedCategory]);
-
   const experienceMap = React.useMemo(
     () => new Map(experiences.map((experience) => [experience.id, experience])),
     [experiences],
@@ -178,6 +160,17 @@ export function ExperienceBoard({
     isFetchingNextPage,
     observedItemCount: filteredExperiences.length,
   });
+  const { showListLoading } = useExperienceBoardListState({
+    data,
+    hasNextPage,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    isPending,
+    keyword,
+    selectedCategory,
+    filteredExperienceCount: filteredExperiences.length,
+  });
 
   const selectedExperience = filteredExperiences.find(
     (experience) => experience.id === selectedExperienceId,
@@ -187,13 +180,6 @@ export function ExperienceBoard({
     panelOpen &&
     Boolean(selectedExperienceId) &&
     (isDetailPending || (isDetailFetching && !selectedExperienceDetailMatches));
-  const showKnownAllEmpty =
-    selectedCategory !== 'all' &&
-    emptyAllKeywordKey === keywordKey &&
-    filteredExperiences.length === 0;
-  const showListLoading =
-    !showKnownAllEmpty &&
-    (isPending || (isFetching && !isFetchingNextPage && filteredExperiences.length === 0));
 
   const handleExperienceReorder = React.useCallback(
     (orderedExperienceIds: string[]) => {
