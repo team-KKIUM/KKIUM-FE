@@ -18,16 +18,17 @@ export function useExperienceBoardDetail({
   panelOpen,
 }: UseExperienceBoardDetailParams) {
   const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
+  const selectedExperienceDetailId = isValidExperienceId(selectedExperienceNumericId)
+    ? selectedExperienceNumericId
+    : null;
   const {
     data: selectedExperienceDetail,
     isError: isDetailError,
     isFetching: isDetailFetching,
     isPending: isDetailPending,
-  } = useExperienceDetail(
-    Number.isFinite(selectedExperienceNumericId) ? selectedExperienceNumericId : null,
-  );
+  } = useExperienceDetail(selectedExperienceDetailId);
   const selectedExperienceDetailMatches =
-    selectedExperienceDetail?.experienceId === selectedExperienceNumericId;
+    selectedExperienceDetail?.experienceId === selectedExperienceDetailId;
   const selectedExperienceDetailItem = React.useMemo(
     () =>
       selectedExperienceDetail && selectedExperienceDetailMatches
@@ -39,7 +40,7 @@ export function useExperienceBoardDetail({
   const panelExperience = selectedExperienceDetailItem ?? selectedExperience;
   const showDetailLoading =
     panelOpen &&
-    Boolean(selectedExperienceId) &&
+    selectedExperienceDetailId !== null &&
     (isDetailPending || (isDetailFetching && !selectedExperienceDetailMatches));
 
   return {
@@ -47,4 +48,8 @@ export function useExperienceBoardDetail({
     isDetailError,
     showDetailLoading,
   };
+}
+
+function isValidExperienceId(experienceId: number | null) {
+  return experienceId !== null && Number.isInteger(experienceId) && experienceId > 0;
 }
