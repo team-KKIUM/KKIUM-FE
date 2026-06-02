@@ -3,7 +3,11 @@
 import { useCallback, useRef, useState } from 'react';
 
 import type { ExperienceAnalyzeResponse } from '@/app/api/experience/add/types';
-import type { ExperienceMaterial } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
+import type {
+  ExperienceMaterial,
+  NotionMaterial,
+  PdfMaterial,
+} from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import type {
   ExperienceAddBasicInfoForm,
   ExperienceAddCoreInfoForm,
@@ -61,8 +65,12 @@ export function useExperienceAddActions({
 
     try {
       if (currentStepIndex === 0) {
-        const pdfMaterial = materials.find((material) => material.type === 'pdf');
-        const notionMaterial = materials.find((material) => material.type === 'notion');
+        const pdfMaterial = materials.find(
+          (material): material is PdfMaterial => material.type === 'pdf',
+        );
+        const notionMaterial = materials.find(
+          (material): material is NotionMaterial => material.type === 'notion',
+        );
 
         try {
           if (pdfMaterial && notionMaterial) {
