@@ -11,6 +11,7 @@ import type { CalendarDateRange } from '@/components/common/RangeCalendar';
 import type { SingleMonthCalendarDateRange } from '@/components/common/SingleMonthRangeCalendar';
 
 type EditableTagGroupKey = 'skill' | 'competency';
+type DateRangeChangeValue = Partial<CalendarDateRange | SingleMonthCalendarDateRange> | null;
 export type { BasicDetailKey } from '@/app/(pages)/experience/_utils/experienceDetailInfoItems';
 export type ExperienceDetailSaveValue = Pick<
   ExperienceItem,
@@ -212,16 +213,13 @@ export function useExperienceDetailForm({
     setDatePickerOpen((open) => !open);
   }, []);
 
-  const handleDateRangeChange = React.useCallback(
-    (nextRange: CalendarDateRange | SingleMonthCalendarDateRange | null) => {
-      if (!nextRange) return;
+  const handleDateRangeChange = React.useCallback((nextRange: DateRangeChangeValue) => {
+    if (!isCompleteDateRange(nextRange)) return;
 
-      setStartDate(formatDateValue(nextRange.start));
-      setEndDate(formatDateValue(nextRange.end));
-      setDatePickerOpen(false);
-    },
-    [],
-  );
+    setStartDate(formatDateValue(nextRange.start));
+    setEndDate(formatDateValue(nextRange.end));
+    setDatePickerOpen(false);
+  }, []);
 
   const handleErrorDialogOpenChange = React.useCallback((open: boolean) => {
     if (!open) {
@@ -283,4 +281,14 @@ function formatDateValue(date: Date) {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+}
+
+function isCompleteDateRange(
+  range: DateRangeChangeValue,
+): range is CalendarDateRange | SingleMonthCalendarDateRange {
+  return isValidDate(range?.start) && isValidDate(range?.end);
+}
+
+function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !Number.isNaN(value.getTime());
 }
