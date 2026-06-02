@@ -10,6 +10,7 @@ import type { ExperienceCategory } from '@/app/(pages)/experience/_components/Ex
 import { ExperienceCategoryTabs } from '@/app/(pages)/experience/_components/ExperienceCategoryTabs';
 import type { ExperienceDetailSaveValue } from '@/app/(pages)/experience/_components/ExperienceDetailContent';
 import { ExperienceDetailPanel } from '@/app/(pages)/experience/_components/ExperienceDetailPanel';
+import { useExperienceBoardInfiniteScroll } from '@/app/(pages)/experience/_hooks/useExperienceBoardInfiniteScroll';
 import { useExperienceBoardSelection } from '@/app/(pages)/experience/_hooks/useExperienceBoardSelection';
 import {
   mapExperienceCardToItem,
@@ -107,7 +108,6 @@ export function ExperienceBoard({
     null,
   );
   const [errorMessage, setErrorMessage] = React.useState('');
-  const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const selectedExperienceNumericId = selectedExperienceId ? Number(selectedExperienceId) : null;
   const {
     data: selectedExperienceDetail,
@@ -172,29 +172,12 @@ export function ExperienceBoard({
         .filter((experience): experience is ExperienceItem => Boolean(experience)),
     [experienceMap, experienceOrderMap, selectedCategory],
   );
-
-  React.useEffect(() => {
-    const loadMoreElement = loadMoreRef.current;
-
-    if (!loadMoreElement || !hasNextPage || isFetchingNextPage) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          void fetchNextPage();
-        }
-      },
-      { rootMargin: '240px 0px' },
-    );
-
-    observer.observe(loadMoreElement);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [fetchNextPage, filteredExperiences.length, hasNextPage, isFetchingNextPage]);
+  const { loadMoreRef } = useExperienceBoardInfiniteScroll({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    observedItemCount: filteredExperiences.length,
+  });
 
   const selectedExperience = filteredExperiences.find(
     (experience) => experience.id === selectedExperienceId,
