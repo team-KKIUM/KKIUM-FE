@@ -15,6 +15,14 @@ import {
   mapExperienceCardToItem,
   mapExperienceDetailToItem,
 } from '@/app/(pages)/experience/_utils/mapExperienceResponse';
+import {
+  areExperienceOrderMapsEqual,
+  createExperienceOrderMap,
+  EXPERIENCE_ORDER_CATEGORIES,
+  parseOrderedExperienceIds,
+  removeExperienceFromOrderMap,
+  syncExperienceOrderMap,
+} from '@/app/(pages)/experience/_utils/experienceOrder';
 import { mapExperienceItemToUpdateRequest } from '@/app/(pages)/experience/_utils/mapExperienceItemToUpdateRequest';
 import type { PieceType } from '@/app/api/experience/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -35,9 +43,6 @@ export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
   keyword?: string;
 }
 
-type ExperienceOrderMap = Record<ExperienceCategory, string[]>;
-
-const sortableCategories: ExperienceCategory[] = ['all', 'activity', 'career', 'education', 'etc'];
 const orderPieceTypeByCategory: Record<ExperienceCategory, PieceType> = {
   all: 'ALL',
   activity: 'ACTIVITY',
@@ -45,7 +50,10 @@ const orderPieceTypeByCategory: Record<ExperienceCategory, PieceType> = {
   education: 'EDUCATION',
   etc: 'ETC',
 };
-const filterPieceTypeByCategory: Record<Exclude<ExperienceCategory, 'all'>, Exclude<PieceType, 'ALL'>> = {
+const filterPieceTypeByCategory: Record<
+  Exclude<ExperienceCategory, 'all'>,
+  Exclude<PieceType, 'ALL'>
+> = {
   activity: 'ACTIVITY',
   career: 'CAREER',
   education: 'EDUCATION',
@@ -53,7 +61,7 @@ const filterPieceTypeByCategory: Record<Exclude<ExperienceCategory, 'all'>, Excl
 };
 
 function isExperienceCategory(category: string | null): category is ExperienceCategory {
-  return sortableCategories.includes(category as ExperienceCategory);
+  return EXPERIENCE_ORDER_CATEGORIES.includes(category as ExperienceCategory);
 }
 
 export function ExperienceBoard({
@@ -99,8 +107,9 @@ export function ExperienceBoard({
     createExperienceOrderMap(experiences),
   );
   const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
-  const [deleteTargetExperience, setDeleteTargetExperience] =
-    React.useState<ExperienceItem | null>(null);
+  const [deleteTargetExperience, setDeleteTargetExperience] = React.useState<ExperienceItem | null>(
+    null,
+  );
   const [errorMessage, setErrorMessage] = React.useState('');
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
@@ -296,13 +305,9 @@ export function ExperienceBoard({
   const handleExperienceReorder = React.useCallback(
     (orderedExperienceIds: string[]) => {
       const previousOrderIds = experienceOrderMap[selectedCategory];
-      const parsedExperienceIds = orderedExperienceIds.map(Number);
+      const parsedExperienceIds = parseOrderedExperienceIds(orderedExperienceIds);
 
-      if (
-        parsedExperienceIds.some(
-          (experienceId) => !Number.isInteger(experienceId) || experienceId <= 0,
-        )
-      ) {
+      if (!parsedExperienceIds) {
         return;
       }
 
@@ -349,11 +354,14 @@ export function ExperienceBoard({
     setDeleteTargetExperience(experience);
   }, []);
 
-  const handleDeleteDialogOpenChange = React.useCallback((open: boolean) => {
-    if (!open && !deleteExperienceMutation.isPending) {
-      setDeleteTargetExperience(null);
-    }
-  }, [deleteExperienceMutation.isPending]);
+  const handleDeleteDialogOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (!open && !deleteExperienceMutation.isPending) {
+        setDeleteTargetExperience(null);
+      }
+    },
+    [deleteExperienceMutation.isPending],
+  );
 
   const handleExperienceDeleteConfirm = React.useCallback(
     async (experience: ExperienceItem) => {
@@ -369,12 +377,7 @@ export function ExperienceBoard({
         await deleteExperienceMutation.mutateAsync(experienceId);
 
         setExperienceOrderMap((currentOrderMap) =>
-          sortableCategories.reduce<ExperienceOrderMap>((nextOrderMap, category) => {
-            nextOrderMap[category] = currentOrderMap[category].filter(
-              (id) => id !== experience.id,
-            );
-            return nextOrderMap;
-          }, {} as ExperienceOrderMap),
+          removeExperienceFromOrderMap(currentOrderMap, experience.id),
         );
 
         if (selectedExperienceId === experience.id) {
@@ -388,7 +391,9 @@ export function ExperienceBoard({
           router.replace('/experience', { scroll: false });
         }
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : '경험 삭제 중 오류가 발생했습니다.');
+        setErrorMessage(
+          error instanceof Error ? error.message : '경험 삭제 중 오류가 발생했습니다.',
+        );
       } finally {
         setDeleteTargetExperience(null);
       }
@@ -532,64 +537,5 @@ export function ExperienceBoard({
         }}
       />
     </section>
-  );
-}
-
-function areStringArraysEqual(source: string[], target: string[]) {
-  return source.length === target.length && source.every((item, index) => item === target[index]);
-}
-
-function createExperienceOrderMap(experiences: ExperienceItem[]): ExperienceOrderMap {
-  return {
-    all: experiences.map((experience) => experience.id),
-    activity: getExperienceIdsByCategory(experiences, 'activity'),
-    career: getExperienceIdsByCategory(experiences, 'career'),
-    education: getExperienceIdsByCategory(experiences, 'education'),
-    etc: getExperienceIdsByCategory(experiences, 'etc'),
-  };
-}
-
-function syncExperienceOrderMap(
-  currentOrderMap: ExperienceOrderMap,
-  experiences: ExperienceItem[],
-  syncedCategory: ExperienceCategory,
-): ExperienceOrderMap {
-  const defaultOrderMap = createExperienceOrderMap(experiences);
-
-  if (syncedCategory === 'all') {
-    return defaultOrderMap;
-  }
-
-  return sortableCategories.reduce<ExperienceOrderMap>((nextOrderMap, category) => {
-    if (category === syncedCategory) {
-      nextOrderMap[category] = defaultOrderMap[category];
-      return nextOrderMap;
-    }
-
-    const nextIds = defaultOrderMap[category];
-    const nextIdSet = new Set(nextIds);
-    const currentIds = currentOrderMap[category] ?? [];
-    const currentIdSet = new Set(currentIds);
-    const preservedIds = currentIds.filter((id) => nextIdSet.has(id));
-    const addedIds = nextIds.filter((id) => !currentIdSet.has(id));
-
-    nextOrderMap[category] = [...preservedIds, ...addedIds];
-
-    return nextOrderMap;
-  }, {} as ExperienceOrderMap);
-}
-
-function getExperienceIdsByCategory(
-  experiences: ExperienceItem[],
-  category: Exclude<ExperienceCategory, 'all'>,
-) {
-  return experiences
-    .filter((experience) => experience.type === category)
-    .map((experience) => experience.id);
-}
-
-function areExperienceOrderMapsEqual(source: ExperienceOrderMap, target: ExperienceOrderMap) {
-  return sortableCategories.every((category) =>
-    areStringArraysEqual(source[category], target[category]),
   );
 }
