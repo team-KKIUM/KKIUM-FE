@@ -28,6 +28,7 @@ export type SidebarItem = {
   label: string;
   icon: SidebarMenuItemIcon;
   href: string;
+  isActive?: (pathname: string) => boolean;
 };
 
 export interface SidebarProps {
@@ -49,6 +50,7 @@ const sidebarItems: SidebarItem[] = [
     label: '지원 관리',
     icon: ApplicationIcon,
     href: '/apply/list',
+    isActive: (pathname) => pathname === '/apply' || pathname.startsWith('/apply/'),
   },
 ];
 
@@ -194,6 +196,10 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
 function isSidebarItemActive(item: SidebarItem, pathname: string | null) {
   if (!pathname) {
     return false;
+  }
+
+  if (item.isActive) {
+    return item.isActive(pathname);
   }
 
   if (item.href === '/') {
