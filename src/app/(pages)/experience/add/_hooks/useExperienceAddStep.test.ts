@@ -10,7 +10,11 @@ import { useExperienceAddStep } from './useExperienceAddStep';
 
 describe('useExperienceAddStep', () => {
   beforeEach(() => {
-    window.scrollTo = jest.fn();
+    jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   test('starts at upload step with initial flags', () => {
