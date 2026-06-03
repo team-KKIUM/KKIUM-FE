@@ -12,6 +12,7 @@ phases:
 
   build:
     commands:
+      - pnpm test:unit
       - pnpm build
 
 artifacts:
