@@ -4,7 +4,6 @@ on:
   schedule:
     # 매일 KST 00:00 (UTC 전날 15:00)에 실행
     - cron: '0 15 * * *'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,10 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -26,7 +24,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin dev
+          git fetch origin
+
+          git checkout main
 
           git merge origin/dev --no-ff --no-edit -m "chore: main 최신화[scheduled]"
 
