@@ -7,6 +7,19 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   serverExternalPackages: ['@lottiefiles/dotlottie-react', '@lottiefiles/dotlottie-web'],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
