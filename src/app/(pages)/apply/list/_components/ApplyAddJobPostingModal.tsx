@@ -3,12 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
-import type { CreateJdAiRequest, ParsedJdUrlResponse } from '@/app/api/apply/types';
+import {
+  normalizeJobPostingAnalyzeErrorMessage,
+  type CreateJdAiRequest,
+  type ParsedJdUrlResponse,
+} from '@/app/api/apply/types';
 import {
   APPLY_COVER_LETTER_MAX_QUESTIONS,
   JOB_POSTING_BODY_MAX_LENGTH,
   JOB_POSTING_COVER_QUESTION_MAX_LENGTH,
   JOB_POSTING_MODAL_CONTENT_CLASS,
+  JOB_POSTING_MODAL_URL_STEP_CONTENT_CLASS,
 } from '@/app/(pages)/apply/_constants/applyConstants';
 import { useApplyJobPostingStore } from '@/app/(pages)/apply/_stores/useApplyJobPostingStore';
 import {
@@ -25,6 +30,7 @@ import {
   useParseApplyJobPostingUrl,
 } from '@/hooks/apply/useApplyJobPostings';
 import { useJobPostingUrlField } from '@/hooks/apply/useJobPostingUrlField';
+import { cn } from '@/lib/utils';
 
 import {
   ApplyAddJobPostingEditStep,
@@ -134,12 +140,8 @@ export function ApplyAddJobPostingModal() {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const errorId = 'apply-job-posting-url-error';
   const analyzeError =
-    (parseJobPostingUrlMutation.error instanceof Error
-      ? parseJobPostingUrlMutation.error.message
-      : null) ??
-    (parseJobPostingOcrMutation.error instanceof Error
-      ? parseJobPostingOcrMutation.error.message
-      : null);
+    normalizeJobPostingAnalyzeErrorMessage(parseJobPostingUrlMutation.error) ??
+    normalizeJobPostingAnalyzeErrorMessage(parseJobPostingOcrMutation.error);
   const saveError =
     createJobPostingMutation.error instanceof Error ? createJobPostingMutation.error.message : null;
 
@@ -235,7 +237,9 @@ export function ApplyAddJobPostingModal() {
     <Modal
       open={open}
       showCloseButton
-      contentClassName={JOB_POSTING_MODAL_CONTENT_CLASS}
+      contentClassName={
+        step === 'url' ? JOB_POSTING_MODAL_URL_STEP_CONTENT_CLASS : JOB_POSTING_MODAL_CONTENT_CLASS
+      }
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
 
@@ -249,7 +253,13 @@ export function ApplyAddJobPostingModal() {
         </Button>
       }
     >
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div
+        className={cn(
+          step === 'url'
+            ? 'flex flex-col'
+            : 'flex min-h-0 flex-1 flex-col overflow-hidden',
+        )}
+      >
         {step === 'url' ? (
           <ApplyAddJobPostingUrlStep
             url={url}

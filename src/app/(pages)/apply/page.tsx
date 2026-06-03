@@ -7,8 +7,7 @@ import { ErrorDialog } from '@/components/common/ErrorDialog';
 
 import {
   APPLY_PAGE_HORIZONTAL_PADDING,
-  APPLY_TAB_STROKE_ANALYSIS,
-  APPLY_TAB_STROKE_COVER_LETTER,
+  APPLY_TAB_STROKE,
 } from './_constants/applyConstants';
 import { ApplyAnalysis } from './_components/(analysis)/ApplyAnalysis';
 import { ApplyJobHeader, type ApplyJobTab } from './_components/(analysis)/ApplyJobHeader';
@@ -140,7 +139,7 @@ export default function ApplyPage() {
 
   return (
     <section
-      className={cn('flex w-full flex-col min-h-[calc(100dvh-30px)]')}
+      className={cn('flex w-full min-h-[calc(100dvh-30px)] flex-col [scrollbar-gutter:stable]')}
     >
       <div
         className={cn(
@@ -162,10 +161,7 @@ export default function ApplyPage() {
 
         <div
           aria-hidden
-          className={cn(
-            'shrink-0 border-b border-border-bold',
-            activeTab === 'cover-letter' ? APPLY_TAB_STROKE_COVER_LETTER : APPLY_TAB_STROKE_ANALYSIS,
-          )}
+          className={cn('shrink-0 border-b border-border-bold', APPLY_TAB_STROKE)}
         />
 
         {activeTab === 'analysis' ? (

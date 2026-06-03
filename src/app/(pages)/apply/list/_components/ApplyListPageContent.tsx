@@ -26,21 +26,19 @@ function ApplyListPageRouteContent() {
   }
 
   return (
-    <section className="w-full">
-      <div className="flex w-full min-w-0 max-w-[1560px] flex-col gap-5">
-        <h1 className="max-w-[687px] text-2xl font-extrabold leading-9 text-gray-main">지원 관리</h1>
+    <section className="flex min-h-[calc(100vh-32px)] w-full flex-col">
+      <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-[30px]">
+        <h1 className="text-2xl font-extrabold text-strong">지원 관리</h1>
 
-        <div className="flex w-full min-w-0 items-center">
+        <div className="flex w-full items-center justify-between gap-5">
           <SearchBar
             placeholder="공고명, 기업명, 모집 분야를 검색해주세요"
-            className="h-11 w-[551px]"
+            className="w-full max-w-[551px]"
             value={keyword}
             onChange={(event) => setKeyword(event.currentTarget.value)}
             onClear={() => setKeyword('')}
           />
-          <div className="ml-auto shrink-0">
-            <ApplyAddJobPostingModal />
-          </div>
+          <ApplyAddJobPostingModal />
         </div>
 
         <ApplyListSection keyword={debouncedKeyword} initialSelectedJdId={selectedJdId} />

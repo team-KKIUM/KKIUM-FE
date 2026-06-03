@@ -132,7 +132,7 @@ export function ApplyCard({
       tabIndex={isInteractive ? 0 : undefined}
       role={isInteractive ? 'button' : undefined}
       className={cn(
-        'flex min-h-60 w-full max-w-[520px] flex-col justify-between gap-7 overflow-hidden rounded-xl border border-border-default bg-background-w px-5 py-7',
+        'flex min-h-60 w-full flex-col justify-between gap-7 overflow-hidden rounded-xl border border-border-default bg-background-w px-5 py-7',
         selected &&
           'shadow-[0px_0px_0px_3px_rgba(114,224,206,1.00)] outline-1 -outline-offset-1 outline-border-default',
         isInteractive &&

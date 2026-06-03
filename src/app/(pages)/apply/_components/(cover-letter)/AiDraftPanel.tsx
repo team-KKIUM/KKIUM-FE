@@ -68,7 +68,7 @@ export function ApplyCoverLetterAiDraftPanel({
     >
       <div
         className={cn(
-          'overflow-hidden transition-[max-height] duration-300 ease-out',
+          'overflow-hidden',
           expanded && hasDraft ? 'max-h-72' : 'max-h-0',
         )}
       >

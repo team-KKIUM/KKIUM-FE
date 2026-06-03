@@ -2,22 +2,17 @@
 
 import { useEffect, useState } from 'react';
 
-import { getAccessTokenFromSession } from '@/app/_utils/authFetch';
+import {
+  hasApplyApiAccess,
+  resolveApplyAccessToken,
+} from '@/app/(pages)/apply/_utils/applyApiAuth';
 
 function readApplyAccessToken() {
   if (typeof window === 'undefined') {
     return null;
   }
 
-  return getAccessTokenFromSession();
-}
-
-export function resolveApplyAccessToken(): string | null {
-  return getAccessTokenFromSession();
-}
-
-export function hasApplyApiAccess(): boolean {
-  return getAccessTokenFromSession() != null;
+  return resolveApplyAccessToken();
 }
 
 export function useApplyAccessToken() {
@@ -46,3 +41,5 @@ export function useHasApplyApiAccess() {
   const accessToken = useApplyAccessToken();
   return accessToken != null;
 }
+
+export { hasApplyApiAccess, resolveApplyAccessToken };

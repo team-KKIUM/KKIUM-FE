@@ -122,7 +122,36 @@ async function syncCreatedQuestionsFromResume(
   return { updatedQuestions, updatedExperienceIdsByQuestion };
 }
 
-async function createMissingResumeQuestions(
+export async function createCoverLetterQuestionOnServer(
+  jdId: JdId,
+  question: ApplyCoverLetterQuestion,
+  questions: ApplyCoverLetterQuestion[],
+  selectedExperienceIdsByQuestion: SelectedExperienceIdsByQuestion,
+) {
+  if (getJdQuestionIdFromCoverLetterQuestion(question) != null) {
+    return { updatedQuestions: questions, updatedExperienceIdsByQuestion: selectedExperienceIdsByQuestion };
+  }
+
+  const content = getCoverLetterQuestionDisplayText(question).trim();
+
+  if (!content) {
+    return { updatedQuestions: questions, updatedExperienceIdsByQuestion: selectedExperienceIdsByQuestion };
+  }
+
+  const knownQuestionIds = collectKnownQuestionIds(questions);
+
+  await createJdResumeQuestion(jdId, { content });
+
+  return syncCreatedQuestionsFromResume(
+    jdId,
+    questions,
+    selectedExperienceIdsByQuestion,
+    [question],
+    knownQuestionIds,
+  );
+}
+
+export async function ensureCoverLetterQuestionsOnServer(
   jdId: JdId,
   questions: ApplyCoverLetterQuestion[],
   selectedExperienceIdsByQuestion: SelectedExperienceIdsByQuestion,
@@ -160,17 +189,12 @@ export async function saveApplyCoverLetter(
   questions: ApplyCoverLetterQuestion[],
   selectedExperienceIdsByQuestion: SelectedExperienceIdsByQuestion,
 ): Promise<SaveApplyCoverLetterResult> {
-  const { updatedQuestions, updatedExperienceIdsByQuestion } = await createMissingResumeQuestions(
-    jdId,
-    questions,
-    selectedExperienceIdsByQuestion,
-  );
-  const request = buildSaveResumeRequest(updatedQuestions, updatedExperienceIdsByQuestion);
+  const request = buildSaveResumeRequest(questions, selectedExperienceIdsByQuestion);
 
   if (request.answers.length === 0) {
     return {
-      updatedQuestions,
-      updatedExperienceIdsByQuestion,
+      updatedQuestions: questions,
+      updatedExperienceIdsByQuestion: selectedExperienceIdsByQuestion,
       saved: false,
     };
   }
@@ -178,8 +202,8 @@ export async function saveApplyCoverLetter(
   await saveJdResume(jdId, request);
 
   return {
-    updatedQuestions,
-    updatedExperienceIdsByQuestion,
+    updatedQuestions: questions,
+    updatedExperienceIdsByQuestion: selectedExperienceIdsByQuestion,
     saved: true,
   };
 }

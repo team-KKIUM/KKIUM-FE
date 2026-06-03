@@ -16,6 +16,7 @@ import {
 import {
   applyCoverLetterQuestionsMock,
   getCoverLetterQuestionDisplayText,
+  type ApplyCoverLetterQuestion,
 } from '../../_constants/applyMockData';
 import { useApplyCoverLetterStore } from '../../_stores/useApplyCoverLetterStore';
 import { getJdQuestionIdFromCoverLetterQuestion } from '../../_utils/buildSaveResumeRequest';
@@ -27,6 +28,7 @@ import { ApplyCoverLetterPanel } from './ApplyCoverLetterPanel';
 import { ApplyCoverLetterRightPanel } from './ApplyCoverLetterRightPanel';
 import {
   useApplyJobPostingResume,
+  useCreateApplyResumeQuestion,
   useDeleteApplyResumeQuestion,
   useUpdateApplyResumeQuestion,
 } from '@/hooks/apply/useApplyJobPostings';
@@ -57,8 +59,12 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
   );
   const resumeQuery = useApplyJobPostingResume(jdId, jdId != null);
   const deleteQuestionMutation = useDeleteApplyResumeQuestion();
+  const createQuestionMutation = useCreateApplyResumeQuestion();
   const updateQuestionMutation = useUpdateApplyResumeQuestion();
+  const isCommittingQuestionTitle =
+    createQuestionMutation.isPending || updateQuestionMutation.isPending;
   const [experienceModalOpen, setExperienceModalOpen] = React.useState(false);
+  const [isPreparingExperienceModal, setIsPreparingExperienceModal] = React.useState(false);
   const initializedQuestionJdIdsRef = React.useRef<Set<string>>(new Set());
 
   const activeQuestion = questions[activeQuestionIndex];
@@ -123,6 +129,47 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
     [activeQuestion, questionExperiencesQuery.data, selectedExperienceIdsByQuestion],
   );
 
+  const handleSelectExperienceClick = async () => {
+    if (!activeQuestion || jdId == null || isPreparingExperienceModal) {
+      return;
+    }
+
+    let nextQuestions = questions;
+    let nextSelectedExperienceIdsByQuestion = selectedExperienceIdsByQuestion;
+
+    if (getJdQuestionIdFromCoverLetterQuestion(activeQuestion) == null) {
+      setIsPreparingExperienceModal(true);
+
+      try {
+        const nextQuestion = {
+          ...activeQuestion,
+          title: getCoverLetterQuestionDisplayText(activeQuestion),
+        };
+        const synced = await createQuestionMutation.mutateAsync({
+          jdId,
+          question: nextQuestion,
+          questions,
+          selectedExperienceIdsByQuestion,
+        });
+        nextQuestions = synced.updatedQuestions;
+        nextSelectedExperienceIdsByQuestion = synced.updatedExperienceIdsByQuestion;
+        setQuestions(nextQuestions);
+        setSelectedExperienceIdsByQuestion(nextSelectedExperienceIdsByQuestion);
+      } catch {
+        return;
+      } finally {
+        setIsPreparingExperienceModal(false);
+      }
+    }
+
+    const syncedActiveQuestion = nextQuestions[activeQuestionIndex];
+    if (getJdQuestionIdFromCoverLetterQuestion(syncedActiveQuestion) == null) {
+      return;
+    }
+
+    setExperienceModalOpen(true);
+  };
+
   const handleRemoveSelectedExperience = (experienceId: string) => {
     if (!activeQuestion) {
       return;
@@ -142,7 +189,7 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
   const canDeleteQuestion = questions.length > 1;
 
   const handleCommitActiveQuestionTitle = async (content: string) => {
-    if (!activeQuestion || updateQuestionMutation.isPending) {
+    if (!activeQuestion || isCommittingQuestionTitle) {
       return;
     }
 
@@ -154,18 +201,35 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
     const targetQuestionId = activeQuestion.id;
     const jdQuestionId = getJdQuestionIdFromCoverLetterQuestion(activeQuestion);
     const previousTitle = activeQuestion.title;
-
-    setQuestions(
-      questions.map((question) =>
-        question.id === targetQuestionId ? { ...question, title: trimmedContent } : question,
-      ),
+    const previousPrompt = activeQuestion.prompt;
+    const nextQuestion: ApplyCoverLetterQuestion = {
+      ...activeQuestion,
+      title: trimmedContent,
+      prompt: trimmedContent,
+    };
+    const nextQuestions = questions.map((question) =>
+      question.id === targetQuestionId ? nextQuestion : question,
     );
 
-    if (jdId == null || jdQuestionId == null) {
+    setQuestions(nextQuestions);
+
+    if (jdId == null) {
       return;
     }
 
     try {
+      if (jdQuestionId == null) {
+        const synced = await createQuestionMutation.mutateAsync({
+          jdId,
+          question: nextQuestion,
+          questions: nextQuestions,
+          selectedExperienceIdsByQuestion,
+        });
+        setQuestions(synced.updatedQuestions);
+        setSelectedExperienceIdsByQuestion(synced.updatedExperienceIdsByQuestion);
+        return;
+      }
+
       await updateQuestionMutation.mutateAsync({
         jdId,
         questionId: jdQuestionId,
@@ -183,7 +247,9 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
 
       setQuestions(
         currentQuestions.map((question) =>
-          question.id === targetQuestionId ? { ...question, title: previousTitle } : question,
+          question.id === targetQuestionId
+            ? { ...question, title: previousTitle, prompt: previousPrompt }
+            : question,
         ),
       );
     }
@@ -268,7 +334,9 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
             <ApplyCoverLetterPanel
               selectedExperiences={activeQuestionSelectedExperiences}
               onSelectedExperienceRemove={handleRemoveSelectedExperience}
-              onSelectExperienceClick={() => setExperienceModalOpen(true)}
+              onSelectExperienceClick={() => {
+                void handleSelectExperienceClick();
+              }}
               writingGuide={writingGuideQuery.data}
               isWritingGuideLoading={writingGuideQuery.isFetching}
               isWritingGuideError={writingGuideQuery.isError}
@@ -288,7 +356,7 @@ export function ApplyCoverLetterSection({ jdId }: ApplyCoverLetterSectionProps) 
               onDeleteQuestion={() => {
                 void handleDeleteActiveQuestion();
               }}
-              isUpdatingQuestionTitle={updateQuestionMutation.isPending}
+              isUpdatingQuestionTitle={isCommittingQuestionTitle}
               onCommitQuestionTitle={(title) => {
                 void handleCommitActiveQuestionTitle(title);
               }}

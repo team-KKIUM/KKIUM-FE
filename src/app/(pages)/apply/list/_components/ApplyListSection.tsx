@@ -289,7 +289,7 @@ export function ApplyListSection({ keyword, initialSelectedJdId }: ApplyListSect
   if (isPending) {
     return (
       <div
-        className="flex h-[823px] w-full flex-col items-center justify-center gap-3"
+        className="flex flex-1 items-center justify-center gap-3"
         aria-live="polite"
         aria-label="공고 목록 로딩 중"
       >
@@ -301,27 +301,29 @@ export function ApplyListSection({ keyword, initialSelectedJdId }: ApplyListSect
 
   if (isError) {
     return (
-      <EmptyState
-        className="h-[823px] w-full py-64"
-        illustrationLabel="공고 목록 조회 실패"
-        title="공고 목록을 불러오지 못했어요"
-        description="잠시 후 다시 시도해주세요."
-      />
+      <div className="flex flex-1 items-center justify-center">
+        <EmptyState
+          illustrationLabel="공고 목록 조회 실패"
+          title="공고 목록을 불러오지 못했어요"
+          description="잠시 후 다시 시도해주세요."
+        />
+      </div>
     );
   }
 
   if (orderedCards.length === 0) {
     return (
-      <EmptyState
-        className="h-[823px] w-full py-64"
-        illustrationLabel={keyword ? '검색 결과 없음' : '등록된 공고 없음'}
-        title={keyword ? '검색 결과가 없어요' : '아직 생성된 공고가 없어요'}
-        description={
-          keyword
-            ? '다른 검색어로 다시 검색해보세요.'
-            : '공고를 추가해 파일에 끼워넣어볼까요?'
-        }
-      />
+      <div className="flex flex-1 items-center justify-center">
+        <EmptyState
+          illustrationLabel={keyword ? '검색 결과 없음' : '등록된 공고 없음'}
+          title={keyword ? '검색 결과가 없어요' : '아직 생성된 공고가 없어요'}
+          description={
+            keyword
+              ? '다른 검색어로 다시 검색해보세요.'
+              : '공고를 추가해 파일에 끼워넣어볼까요?'
+          }
+        />
+      </div>
     );
   }
 

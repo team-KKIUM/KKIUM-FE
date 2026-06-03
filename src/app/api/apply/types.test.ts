@@ -2,6 +2,7 @@ import {
   UNPARSEABLE_JD_URL_MESSAGE,
   assertParseableJdUrlResponse,
   jdAnalysisResponseSchema,
+  normalizeJobPostingAnalyzeErrorMessage,
   updateJdResumeQuestionRequestSchema,
 } from './types';
 
@@ -24,6 +25,21 @@ describe('assertParseableJdUrlResponse', () => {
         content: '',
       }),
     ).toThrow(UNPARSEABLE_JD_URL_MESSAGE);
+  });
+});
+
+describe('normalizeJobPostingAnalyzeErrorMessage', () => {
+  test('maps content null zod error payload to user-friendly message', () => {
+    const zodErrorMessage =
+      '[ { "expected": "string", "code": "invalid_type", "path": [ "content" ], "message": "Invalid input: expected string, received null" } ]';
+
+    expect(normalizeJobPostingAnalyzeErrorMessage(new Error(zodErrorMessage))).toBe(
+      UNPARSEABLE_JD_URL_MESSAGE,
+    );
+  });
+
+  test('returns null when error is absent', () => {
+    expect(normalizeJobPostingAnalyzeErrorMessage(null)).toBeNull();
   });
 });
 

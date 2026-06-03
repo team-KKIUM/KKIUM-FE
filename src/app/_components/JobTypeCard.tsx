@@ -41,11 +41,11 @@ export function JobTypeCard({
       <div className="absolute inset-x-0 top-[238px] h-28 overflow-hidden bg-background-w px-5">
         <div className="absolute left-5 top-3 right-5 inline-flex flex-col items-start justify-start gap-1.5">
           <h4 className="text-lg font-bold leading-7 text-background-b">나의 역량 강점</h4>
-          <div className="inline-flex w-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
+          <div className="flex w-full flex-wrap items-center gap-1">
             {strengths.map((strength) => (
               <span
                 key={strength}
-                className="shrink-0 rounded bg-mint-50 px-2.5 py-0.5 text-sm font-bold leading-5 text-success"
+                className="rounded bg-mint-50 px-2 py-0.5 text-xs font-bold leading-5 text-success"
               >
                 {strength}
               </span>

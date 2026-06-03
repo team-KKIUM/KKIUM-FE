@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import { Tag } from '@/components/common/Tag';
 import { ExperienceMatchGauge } from '@/app/_components/ExperienceMatchChart';
 import { HOME_DASHBOARD_CONTENT_CLASS } from '@/app/_constants/homeLayoutConstants';
 import { EXPERIENCE_MATCH_MOCK } from '@/app/_constants/experienceMatchMockData';
@@ -123,12 +124,9 @@ export function ExperienceMatch({
             <h4 className="text-lg font-bold leading-7 text-strong">요구 기술</h4>
             <div className="flex flex-wrap items-start gap-1.5">
               {requiredSkills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded bg-blue-50 px-3 py-1 text-xs font-bold leading-5 text-blue-900"
-                >
+                <Tag key={skill} tone="skill" size="large">
                   {skill}
-                </span>
+                </Tag>
               ))}
             </div>
           </div>
@@ -137,12 +135,9 @@ export function ExperienceMatch({
             <h4 className="text-lg font-bold leading-7 text-strong">요구 역량</h4>
             <div className="flex flex-wrap items-start gap-1.5">
               {requiredCompetencies.map((competency) => (
-                <span
-                  key={competency}
-                  className="rounded bg-mint-50 px-3 py-1 text-xs font-bold leading-5 text-success"
-                >
+                <Tag key={competency} tone="competency" size="large">
                   {competency}
-                </span>
+                </Tag>
               ))}
             </div>
           </div>
