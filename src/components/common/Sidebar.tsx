@@ -23,6 +23,7 @@ import {
   useUserProfile,
 } from '@/hooks/user/useUserProfile';
 import { cn } from '@/lib/utils';
+import { isSidebarItemActivePath } from './sidebarActive';
 
 export type SidebarItem = {
   label: string;
@@ -192,19 +193,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
 }
 
 function isSidebarItemActive(item: SidebarItem, pathname: string | null) {
-  if (!pathname) {
-    return false;
-  }
-
-  if (item.href === '/') {
-    return pathname === '/';
-  }
-
-  if (item.href === '/apply/list') {
-    return pathname === '/apply' || pathname.startsWith('/apply/');
-  }
-
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  return isSidebarItemActivePath(item.href, pathname);
 }
 
 function SidebarNavItem({
