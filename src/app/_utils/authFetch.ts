@@ -82,35 +82,24 @@ export function clearAccessTokenFromSession() {
   getStorage()?.removeItem(ACCESS_TOKEN_STORAGE_KEY);
 }
 
-// 인증 만료 시 로그인 화면으로 이동 
+// 인증 만료 시 로그인 화면으로 이동
 export function redirectToLoginOnUnauthorized() {
   if (typeof window === 'undefined') return;
 
   clearAccessTokenFromSession();
 
-  if (isAuthExemptPath(window.location.pathname)) {
+  if (isPublicAuthPath(window.location.pathname)) {
     return;
   }
 
   window.location.replace('/login');
 }
 
-// 로그인·OAuth 화면 (사이드바 없음)
+// 로그인·OAuth 화면 (토큰 없이 접근 가능)
 export function isPublicAuthPath(pathname: string) {
   const path = pathname.replace(/\/$/, '') || '/';
   return (
     path === '/login' || path.startsWith('/oauth') || path.startsWith('/auth/callback')
-  );
-}
-
-// 토큰 없이 UI 확인용
-export function isAuthExemptPath(pathname: string) {
-  const path = pathname.replace(/\/$/, '') || '/';
-  return (
-    isPublicAuthPath(pathname) ||
-    path === '/' ||
-    path === '/apply' ||
-    path.startsWith('/apply/')
   );
 }
 
@@ -277,6 +266,7 @@ export async function authFetch(path: string, init: AuthFetchInit = {}) {
 
   if (response.status === 401) {
     redirectToLoginOnUnauthorized();
+    throw new Error('Unauthorized');
   }
 
   return response;
