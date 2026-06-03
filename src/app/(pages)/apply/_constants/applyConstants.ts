@@ -12,7 +12,7 @@ export const APPLY_TAB_STROKE_COVER_LETTER =
 export const APPLY_COVER_LETTER_SPLIT_BLEED = '-ml-20 w-[calc(100%+5rem)] max-w-none';
 
 /** 탭 하단 전체 너비 스트로크  */
-export const APPLY_TAB_STROKE_ANALYSIS = APPLY_PAGE_HORIZONTAL_PADDING;
+export const APPLY_TAB_STROKE = APPLY_TAB_STROKE_COVER_LETTER;
 
 /** 자소서 작성 패널 왼쪽 inset */
 export const APPLY_COVER_LETTER_LEFT_PANEL_INSET = 160;
@@ -39,6 +39,9 @@ export const JOB_POSTING_COVER_QUESTION_MAX_LENGTH = 300;
 
 export const JOB_POSTING_MODAL_CONTENT_CLASS =
   'flex h-[857px] max-h-[calc(100dvh-40px)] w-full max-w-[864px] flex-col gap-6 overflow-hidden px-[30px] py-5';
+
+export const JOB_POSTING_MODAL_URL_STEP_CONTENT_CLASS =
+  'flex h-auto max-h-[calc(100dvh-40px)] w-full max-w-[864px] flex-col gap-6 overflow-hidden px-[30px] py-5';
 
 export const JOB_POSTING_PRIMARY_BUTTON_CLASS = 'h-12 w-full shrink-0';
 

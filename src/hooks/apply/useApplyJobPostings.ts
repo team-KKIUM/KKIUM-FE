@@ -24,7 +24,7 @@ import {
   updateJdOrder,
   updateJdTitle,
 } from '@/app/api/apply';
-import { saveApplyCoverLetter } from '@/app/(pages)/apply/_utils/saveApplyCoverLetter';
+import { saveApplyCoverLetter, createCoverLetterQuestionOnServer } from '@/app/(pages)/apply/_utils/saveApplyCoverLetter';
 import type { ApplyCoverLetterQuestion } from '@/app/(pages)/apply/_constants/applyMockData';
 import type {
   CreateJdAiRequest,
@@ -178,6 +178,31 @@ export function useSaveApplyCoverLetter() {
       questions: ApplyCoverLetterQuestion[];
       selectedExperienceIdsByQuestion: Record<string, string[]>;
     }) => saveApplyCoverLetter(jdId, questions, selectedExperienceIdsByQuestion),
+    onSuccess: (_, { jdId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
+        refetchType: 'active',
+      });
+    },
+  });
+}
+
+export function useCreateApplyResumeQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      jdId,
+      question,
+      questions,
+      selectedExperienceIdsByQuestion,
+    }: {
+      jdId: JdId;
+      question: ApplyCoverLetterQuestion;
+      questions: ApplyCoverLetterQuestion[];
+      selectedExperienceIdsByQuestion: Record<string, string[]>;
+    }) =>
+      createCoverLetterQuestionOnServer(jdId, question, questions, selectedExperienceIdsByQuestion),
     onSuccess: (_, { jdId }) => {
       void queryClient.invalidateQueries({
         queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'resume'],
