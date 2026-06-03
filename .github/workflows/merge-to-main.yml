@@ -4,6 +4,7 @@ on:
   schedule:
     # 매일 KST 00:00 (UTC 전날 15:00)에 실행
     - cron: '0 15 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           ref: main
@@ -25,8 +26,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 현재 체크아웃된 브랜치(dev 등)에 fetch하지 않도록 remote-tracking만 갱신
-          git fetch origin main dev
+          git fetch origin dev
 
           git merge origin/dev --no-ff --no-edit -m "chore: main 최신화[scheduled]"
 
