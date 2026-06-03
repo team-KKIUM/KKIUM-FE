@@ -1,4 +1,5 @@
 import { ApiError, api } from '@/app/api/client';
+import { ZodError } from 'zod';
 
 import {
   createJdAiRequestSchema,
@@ -185,6 +186,30 @@ export async function getJdResumeQuestionExperiences(jdId: JdId, questionId: num
   return resumeQuestionExperiencesResponseSchema.parse(response);
 }
 
+function throwParseJdUrlAnalyzeError(error: unknown): never {
+  if (error instanceof ApiError && error.code === 'JD_URL_UNPARSEABLE') {
+    throw error;
+  }
+
+  if (error instanceof ZodError) {
+    throw new ApiError({
+      status: 0,
+      code: 'JD_URL_UNPARSEABLE',
+      message: UNPARSEABLE_JD_URL_MESSAGE,
+    });
+  }
+
+  if (error instanceof Error && error.message === UNPARSEABLE_JD_URL_MESSAGE) {
+    throw new ApiError({
+      status: 0,
+      code: 'JD_URL_UNPARSEABLE',
+      message: UNPARSEABLE_JD_URL_MESSAGE,
+    });
+  }
+
+  throw error;
+}
+
 export async function parseJdUrl(request: ParseJdUrlRequest) {
   const parsedRequest = parseJdUrlRequestSchema.parse(request);
   const response = await api.post<unknown>('/api/v1/jd/url', parsedRequest);
@@ -192,17 +217,14 @@ export async function parseJdUrl(request: ParseJdUrlRequest) {
   try {
     assertParseableJdUrlResponse(response);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : UNPARSEABLE_JD_URL_MESSAGE;
-
-    throw new ApiError({
-      status: 0,
-      code: 'JD_URL_UNPARSEABLE',
-      message,
-    });
+    throwParseJdUrlAnalyzeError(error);
   }
 
-  return parsedJdUrlResponseSchema.parse(response);
+  try {
+    return parsedJdUrlResponseSchema.parse(response);
+  } catch (error) {
+    throwParseJdUrlAnalyzeError(error);
+  }
 }
 
 export async function parseJdOcr(file: File) {

@@ -224,6 +224,52 @@ export const resumeQuestionExperiencesResponseSchema = z.object({
 
 export const UNPARSEABLE_JD_URL_MESSAGE = '공고 내용을 불러오지 못했어요. 다시 시도해주세요';
 
+function isJdUrlContentNullErrorMessage(message: string) {
+  if (message.includes('expected string, received null') && message.includes('content')) {
+    return true;
+  }
+
+  if (!message.trim().startsWith('[')) {
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(message) as unknown;
+
+    if (!Array.isArray(parsed)) {
+      return false;
+    }
+
+    return parsed.some(
+      (issue) =>
+        typeof issue === 'object' &&
+        issue != null &&
+        'code' in issue &&
+        issue.code === 'invalid_type' &&
+        Array.isArray(issue.path) &&
+        issue.path[0] === 'content',
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function normalizeJobPostingAnalyzeErrorMessage(error: unknown): string | null {
+  if (error == null) {
+    return null;
+  }
+
+  if (error instanceof Error) {
+    if (error.message === UNPARSEABLE_JD_URL_MESSAGE || isJdUrlContentNullErrorMessage(error.message)) {
+      return UNPARSEABLE_JD_URL_MESSAGE;
+    }
+
+    return error.message;
+  }
+
+  return '공고 분석 중 문제가 발생했어요.';
+}
+
 const parsedJdUrlCriticalFieldKeys = [
   'postingTitle',
   'companyName',

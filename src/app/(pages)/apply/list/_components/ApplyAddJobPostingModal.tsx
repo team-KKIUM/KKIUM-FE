@@ -3,7 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
-import type { CreateJdAiRequest, ParsedJdUrlResponse } from '@/app/api/apply/types';
+import {
+  normalizeJobPostingAnalyzeErrorMessage,
+  type CreateJdAiRequest,
+  type ParsedJdUrlResponse,
+} from '@/app/api/apply/types';
 import {
   APPLY_COVER_LETTER_MAX_QUESTIONS,
   JOB_POSTING_BODY_MAX_LENGTH,
@@ -136,12 +140,8 @@ export function ApplyAddJobPostingModal() {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const errorId = 'apply-job-posting-url-error';
   const analyzeError =
-    (parseJobPostingUrlMutation.error instanceof Error
-      ? parseJobPostingUrlMutation.error.message
-      : null) ??
-    (parseJobPostingOcrMutation.error instanceof Error
-      ? parseJobPostingOcrMutation.error.message
-      : null);
+    normalizeJobPostingAnalyzeErrorMessage(parseJobPostingUrlMutation.error) ??
+    normalizeJobPostingAnalyzeErrorMessage(parseJobPostingOcrMutation.error);
   const saveError =
     createJobPostingMutation.error instanceof Error ? createJobPostingMutation.error.message : null;
 
