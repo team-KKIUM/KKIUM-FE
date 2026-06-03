@@ -2,7 +2,6 @@ name: Merge to Main
 
 on:
   schedule:
-    # 매일 KST 00:00 (UTC 전날 15:00)에 실행
     - cron: '0 15 * * *'
   workflow_dispatch:
 
@@ -17,17 +16,16 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main  
 
       - name: Merge dev into main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 절대 "dev:dev"처럼 체크아웃 중인 브랜치로 fetch하지 않음
-          git fetch origin dev
+          git fetch origin
 
           git merge origin/dev --no-ff --no-edit -m "chore: main 최신화[scheduled]"
 
