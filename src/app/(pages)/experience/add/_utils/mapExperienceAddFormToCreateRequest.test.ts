@@ -48,6 +48,20 @@ function createResultInfo(
   };
 }
 
+const etcCreateRequest = {
+  type: 'ETC',
+  title: '경험 제목',
+  oneLineIntro: '한 줄 소개',
+  startDate: '2024-01-01',
+  endDate: '2024-12-31',
+  situation: '상황',
+  task: '과제',
+  act: '행동',
+  result: '결과',
+  taken: '배운 점',
+  tags: [],
+} as const;
+
 describe('mapExperienceAddFormToCreateRequest', () => {
   test('maps common fields, tags, and activity fields to create request', () => {
     const request = mapExperienceAddFormToCreateRequest({
@@ -140,6 +154,21 @@ describe('mapExperienceAddFormToCreateRequest', () => {
     });
   });
 
+  test('maps etc type to etc create request without type-specific fields', () => {
+    const request = mapExperienceAddFormToCreateRequest({
+      basicInfo: createBasicInfo({
+        type: 'etc',
+      }),
+      coreInfo: createCoreInfo(),
+      resultInfo: createResultInfo({
+        skillTags: [],
+        competencyTags: [],
+      }),
+    });
+
+    expect(request).toEqual(etcCreateRequest);
+  });
+
   test('maps missing type to etc create request without type-specific fields', () => {
     const request = mapExperienceAddFormToCreateRequest({
       basicInfo: createBasicInfo({
@@ -152,18 +181,6 @@ describe('mapExperienceAddFormToCreateRequest', () => {
       }),
     });
 
-    expect(request).toEqual({
-      type: 'ETC',
-      title: '경험 제목',
-      oneLineIntro: '한 줄 소개',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      situation: '상황',
-      task: '과제',
-      act: '행동',
-      result: '결과',
-      taken: '배운 점',
-      tags: [],
-    });
+    expect(request).toEqual(etcCreateRequest);
   });
 });
