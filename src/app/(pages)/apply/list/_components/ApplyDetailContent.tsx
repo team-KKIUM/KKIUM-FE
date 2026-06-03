@@ -277,6 +277,45 @@ function normalizeLocalDateTimeString(value: string) {
   return trimmed.replace(' ', 'T');
 }
 
+function AutoResizeTextarea({
+  value,
+  readOnly,
+  placeholder,
+  className,
+  onChange,
+}: {
+  value: string;
+  readOnly?: boolean;
+  placeholder?: string;
+  className?: string;
+  onChange?: (value: string) => void;
+}) {
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      readOnly={readOnly}
+      placeholder={placeholder}
+      rows={1}
+      className={className}
+      onChange={(event) => onChange?.(event.currentTarget.value)}
+    />
+  );
+}
+
 function QuestionBlock({
   index,
   label,
@@ -317,19 +356,19 @@ function QuestionBlock({
       </div>
       <div
         className={cn(
-          'flex min-h-36 flex-col gap-2 rounded-2xl px-3 py-4',
+          'flex flex-col gap-2 rounded-2xl px-3 py-4',
           inputBackgroundClassName ?? 'bg-[#FFFFFF]',
         )}
       >
-        <textarea
+        <AutoResizeTextarea
           value={answer}
           readOnly={!editable}
           placeholder="여기에 자기소개서를 작성해보세요."
           className={cn(
-            'h-full min-h-28 w-full resize-none bg-transparent body-3-bold text-gray-700 outline-none placeholder:text-tertiary',
+            'min-h-28 w-full resize-none overflow-hidden bg-transparent body-3-bold text-gray-700 outline-none placeholder:text-tertiary',
             !editable && 'cursor-default',
           )}
-          onChange={(event) => onAnswerChange?.(event.currentTarget.value)}
+          onChange={onAnswerChange}
         />
       </div>
     </div>
