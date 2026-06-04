@@ -261,7 +261,7 @@ export function ApplyAddJobPostingUrlStep({
             ) : (
               <div className="flex w-full flex-col items-center justify-center gap-3 px-5 text-center">
                 <Image
-                  src="/null.svg"
+                  src="/empty-state.svg"
                   alt=""
                   width={132}
                   height={100}

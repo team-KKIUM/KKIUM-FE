@@ -26,7 +26,7 @@ export function NullBubble({
     >
       <div className="absolute inset-x-0 top-0 flex h-[138px] items-center justify-center">
         <Image
-          src="/null.svg"
+          src="/empty-state.svg"
           alt=""
           width={174}
           height={138}

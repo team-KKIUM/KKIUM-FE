@@ -15,6 +15,16 @@ phases:
       - pnpm test:unit
       - pnpm build
 
+  post_build:
+    commands:
+      - chmod +x scripts/s3-sync-with-cache.sh
+      - |
+        if [ -n "${S3_BUCKET:-}" ]; then
+          ./scripts/s3-sync-with-cache.sh out
+        else
+          echo "S3_BUCKET not set — skipping S3 deploy (artifact-only). Set S3_BUCKET in CodeBuild to apply cache + gzip HTML headers."
+        fi
+
 artifacts:
   base-directory: out
   files:

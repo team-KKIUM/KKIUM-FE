@@ -17,7 +17,7 @@ export function SidebarProfile({
   collapsed = false,
   active = false,
   name = 'KKIUM',
-  profileSrc = '/profile.svg',
+  profileSrc = '/profile-placeholder.svg',
   ariaControls,
   ariaExpanded,
   onClick,

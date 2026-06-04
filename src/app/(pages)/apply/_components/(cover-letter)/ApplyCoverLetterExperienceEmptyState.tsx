@@ -16,7 +16,7 @@ export function ApplyCoverLetterExperienceEmptyState({
     >
       <div className="flex h-56 w-full items-center justify-center">
         <Image
-          src="/null.svg"
+          src="/empty-state.svg"
           alt=""
           width={174}
           height={138}

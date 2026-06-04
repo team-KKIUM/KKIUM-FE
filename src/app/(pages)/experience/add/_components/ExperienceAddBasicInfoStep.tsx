@@ -25,7 +25,7 @@ import { type CalendarDateRange, RangeCalendar } from '@/components/common/Range
 import { TextField } from '@/components/common/TextField';
 import { cn } from '@/lib/utils';
 
-interface ExperienceAddBasicInfoStepProps {
+export interface ExperienceAddBasicInfoStepProps {
   value: ExperienceAddBasicInfoForm;
   onChange: (value: ExperienceAddBasicInfoForm) => void;
 }

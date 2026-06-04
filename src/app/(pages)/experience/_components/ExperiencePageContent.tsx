@@ -1,13 +1,25 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { notFound, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import * as React from 'react';
 
 import { ExperienceBoard } from '@/app/(pages)/experience/_components/ExperienceBoard';
-import { ExperienceDetailPageContent } from '@/app/(pages)/experience/_components/ExperienceDetailPageContent';
+import type { ExperienceDetailPageContentProps } from '@/app/(pages)/experience/_components/ExperienceDetailPageContent';
 import { ExperiencePageHeader } from '@/app/(pages)/experience/_components/ExperiencePageHeader';
 import { useDebouncedValue } from '@/hooks/experience/useDebouncedValue';
+
+const ExperienceDetailPageContent = dynamic<ExperienceDetailPageContentProps>(
+  () =>
+    import('@/app/(pages)/experience/_components/ExperienceDetailPageContent').then(
+      (mod) => mod.ExperienceDetailPageContent,
+    ),
+  {
+    ssr: false,
+    loading: ExperienceDetailPageLoading,
+  },
+);
 
 export function ExperiencePageContent() {
   const [keyword, setKeyword] = React.useState('');
@@ -21,6 +33,35 @@ export function ExperiencePageContent() {
         onKeywordChange={setKeyword}
       />
     </Suspense>
+  );
+}
+
+function ExperienceDetailPageLoading() {
+  return (
+    <div className="flex min-h-[calc(100vh-32px)] flex-col gap-[22px]">
+      <header className="grid h-8 grid-cols-[32px_1fr_32px] items-center">
+        <div className="size-8 animate-pulse rounded bg-gray-200" />
+        <div className="mx-auto h-6 w-24 animate-pulse rounded bg-gray-200" />
+        <div className="size-8 animate-pulse rounded bg-gray-200" />
+      </header>
+      <div className="flex animate-pulse flex-col gap-7">
+        <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-background-w px-[30px] py-5">
+          <div className="h-8 w-2/3 rounded bg-gray-200" />
+          <div className="h-5 w-full rounded bg-gray-100" />
+          <div className="h-5 w-3/4 rounded bg-gray-100" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="h-20 rounded-xl bg-gray-100" />
+          ))}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="h-6 w-32 rounded bg-gray-200" />
+          <div className="h-36 rounded-xl bg-gray-100" />
+          <div className="h-36 rounded-xl bg-gray-100" />
+        </div>
+      </div>
+    </div>
   );
 }
 

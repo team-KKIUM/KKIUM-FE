@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import { NameCompatibilityAnimation } from '@/app/_components/NameCompatibilityAnimation';
 import { Button } from '@/components/ui/button';
+import { loadKakaoSdk } from '@/lib/loadKakaoSdk';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
 const KKIUM_DESCRIPTION = '당신의 경험이 제자리를 찾는 방식';
@@ -13,10 +14,19 @@ interface MobileLandingResultProps {
 }
 
 export function MobileLandingResult({ name, company, score }: MobileLandingResultProps) {
-  const handleKakaoShare = () => {
-    const kakao = window.Kakao;
+  const handleKakaoShare = async () => {
+    if (!SITE_URL) {
+      return;
+    }
 
-    if (!kakao?.isInitialized() || !SITE_URL) {
+    try {
+      await loadKakaoSdk();
+    } catch {
+      return;
+    }
+
+    const kakao = window.Kakao;
+    if (!kakao?.isInitialized()) {
       return;
     }
 

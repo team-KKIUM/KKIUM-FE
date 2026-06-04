@@ -1,11 +1,12 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import * as React from 'react';
 
 import { ExperienceCardGrid } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
 import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
 import { ExperienceCategoryTabs } from '@/app/(pages)/experience/_components/ExperienceCategoryTabs';
-import { ExperienceDetailPanel } from '@/app/(pages)/experience/_components/ExperienceDetailPanel';
+import type { ExperienceDetailPanelProps } from '@/app/(pages)/experience/_components/ExperienceDetailPanel';
 import { useExperienceBoardActions } from '@/app/(pages)/experience/_hooks/useExperienceBoardActions';
 import { useExperienceBoardDetail } from '@/app/(pages)/experience/_hooks/useExperienceBoardDetail';
 import { useExperienceBoardInfiniteScroll } from '@/app/(pages)/experience/_hooks/useExperienceBoardInfiniteScroll';
@@ -35,6 +36,17 @@ const filterPieceTypeByCategory: Record<
   education: 'EDUCATION',
   etc: 'ETC',
 };
+
+const ExperienceDetailPanel = dynamic<ExperienceDetailPanelProps>(
+  () =>
+    import('@/app/(pages)/experience/_components/ExperienceDetailPanel').then(
+      (mod) => mod.ExperienceDetailPanel,
+    ),
+  {
+    ssr: false,
+    loading: ExperienceDetailPanelLoading,
+  },
+);
 
 export function ExperienceBoard({
   initialSelectedExperienceId,
@@ -209,5 +221,39 @@ export function ExperienceBoard({
         onOpenChange={handleErrorDialogOpenChange}
       />
     </section>
+  );
+}
+
+function ExperienceDetailPanelLoading() {
+  return (
+    <aside
+      role="dialog"
+      aria-modal="true"
+      aria-label="경험 상세 패널 로딩 중"
+      className="fixed top-0 right-0 z-40 flex h-dvh w-full max-w-[500px] flex-col gap-6 bg-background-default px-6 pt-8 pb-8 shadow-2xl"
+    >
+      <div className="grid h-8 grid-cols-[32px_1fr_32px] items-center">
+        <div className="size-8 animate-pulse rounded bg-gray-200" />
+        <div className="mx-auto h-6 w-24 animate-pulse rounded bg-gray-200" />
+        <div className="size-8 animate-pulse rounded bg-gray-200" />
+      </div>
+      <div className="flex animate-pulse flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <div className="h-8 w-3/4 rounded bg-gray-200" />
+          <div className="h-5 w-full rounded bg-gray-100" />
+          <div className="h-5 w-2/3 rounded bg-gray-100" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="h-16 rounded-lg bg-gray-100" />
+          ))}
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="h-5 w-24 rounded bg-gray-200" />
+          <div className="h-28 rounded-lg bg-gray-100" />
+          <div className="h-28 rounded-lg bg-gray-100" />
+        </div>
+      </div>
+    </aside>
   );
 }

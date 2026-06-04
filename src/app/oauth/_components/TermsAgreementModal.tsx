@@ -184,7 +184,7 @@ export function TermsAgreementModal({ open, onDismiss, onComplete }: TermsAgreem
               <div className="flex flex-col gap-3 overflow-hidden">
                 <div className="inline-flex items-center gap-3">
                   <div className="flex size-20 items-center justify-center rounded-lg">
-                    <Image src="/file.svg" alt="KKIUM 로고" width={64} height={44} priority />
+                    <Image src="/document-file.svg" alt="KKIUM 로고" width={64} height={44} priority />
                   </div>
                   <div className="flex flex-col gap-2">
                     <h2 className="heading-3-extra-bold text-strong">KKIUM</h2>

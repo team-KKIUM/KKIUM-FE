@@ -23,7 +23,7 @@ export function ApplyCoverLetterExperienceSelectEmptyState({
     >
       <div className="flex flex-col items-center gap-1 text-center">
         <Image
-          src="/null.svg"
+          src="/empty-state.svg"
           alt=""
           width={320}
           height={208}

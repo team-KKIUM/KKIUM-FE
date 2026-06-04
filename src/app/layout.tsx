@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/common/AppShell';
 import { GoogleAnalytics } from '@/components/common/GoogleAnalytics';
-import { KakaoSdkScript } from '@/components/common/KakaoSdkScript';
 import { nanumSquare } from './fonts';
 import { Providers } from './providers';
 import './globals.css';
@@ -34,7 +33,6 @@ export default function RootLayout({
     <html lang="ko" className={`${nanumSquare.className} h-full antialiased`}>
       <body className="min-h-full">
         <GoogleAnalytics />
-        <KakaoSdkScript />
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

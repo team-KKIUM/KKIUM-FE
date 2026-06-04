@@ -193,7 +193,7 @@ function UploadedPdfCard({ name, size, onRemove }: UploadedPdfCardProps) {
   return (
     <div className="flex w-full items-center gap-3 rounded-lg bg-gray-50 px-2.5 py-2">
       <div className="flex size-10 shrink-0 items-center justify-center">
-        <Image src="/pdf.svg" alt="" width={22} height={28} className="h-7 w-[22px]" />
+        <Image src="/pdf-file.svg" alt="" width={22} height={28} className="h-7 w-[22px]" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate body-1-bold text-strong">{name}</p>

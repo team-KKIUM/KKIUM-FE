@@ -36,7 +36,7 @@ export function NullComponent({
     >
       <div className="flex h-72 w-96 shrink-0 flex-col items-center justify-center">
         <Image
-          src="/null.svg"
+          src="/empty-state.svg"
           alt=""
           width={260}
           height={206}

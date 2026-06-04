@@ -9,7 +9,8 @@ export interface JobTypeCardProps extends Omit<React.ComponentProps<'section'>, 
   strengths?: readonly string[];
 }
 
-const JOB_TYPE_BACKGROUND_IMAGE = '/TypeBackground.svg';
+/** Raster optimized from job-type-background.svg (~557KB → ~24KB). See scripts/optimize-public-images.mjs */
+const JOB_TYPE_BACKGROUND_IMAGE = '/job-type-background-opt.jpg';
 
 export function JobTypeCard({
   roleTypeName = DEFAULT_HOME_JOB_TYPE_PROFILE.roleTypeName,
@@ -26,7 +27,15 @@ export function JobTypeCard({
       className={cn('relative h-[336px] min-w-0 overflow-hidden rounded-xl border border-gray-300 bg-background-w', className)}
       {...props}
     >
-      <Image src={backgroundImage} alt="" fill className="object-cover" sizes="384px" priority={false} />
+      <Image
+        src={backgroundImage}
+        alt=""
+        fill
+        className="object-cover object-center"
+        sizes="(max-width: 1280px) 100vw, 384px"
+        priority
+        fetchPriority="high"
+      />
 
       <div className="absolute left-5 top-[26px] inline-flex w-80 items-start justify-between">
         <h3 className="text-xl font-extrabold leading-7 text-gray-main">나의 직무 유형</h3>

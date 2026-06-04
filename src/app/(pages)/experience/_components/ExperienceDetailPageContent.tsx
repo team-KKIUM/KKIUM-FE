@@ -14,7 +14,7 @@ import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { useExperienceDetail, useUpdateExperience } from '@/hooks/experience/useExperiences';
 
-interface ExperienceDetailPageContentProps {
+export interface ExperienceDetailPageContentProps {
   experienceId: number;
 }
 

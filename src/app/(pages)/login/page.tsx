@@ -1,9 +1,16 @@
+'use client';
+
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
 import { GoogleLoginButton } from './_components/GoogleLoginButton';
 import { KakaoLoginButton } from './_components/KakaoLoginButton';
 import { LoginErrorBanner } from './_components/LoginErrorBanner';
-import { LoginVisual } from './_components/LoginVisual';
+
+const LoginVisual = dynamic(
+  () => import('./_components/LoginVisual').then((mod) => ({ default: mod.LoginVisual })),
+  { ssr: false },
+);
 
 export default function LoginPage() {
   return (

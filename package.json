@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "optimize:images": "node scripts/optimize-public-images.mjs",
+    "build": "node scripts/optimize-public-images.mjs && next build && node scripts/defer-render-blocking-css.mjs out && node scripts/inject-performance-hints.mjs out",
     "start": "next start",
     "lint": "eslint",
     "test:unit": "jest --config jest.config.mjs",
