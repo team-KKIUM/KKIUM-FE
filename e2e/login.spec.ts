@@ -20,7 +20,7 @@ test.describe('보호 라우트', () => {
     test(`인증되지 않은 사용자는 ${route}에서 로그인으로 이동한다`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
 
-      await expect(page).toHaveURL(/\/login\/?$/, { timeout: AUTH_REDIRECT_TIMEOUT });
+      await expect(page).toHaveURL(/\/login\/?(?:\?.*)?$/, { timeout: AUTH_REDIRECT_TIMEOUT });
       await expect(page.getByRole('button', { name: '카카오로 로그인' })).toBeVisible();
     });
   }
