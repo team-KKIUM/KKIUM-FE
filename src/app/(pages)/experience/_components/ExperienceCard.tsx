@@ -9,23 +9,13 @@ import type { ErrorDialogProps } from '@/components/common/ErrorDialog';
 import { Tag } from '@/components/common/Tag';
 import { getExperienceCategoryIconSrc } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { EXPERIENCE_FIELD_MAX_LENGTHS } from '@/app/(pages)/experience/_utils/experienceFieldLimits';
-import { MoreVerticalIcon } from '@/components/common/icons/MoreVerticalIcon';
 import { cn } from '@/lib/utils';
-import type { ExperienceCardDropdownMenuProps } from './ExperienceCardDropdownMenu';
+import { ExperienceCardDropdownMenu } from './ExperienceCardDropdownMenu';
 import type { ExperienceCategory } from './ExperienceCategoryTab';
 
 const ErrorDialog = dynamic<ErrorDialogProps>(
   () => import('@/components/common/ErrorDialog').then((mod) => mod.ErrorDialog),
   { ssr: false },
-);
-
-const ExperienceCardDropdownMenu = dynamic<ExperienceCardDropdownMenuProps>(
-  () =>
-    import('./ExperienceCardDropdownMenu').then((mod) => mod.ExperienceCardDropdownMenu),
-  {
-    ssr: false,
-    loading: ExperienceCardDropdownMenuLoading,
-  },
 );
 
 const experienceCardVariants = cva(
@@ -265,20 +255,6 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
     );
   },
 );
-
-function ExperienceCardDropdownMenuLoading() {
-  return (
-    <button
-      type="button"
-      aria-label="경험 카드 메뉴 불러오는 중"
-      aria-disabled="true"
-      tabIndex={-1}
-      className="flex size-8 shrink-0 items-center justify-center text-gray-main"
-    >
-      <MoreVerticalIcon className="size-6" />
-    </button>
-  );
-}
 
 function TagRow({
   tags,
