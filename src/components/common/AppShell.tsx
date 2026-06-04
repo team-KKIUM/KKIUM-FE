@@ -27,12 +27,26 @@ function resolveShellPathname(routerPathname: string) {
   return routerPathname;
 }
 
+function getInitialCanRender(pathname: string) {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (isPublicAuthPath(pathname)) {
+    return true;
+  }
+
+  return hasApiAccessToken();
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const routerPathname = usePathname();
   const pathname = resolveShellPathname(routerPathname);
   const router = useRouter();
   const [collapsed] = React.useState(false);
-  const [canRender, setCanRender] = React.useState(false);
+  const [canRender, setCanRender] = React.useState(() =>
+    getInitialCanRender(resolveShellPathname(routerPathname)),
+  );
 
   const hideSidebar = isPublicAuthPath(pathname);
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;

@@ -8,10 +8,10 @@ import { trackEvent } from '@/lib/analytics';
 
 export type OAuthProvider = 'google' | 'kakao';
 
-/**
- * `output: 'export'` + `useSearchParams` leaves a CSR bailout placeholder and breaks hydration (#418).
- * Read OAuth query params from `window.location` instead (same approach as LoginErrorBanner).
- */
+function redirectToHome() {
+  window.location.replace('/');
+}
+
 function readOAuthCallbackSearchParams() {
   if (typeof window === 'undefined') {
     return { code: null, error: null, state: null };
@@ -57,7 +57,7 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
     void requestSocialLoginOnce(provider, code)
       .then((result) => {
         if (result.termsAgreed === true) {
-          router.replace('/');
+          redirectToHome();
           return;
         }
 
@@ -81,7 +81,7 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
           method: provider,
         });
         setShowTermsAgreement(false);
-        router.replace('/');
+        redirectToHome();
       }}
     />
   );
