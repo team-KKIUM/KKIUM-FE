@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { DEFAULT_HOME_JOB_TYPE_PROFILE } from '@/app/_constants/jobTypeCardMappingData';
 import { cn } from '@/lib/utils';
 
@@ -16,21 +18,19 @@ export function JobTypeCard({
   className,
   ...props
 }: JobTypeCardProps) {
-  const backgroundImage = JOB_TYPE_BACKGROUND_IMAGE;
-
   return (
     <section
       data-slot="job-type-card"
       className={cn('relative h-[336px] min-w-0 overflow-hidden rounded-xl border border-gray-300 bg-background-w', className)}
       {...props}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- LCP hero; static asset from /public */}
-      <img
-        src={backgroundImage}
+      <Image
+        src={JOB_TYPE_BACKGROUND_IMAGE}
         alt=""
-        fetchPriority="high"
-        decoding="async"
-        className="absolute inset-0 size-full object-cover object-center"
+        fill
+        className="object-cover object-center"
+        sizes="384px"
+        priority={false}
       />
 
       <div className="absolute left-5 top-[26px] inline-flex w-80 items-start justify-between">

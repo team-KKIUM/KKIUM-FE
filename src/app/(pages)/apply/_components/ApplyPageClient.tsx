@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,31 +9,10 @@ import {
   APPLY_PAGE_HORIZONTAL_PADDING,
   APPLY_TAB_STROKE,
 } from '../_constants/applyConstants';
+import { ApplyAnalysis } from './(analysis)/ApplyAnalysis';
 import { ApplyJobHeader, type ApplyJobTab } from './(analysis)/ApplyJobHeader';
-
-const ApplyAnalysis = dynamic(
-  () =>
-    import('./(analysis)/ApplyAnalysis').then((mod) => ({
-      default: mod.ApplyAnalysis,
-    })),
-  { loading: () => <div className="min-h-[320px] flex-1 animate-pulse rounded-lg bg-gray-100" /> },
-);
-
-const ApplyMyExperience = dynamic(
-  () =>
-    import('./(analysis)/ApplyMyExperience').then((mod) => ({
-      default: mod.ApplyMyExperience,
-    })),
-  { loading: () => <div className="min-h-[320px] flex-1 animate-pulse rounded-lg bg-gray-100" /> },
-);
-
-const ApplyCoverLetterSection = dynamic(
-  () =>
-    import('./(cover-letter)/ApplyCoverLetterSection').then((mod) => ({
-      default: mod.ApplyCoverLetterSection,
-    })),
-  { loading: () => <div className="min-h-[400px] w-full animate-pulse bg-gray-50" /> },
-);
+import { ApplyMyExperience } from './(analysis)/ApplyMyExperience';
+import { ApplyCoverLetterSection } from './(cover-letter)/ApplyCoverLetterSection';
 import { useApplyCoverLetterStore } from '../_stores/useApplyCoverLetterStore';
 import { ResizableSplit } from './ResizableSplit';
 import { ToastMessage } from '@/components/ui/ToastMessage';

@@ -4,10 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "optimize:images": "node scripts/optimize-public-images.mjs",
-    "deploy:static": "bash scripts/s3-sync-with-cache.sh out",
-    "repair:s3-cache": "bash scripts/repair-s3-cache-headers.sh",
-    "build": "node scripts/optimize-public-images.mjs && next build && node scripts/inject-performance-hints.mjs out",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test:unit": "jest --config jest.config.mjs",

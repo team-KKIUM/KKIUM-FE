@@ -15,19 +15,6 @@ phases:
       - pnpm test:unit
       - pnpm build
 
-  post_build:
-    commands:
-      - chmod +x scripts/s3-sync-with-cache.sh
-      - |
-        DEPLOY_BUCKET="${S3_BUCKET:-${STATIC_SITE_BUCKET:-${KKIUM_S3_BUCKET:-}}}"
-        if [ -z "$DEPLOY_BUCKET" ]; then
-          echo "ERROR: Set S3_BUCKET (or STATIC_SITE_BUCKET / KKIUM_S3_BUCKET) on CodeBuild." >&2
-          echo "Artifact-only deploy skips gzip HTML headers and leaves stale HTML referencing deleted _next chunks." >&2
-          exit 1
-        fi
-        export S3_BUCKET="$DEPLOY_BUCKET"
-        ./scripts/s3-sync-with-cache.sh out
-
 artifacts:
   base-directory: out
   files:

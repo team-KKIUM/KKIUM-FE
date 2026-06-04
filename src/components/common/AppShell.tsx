@@ -14,23 +14,25 @@ const SIDEBAR_WIDTH = {
   expanded: '252px',
 } as const;
 
-function getInitialCanRender(pathname: string) {
+function resolveShellPathname(routerPathname: string) {
   if (typeof window === 'undefined') {
-    return true;
+    return routerPathname;
   }
 
-  if (isPublicAuthPath(pathname)) {
-    return true;
+  const locationPathname = window.location.pathname;
+  if (isPublicAuthPath(locationPathname)) {
+    return locationPathname;
   }
 
-  return hasApiAccessToken();
+  return routerPathname;
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const routerPathname = usePathname();
+  const pathname = resolveShellPathname(routerPathname);
   const router = useRouter();
   const [collapsed] = React.useState(false);
-  const [canRender, setCanRender] = React.useState(() => getInitialCanRender(pathname));
+  const [canRender, setCanRender] = React.useState(false);
 
   const hideSidebar = isPublicAuthPath(pathname);
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;
@@ -40,7 +42,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   } as React.CSSProperties;
 
   React.useEffect(() => {
-    if (isPublicAuthPath(pathname)) {
+    const currentPath = resolveShellPathname(routerPathname);
+
+    if (isPublicAuthPath(currentPath)) {
       setCanRender(true);
       return;
     }
@@ -52,7 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     setCanRender(false);
     router.replace('/login');
-  }, [pathname, router]);
+  }, [routerPathname, router]);
 
   React.useEffect(() => {
     const width = hideSidebar ? '0px' : sidebarWidth;

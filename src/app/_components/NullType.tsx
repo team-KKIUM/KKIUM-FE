@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 
 export interface NullTypeProps extends Omit<React.ComponentProps<'section'>, 'title'> {
@@ -23,14 +25,13 @@ export function NullType({
       )}
       {...props}
     >
-      {/* Native img: faster LCP paint than next/image fill (avoids hydration delay). */}
-      {/* eslint-disable-next-line @next/next/no-img-element -- LCP hero; static SVG from /public */}
-      <img
+      <Image
         src="/empty-type.svg"
         alt=""
-        fetchPriority="high"
-        decoding="async"
-        className="absolute inset-0 size-full object-cover object-center"
+        fill
+        className="object-cover object-center"
+        sizes="(max-width: 1280px) 100vw, 384px"
+        priority={false}
       />
 
       <div className="absolute inset-x-5 top-[26px] inline-flex items-start justify-between">
