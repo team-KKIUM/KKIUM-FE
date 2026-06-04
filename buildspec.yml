@@ -19,11 +19,14 @@ phases:
     commands:
       - chmod +x scripts/s3-sync-with-cache.sh
       - |
-        if [ -n "${S3_BUCKET:-}" ]; then
-          ./scripts/s3-sync-with-cache.sh out
-        else
-          echo "S3_BUCKET not set — skipping S3 deploy (artifact-only). Set S3_BUCKET in CodeBuild to apply cache + gzip HTML headers."
+        DEPLOY_BUCKET="${S3_BUCKET:-${STATIC_SITE_BUCKET:-${KKIUM_S3_BUCKET:-}}}"
+        if [ -z "$DEPLOY_BUCKET" ]; then
+          echo "ERROR: Set S3_BUCKET (or STATIC_SITE_BUCKET / KKIUM_S3_BUCKET) on CodeBuild." >&2
+          echo "Artifact-only deploy skips gzip HTML headers and leaves stale HTML referencing deleted _next chunks." >&2
+          exit 1
         fi
+        export S3_BUCKET="$DEPLOY_BUCKET"
+        ./scripts/s3-sync-with-cache.sh out
 
 artifacts:
   base-directory: out

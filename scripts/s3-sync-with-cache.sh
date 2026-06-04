@@ -34,9 +34,10 @@ upload_html() {
 echo "Syncing $OUT_DIR -> s3://$BUCKET"
 
 # 1) Hashed build assets (_next/static) — safe to cache for 1 year
+# Do NOT --delete: browsers/CDN may still serve older HTML that references previous
+# chunk hashes. Missing chunks + SPA 404→index.html causes "Unexpected token '<'" on JS.
 if [ -d "$OUT_DIR/_next/static" ]; then
   aws s3 sync "$OUT_DIR/_next/static" "s3://$BUCKET/_next/static" \
-    --delete \
     --cache-control "$LONG_CACHE"
 fi
 

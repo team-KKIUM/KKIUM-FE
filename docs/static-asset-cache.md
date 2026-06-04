@@ -2,6 +2,8 @@
 
 상세한 Lighthouse 항목별 수정 위치·검증 방법은 **[performance-optimization.md](./performance-optimization.md)** 에 통합해 두었습니다.
 
+JS 로드 실패(`Unexpected token '<'`) / 배포 직후 깨짐 → **[cloudfront-static-assets.md](./cloudfront-static-assets.md)** 참고.
+
 ## 빠른 참고
 
 - 배포: [`scripts/s3-sync-with-cache.sh`](../scripts/s3-sync-with-cache.sh)

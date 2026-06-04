@@ -89,7 +89,8 @@ pnpm build   # includes s3-sync when S3_BUCKET set in CI
 
 **증상:** `/_next/static/chunks/*.css` (~70KB, ~190ms)가 초기 렌더를 블로킹. 예: `07yk.tnyd8~cx.css`.
 
-**대응:** 프로덕션 빌드 후 HTML의 Next CSS `<link rel="stylesheet">`를 **preload + onload** 비동기 로드로 변환.
+**대응 (보류·회귀):** ~~프로덕션 빌드 후 HTML의 Next CSS `<link rel="stylesheet">`를 **preload + onload** 비동기 로드로 변환.~~  
+새로고침 시 CSS 미적용·FOUC가 발생해 **`defer-render-blocking-css.mjs`는 build에서 제거**함 (2026-06). Lighthouse render-blocking은 다시 경고될 수 있음.
 
 ### 수정한 파일
 
