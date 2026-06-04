@@ -138,6 +138,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             width={logoSize.width}
             height={logoSize.height}
             priority
+            fetchPriority="high"
             className={cn(collapsed ? 'size-[49px]' : 'h-[49px] w-[136px]')}
           />
         </Link>

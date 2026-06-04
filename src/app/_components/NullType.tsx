@@ -1,5 +1,4 @@
-import Image from 'next/image';
-
+import { EmptyTypeBackground } from '@/app/_components/EmptyTypeBackground';
 import { cn } from '@/lib/utils';
 
 export interface NullTypeProps extends Omit<React.ComponentProps<'section'>, 'title'> {
@@ -25,14 +24,9 @@ export function NullType({
       )}
       {...props}
     >
-      <Image
-        src="/empty-type.svg"
-        alt=""
-        fill
-        className="object-cover object-center"
-        sizes="(max-width: 1280px) 100vw, 384px"
-        priority={false}
-      />
+      <div className="absolute inset-0" aria-hidden>
+        <EmptyTypeBackground />
+      </div>
 
       <div className="absolute inset-x-5 top-[26px] inline-flex items-start justify-between">
         <h3 className="text-xl font-extrabold leading-7 text-gray-main">나의 직무 유형</h3>

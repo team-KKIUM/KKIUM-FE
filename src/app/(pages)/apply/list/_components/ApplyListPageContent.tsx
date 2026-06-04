@@ -27,6 +27,8 @@ function ApplyListPageRouteContent() {
 
   return (
     <section className="flex min-h-[calc(100vh-32px)] w-full flex-col">
+      <link rel="preload" as="image" href="/logo-light.svg" />
+      <link rel="preload" as="image" href="/career-selected.svg" />
       <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-[30px]">
         <h1 className="text-2xl font-extrabold text-strong">지원 관리</h1>
 

@@ -411,6 +411,7 @@ function SortableApplyCard({
         isTargeted={card.isTarget}
         menuActionDisabled={menuActionDisabled}
         selected={selected}
+        priority={index === 0}
         onCardClick={() => onCardClick(card.id)}
         onUpdateTitle={onUpdateTitle}
         onToggleTarget={onToggleTarget}

@@ -19,6 +19,7 @@ export interface ApplyCardProps extends React.ComponentProps<'article'> {
   isTargeted?: boolean;
   menuActionDisabled?: boolean;
   selected?: boolean;
+  priority?: boolean;
   onCardClick?: React.MouseEventHandler<HTMLElement>;
   onUpdateTitle?: (jdId: string, nextTitle: string) => void;
   onToggleTarget?: (jdId: string) => void;
@@ -34,6 +35,7 @@ export function ApplyCard({
   isTargeted = false,
   menuActionDisabled = false,
   selected = false,
+  priority = false,
   onCardClick,
   onUpdateTitle,
   onToggleTarget,
@@ -151,6 +153,8 @@ export function ApplyCard({
           width={112}
           height={102}
           className="h-auto w-28 shrink-0"
+          priority={priority}
+          fetchPriority={priority ? 'high' : 'auto'}
         />
 
         <div className="flex min-w-0 flex-1 items-start justify-between gap-4">

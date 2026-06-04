@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { getJdAnalysisWithMatch } from '@/app/api/apply';
+import { applyJobPostingQueryKeys } from '@/hooks/apply/useApplyJobPostings';
 
 import { BubbleChart } from '@/app/_components/BubbleChart';
 import { ExperienceUpdateCard } from '@/app/_components/ExperienceUpdateCard';
@@ -26,6 +30,7 @@ function formatTodayLabelKo(date: Date) {
 
 export default function Home() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: homeData } = useHomeDashboard(true);
   const [currentPostingIndex, setCurrentPostingIndex] = useState(0);
   const todayLabel = formatTodayLabelKo(new Date());
@@ -41,6 +46,18 @@ export default function Home() {
   const targetApplyHref =
     targetJdId == null ? '/apply/list' : `/apply?jdid=${encodeURIComponent(String(targetJdId))}`;
   const hasAnyExperience = (homeData?.totalExperienceCount ?? 0) > 0;
+
+  useEffect(() => {
+    if (targetJdId == null) {
+      return;
+    }
+
+    const jdId = String(targetJdId);
+    void queryClient.prefetchQuery({
+      queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'analysis'],
+      queryFn: () => getJdAnalysisWithMatch(jdId),
+    });
+  }, [queryClient, targetJdId]);
 
   const handlePrevPosting = () => {
     if (!canGoPrev) return;
@@ -58,6 +75,7 @@ export default function Home() {
 
   return (
     <section className="flex w-full min-w-0 flex-col items-stretch gap-6 pb-12">
+      <link rel="preload" as="image" href="/job-type-background.svg" />
       <div className={cn('flex flex-col items-stretch gap-2', HOME_DASHBOARD_CONTENT_CLASS)}>
         <div className="flex flex-col items-start gap-0.5">
           <p
@@ -97,6 +115,7 @@ export default function Home() {
             roleTypeName={mappedJobType.roleTypeName}
             roleTypeDescription={mappedJobType.description}
             strengths={mappedJobType.coreKeywords.slice(0, 4)}
+            priority
           />
         ) : (
           <NullType className={HOME_DASHBOARD_SIDE_CARD_CLASS} />
