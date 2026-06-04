@@ -194,10 +194,7 @@ export async function mockExperienceApi(page: Page) {
   });
 }
 
-export async function mockExperienceCreateApi(
-  page: Page,
-  onCreate?: (requestBody: Record<string, unknown>) => void,
-) {
+export async function mockExperienceCreateApi(page: Page) {
   await page.route('**/api/v1/experiences', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -213,7 +210,6 @@ export async function mockExperienceCreateApi(
         throw new Error(`Unexpected E2E create experience body: ${request.postData() ?? ''}`);
       }
 
-      onCreate?.(requestBody);
       await fulfillApiSuccess(route, null);
       return;
     }

@@ -73,12 +73,8 @@ test('인증 상태에서 경험 추가 첫 단계에서 기본 정보 단계로
 });
 
 test('자료 없이 직접 입력한 경험을 저장한다', async ({ page }) => {
-  let createRequestBody: Record<string, unknown> | null = null;
-
   await setupAuthenticatedExperienceAddPage(page);
-  await mockExperienceCreateApi(page, (requestBody) => {
-    createRequestBody = requestBody;
-  });
+  await mockExperienceCreateApi(page);
 
   await page.goto('/experience/add');
   await page.getByRole('button', { name: '다음' }).click();
@@ -91,7 +87,15 @@ test('자료 없이 직접 입력한 경험을 저장한다', async ({ page }) =
 
   await expect(page.getByRole('heading', { name: '결과 확인' })).toBeVisible();
   await addResultTags(page);
+
+  const createRequestPromise = page.waitForRequest(
+    (request) => request.url().includes('/api/v1/experiences') && request.method() === 'POST',
+  );
+
   await page.getByRole('button', { name: '저장하기' }).click();
+
+  const createRequest = await createRequestPromise;
+  const createRequestBody = createRequest.postDataJSON();
 
   await expect(page.getByRole('heading', { name: '경험 추가가 완료되었습니다!' })).toBeVisible();
   expect(createRequestBody).toMatchObject({
