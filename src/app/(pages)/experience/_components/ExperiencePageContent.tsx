@@ -68,6 +68,27 @@ interface ExperiencePageRouteContentProps {
   onKeywordChange: (keyword: string) => void;
 }
 
+function getDetailExperienceIdFromSearch() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const selectedExperienceId = searchParams.get('selected');
+
+  if (searchParams.get('view') !== 'detail') {
+    return { experienceId: null, invalid: false };
+  }
+
+  const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
+
+  if (
+    numericExperienceId === null ||
+    !Number.isInteger(numericExperienceId) ||
+    numericExperienceId <= 0
+  ) {
+    return { experienceId: null, invalid: true };
+  }
+
+  return { experienceId: numericExperienceId, invalid: false };
+}
+
 function ExperiencePageRouteContent({
   keyword,
   debouncedKeyword,
@@ -76,23 +97,24 @@ function ExperiencePageRouteContent({
   const [detailExperienceId, setDetailExperienceId] = React.useState<number | null>(null);
   const [hasInvalidDetailParam, setHasInvalidDetailParam] = React.useState(false);
 
+  const syncDetailRoute = React.useCallback(() => {
+    const { experienceId, invalid } = getDetailExperienceIdFromSearch();
+
+    setDetailExperienceId(experienceId);
+    setHasInvalidDetailParam(invalid);
+  }, []);
+
   React.useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const selectedExperienceId = searchParams.get('selected');
+    syncDetailRoute();
+    window.addEventListener('popstate', syncDetailRoute);
 
-    if (searchParams.get('view') !== 'detail') {
-      setDetailExperienceId(null);
-      setHasInvalidDetailParam(false);
-      return;
-    }
+    return () => window.removeEventListener('popstate', syncDetailRoute);
+  }, [syncDetailRoute]);
 
-    const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
+  const handleDetailViewRequest = React.useCallback((experienceId: string) => {
+    const numericExperienceId = Number(experienceId);
 
-    if (
-      numericExperienceId === null ||
-      !Number.isInteger(numericExperienceId) ||
-      numericExperienceId <= 0
-    ) {
+    if (!Number.isInteger(numericExperienceId) || numericExperienceId <= 0) {
       setDetailExperienceId(null);
       setHasInvalidDetailParam(true);
       return;
@@ -102,19 +124,32 @@ function ExperiencePageRouteContent({
     setHasInvalidDetailParam(false);
   }, []);
 
+  const handleDetailRouteExit = React.useCallback(() => {
+    setDetailExperienceId(null);
+    setHasInvalidDetailParam(false);
+  }, []);
+
   if (hasInvalidDetailParam) {
     notFound();
   }
 
   if (detailExperienceId) {
-    return <ExperienceDetailPageContent experienceId={detailExperienceId} />;
+    return (
+      <ExperienceDetailPageContent
+        experienceId={detailExperienceId}
+        onRouteExit={handleDetailRouteExit}
+      />
+    );
   }
 
   return (
     <div className="flex min-h-[calc(100vh-32px)] flex-col">
       <div className="flex flex-1 flex-col gap-5">
         <ExperiencePageHeader keyword={keyword} onKeywordChange={onKeywordChange} />
-        <ExperienceBoard keyword={debouncedKeyword || undefined} />
+        <ExperienceBoard
+          keyword={debouncedKeyword || undefined}
+          onDetailViewRequest={handleDetailViewRequest}
+        />
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ interface ExperienceSelectionItem {
 interface UseExperienceBoardSelectionParams {
   initialSelectedExperienceId?: string;
   keyword?: string;
+  onDetailViewRequest?: (experienceId: string) => void;
 }
 
 function isExperienceCategory(category: string | null): category is ExperienceCategory {
@@ -30,6 +31,7 @@ function getCurrentSearchParams() {
 export function useExperienceBoardSelection({
   initialSelectedExperienceId,
   keyword,
+  onDetailViewRequest,
 }: UseExperienceBoardSelectionParams) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = React.useState<ExperienceCategory>('all');
@@ -53,7 +55,8 @@ export function useExperienceBoardSelection({
     }
   }, []);
 
-  React.useEffect(() => {
+  const syncRouteSelection = React.useCallback(() => {
+    clearCloseTimer();
     const searchParams = getCurrentSearchParams();
     const nextSelectedExperienceId = searchParams.get('selected') ?? initialSelectedExperienceId;
     const selectedCategoryFromQuery = searchParams.get('category');
@@ -61,15 +64,26 @@ export function useExperienceBoardSelection({
       ? selectedCategoryFromQuery
       : 'all';
 
+    hasAppliedInitialSelectionRef.current = false;
     setInitialSelectedCategory(nextSelectedCategory);
     setSelectedCategory(nextSelectedCategory);
     setSelectedExperienceIdFromQuery(nextSelectedExperienceId);
 
-    if (!nextSelectedExperienceId) {
+    if (nextSelectedExperienceId) {
+      setSelectedExperienceId(nextSelectedExperienceId);
+      setPanelOpen(true);
+    } else {
       setSelectedExperienceId(undefined);
       setPanelOpen(false);
     }
-  }, [initialSelectedExperienceId]);
+  }, [clearCloseTimer, initialSelectedExperienceId]);
+
+  React.useEffect(() => {
+    syncRouteSelection();
+    window.addEventListener('popstate', syncRouteSelection);
+
+    return () => window.removeEventListener('popstate', syncRouteSelection);
+  }, [syncRouteSelection]);
 
   const applyInitialSelectedExperience = React.useCallback(
     (experiences: readonly ExperienceSelectionItem[]) => {
@@ -176,8 +190,9 @@ export function useExperienceBoardSelection({
       params.set('view', 'detail');
 
       router.push(`/experience?${params.toString()}`);
+      onDetailViewRequest?.(experienceId);
     },
-    [router, selectedCategory],
+    [onDetailViewRequest, router, selectedCategory],
   );
 
   return {
