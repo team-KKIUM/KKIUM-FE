@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 export interface ExperienceBoardProps extends React.ComponentProps<'section'> {
   initialSelectedExperienceId?: string;
   keyword?: string;
+  onDetailViewRequest?: (experienceId: string) => void;
 }
 
 const filterPieceTypeByCategory: Record<
@@ -51,6 +52,7 @@ const ExperienceDetailPanel = dynamic<ExperienceDetailPanelProps>(
 export function ExperienceBoard({
   initialSelectedExperienceId,
   keyword,
+  onDetailViewRequest,
   className,
   ...props
 }: ExperienceBoardProps) {
@@ -67,6 +69,7 @@ export function ExperienceBoard({
   } = useExperienceBoardSelection({
     initialSelectedExperienceId,
     keyword,
+    onDetailViewRequest,
   });
   const selectedPieceType =
     selectedCategory === 'all' ? undefined : filterPieceTypeByCategory[selectedCategory];

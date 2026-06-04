@@ -1,8 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { notFound, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import * as React from 'react';
 
 import { ExperienceBoard } from '@/app/(pages)/experience/_components/ExperienceBoard';
@@ -26,13 +25,11 @@ export function ExperiencePageContent() {
   const debouncedKeyword = useDebouncedValue(keyword.trim(), 500);
 
   return (
-    <Suspense>
-      <ExperiencePageRouteContent
-        keyword={keyword}
-        debouncedKeyword={debouncedKeyword}
-        onKeywordChange={setKeyword}
-      />
-    </Suspense>
+    <ExperiencePageRouteContent
+      keyword={keyword}
+      debouncedKeyword={debouncedKeyword}
+      onKeywordChange={setKeyword}
+    />
   );
 }
 
@@ -71,34 +68,88 @@ interface ExperiencePageRouteContentProps {
   onKeywordChange: (keyword: string) => void;
 }
 
+function getDetailExperienceIdFromSearch() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const selectedExperienceId = searchParams.get('selected');
+
+  if (searchParams.get('view') !== 'detail') {
+    return { experienceId: null, invalid: false };
+  }
+
+  const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
+
+  if (
+    numericExperienceId === null ||
+    !Number.isInteger(numericExperienceId) ||
+    numericExperienceId <= 0
+  ) {
+    return { experienceId: null, invalid: true };
+  }
+
+  return { experienceId: numericExperienceId, invalid: false };
+}
+
 function ExperiencePageRouteContent({
   keyword,
   debouncedKeyword,
   onKeywordChange,
 }: ExperiencePageRouteContentProps) {
-  const searchParams = useSearchParams();
-  const selectedExperienceId = searchParams.get('selected');
-  const isDetailView = searchParams.get('view') === 'detail';
+  const [detailExperienceId, setDetailExperienceId] = React.useState<number | null>(null);
+  const [hasInvalidDetailParam, setHasInvalidDetailParam] = React.useState(false);
 
-  if (isDetailView) {
-    const numericExperienceId = selectedExperienceId ? Number(selectedExperienceId) : null;
+  const syncDetailRoute = React.useCallback(() => {
+    const { experienceId, invalid } = getDetailExperienceIdFromSearch();
 
-    if (
-      numericExperienceId === null ||
-      !Number.isInteger(numericExperienceId) ||
-      numericExperienceId <= 0
-    ) {
-      notFound();
+    setDetailExperienceId(experienceId);
+    setHasInvalidDetailParam(invalid);
+  }, []);
+
+  React.useEffect(() => {
+    syncDetailRoute();
+    window.addEventListener('popstate', syncDetailRoute);
+
+    return () => window.removeEventListener('popstate', syncDetailRoute);
+  }, [syncDetailRoute]);
+
+  const handleDetailViewRequest = React.useCallback((experienceId: string) => {
+    const numericExperienceId = Number(experienceId);
+
+    if (!Number.isInteger(numericExperienceId) || numericExperienceId <= 0) {
+      setDetailExperienceId(null);
+      setHasInvalidDetailParam(true);
+      return;
     }
 
-    return <ExperienceDetailPageContent experienceId={numericExperienceId} />;
+    setDetailExperienceId(numericExperienceId);
+    setHasInvalidDetailParam(false);
+  }, []);
+
+  const handleDetailRouteExit = React.useCallback(() => {
+    setDetailExperienceId(null);
+    setHasInvalidDetailParam(false);
+  }, []);
+
+  if (hasInvalidDetailParam) {
+    notFound();
+  }
+
+  if (detailExperienceId) {
+    return (
+      <ExperienceDetailPageContent
+        experienceId={detailExperienceId}
+        onRouteExit={handleDetailRouteExit}
+      />
+    );
   }
 
   return (
     <div className="flex min-h-[calc(100vh-32px)] flex-col">
       <div className="flex flex-1 flex-col gap-5">
         <ExperiencePageHeader keyword={keyword} onKeywordChange={onKeywordChange} />
-        <ExperienceBoard keyword={debouncedKeyword || undefined} />
+        <ExperienceBoard
+          keyword={debouncedKeyword || undefined}
+          onDetailViewRequest={handleDetailViewRequest}
+        />
       </div>
     </div>
   );

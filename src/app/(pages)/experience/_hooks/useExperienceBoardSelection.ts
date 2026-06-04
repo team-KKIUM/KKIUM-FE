@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import type { ExperienceCategory } from '@/app/(pages)/experience/_utils/ExperienceCategory';
@@ -13,29 +13,37 @@ interface ExperienceSelectionItem {
 interface UseExperienceBoardSelectionParams {
   initialSelectedExperienceId?: string;
   keyword?: string;
+  onDetailViewRequest?: (experienceId: string) => void;
 }
 
 function isExperienceCategory(category: string | null): category is ExperienceCategory {
   return EXPERIENCE_ORDER_CATEGORIES.includes(category as ExperienceCategory);
 }
 
+function getCurrentSearchParams() {
+  if (typeof window === 'undefined') {
+    return new URLSearchParams();
+  }
+
+  return new URLSearchParams(window.location.search);
+}
+
 export function useExperienceBoardSelection({
   initialSelectedExperienceId,
   keyword,
+  onDetailViewRequest,
 }: UseExperienceBoardSelectionParams) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const selectedExperienceIdFromQuery = searchParams.get('selected') ?? initialSelectedExperienceId;
-  const selectedCategoryFromQuery = searchParams.get('category');
-  const initialSelectedCategory = isExperienceCategory(selectedCategoryFromQuery)
-    ? selectedCategoryFromQuery
-    : 'all';
-  const [selectedCategory, setSelectedCategory] =
-    React.useState<ExperienceCategory>(initialSelectedCategory);
+  const [selectedCategory, setSelectedCategory] = React.useState<ExperienceCategory>('all');
   const [selectedExperienceId, setSelectedExperienceId] = React.useState<string | undefined>(
-    selectedExperienceIdFromQuery,
+    initialSelectedExperienceId,
   );
-  const [panelOpen, setPanelOpen] = React.useState(Boolean(selectedExperienceIdFromQuery));
+  const [panelOpen, setPanelOpen] = React.useState(Boolean(initialSelectedExperienceId));
+  const [initialSelectedCategory, setInitialSelectedCategory] =
+    React.useState<ExperienceCategory>('all');
+  const [selectedExperienceIdFromQuery, setSelectedExperienceIdFromQuery] = React.useState<
+    string | undefined
+  >(initialSelectedExperienceId);
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAppliedInitialSelectionRef = React.useRef(false);
   const previousKeywordRef = React.useRef(keyword);
@@ -46,6 +54,36 @@ export function useExperienceBoardSelection({
       closeTimerRef.current = null;
     }
   }, []);
+
+  const syncRouteSelection = React.useCallback(() => {
+    clearCloseTimer();
+    const searchParams = getCurrentSearchParams();
+    const nextSelectedExperienceId = searchParams.get('selected') ?? initialSelectedExperienceId;
+    const selectedCategoryFromQuery = searchParams.get('category');
+    const nextSelectedCategory = isExperienceCategory(selectedCategoryFromQuery)
+      ? selectedCategoryFromQuery
+      : 'all';
+
+    hasAppliedInitialSelectionRef.current = false;
+    setInitialSelectedCategory(nextSelectedCategory);
+    setSelectedCategory(nextSelectedCategory);
+    setSelectedExperienceIdFromQuery(nextSelectedExperienceId);
+
+    if (nextSelectedExperienceId) {
+      setSelectedExperienceId(nextSelectedExperienceId);
+      setPanelOpen(true);
+    } else {
+      setSelectedExperienceId(undefined);
+      setPanelOpen(false);
+    }
+  }, [clearCloseTimer, initialSelectedExperienceId]);
+
+  React.useEffect(() => {
+    syncRouteSelection();
+    window.addEventListener('popstate', syncRouteSelection);
+
+    return () => window.removeEventListener('popstate', syncRouteSelection);
+  }, [syncRouteSelection]);
 
   const applyInitialSelectedExperience = React.useCallback(
     (experiences: readonly ExperienceSelectionItem[]) => {
@@ -80,7 +118,7 @@ export function useExperienceBoardSelection({
     setSelectedExperienceId(undefined);
     setPanelOpen(false);
 
-    const params = new URLSearchParams(searchParams.toString());
+    const params = getCurrentSearchParams();
 
     params.delete('selected');
 
@@ -93,7 +131,7 @@ export function useExperienceBoardSelection({
     router.replace(params.size > 0 ? `/experience?${params.toString()}` : '/experience', {
       scroll: false,
     });
-  }, [clearCloseTimer, keyword, router, searchParams, selectedCategory]);
+  }, [clearCloseTimer, keyword, router, selectedCategory]);
 
   React.useEffect(() => clearCloseTimer, [clearCloseTimer]);
 
@@ -145,15 +183,16 @@ export function useExperienceBoardSelection({
         return;
       }
 
-      const params = new URLSearchParams(searchParams.toString());
+      const params = getCurrentSearchParams();
 
       params.set('selected', experienceId);
       params.set('category', selectedCategory);
       params.set('view', 'detail');
 
       router.push(`/experience?${params.toString()}`);
+      onDetailViewRequest?.(experienceId);
     },
-    [router, searchParams, selectedCategory],
+    [onDetailViewRequest, router, selectedCategory],
   );
 
   return {

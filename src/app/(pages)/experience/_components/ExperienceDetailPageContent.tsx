@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -16,10 +16,13 @@ import { useExperienceDetail, useUpdateExperience } from '@/hooks/experience/use
 
 export interface ExperienceDetailPageContentProps {
   experienceId: number;
+  onRouteExit?: () => void;
 }
 
-export function ExperienceDetailPageContent({ experienceId }: ExperienceDetailPageContentProps) {
-  const router = useRouter();
+export function ExperienceDetailPageContent({
+  experienceId,
+  onRouteExit,
+}: ExperienceDetailPageContentProps) {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
   const { data, isError, isPending } = useExperienceDetail(experienceId);
@@ -33,11 +36,13 @@ export function ExperienceDetailPageContent({ experienceId }: ExperienceDetailPa
       params.set('category', category);
     }
 
-    router.push(`/experience?${params.toString()}`);
+    window.history.pushState(null, '', `/experience?${params.toString()}`);
+    onRouteExit?.();
   };
 
   const handleBackToExperience = () => {
-    router.push('/experience');
+    window.history.pushState(null, '', '/experience');
+    onRouteExit?.();
   };
 
   const handleExperienceSave = async (nextExperience: ExperienceDetailSaveValue) => {

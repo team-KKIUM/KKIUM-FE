@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import type { ExperienceAddMaterialModalView } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
@@ -17,9 +17,6 @@ import { Button } from '@/components/ui/button';
 
 export function ExperienceAddPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isNotionConnected =
-    searchParams.get('notion') === 'connected' || searchParams.get('success') === 'true';
   const {
     currentStepIndex,
     isFirstStep,
@@ -31,9 +28,9 @@ export function ExperienceAddPageContent() {
     goNextStep: goToNextStep,
   } = useExperienceAddStep();
   const { materials, setMaterials } = useExperienceAddMaterials();
-  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(isNotionConnected);
+  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const [materialModalInitialView, setMaterialModalInitialView] =
-    useState<ExperienceAddMaterialModalView>(isNotionConnected ? 'notion-pages' : 'material');
+    useState<ExperienceAddMaterialModalView>('material');
   const {
     basicInfo,
     coreInfo,
@@ -68,10 +65,21 @@ export function ExperienceAddPageContent() {
   });
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isNotionConnected =
+      searchParams.get('notion') === 'connected' || searchParams.get('success') === 'true';
+
     if (!isNotionConnected) return;
 
+    const frameId = window.requestAnimationFrame(() => {
+      setMaterialModalInitialView('notion-pages');
+      setIsMaterialModalOpen(true);
+    });
+
     router.replace('/experience/add', { scroll: false });
-  }, [isNotionConnected, router]);
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [router]);
 
   return (
     <div className="flex min-h-dvh flex-col py-5">
