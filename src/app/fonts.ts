@@ -24,7 +24,7 @@ export const nanumSquare = localFont({
     },
   ],
   display: 'swap',
-  preload: true,
+  preload: false,
   fallback: ['system-ui', 'Apple SD Gothic Neo', 'Malgun Gothic', 'sans-serif'],
   adjustFontFallback: 'Arial',
 });
