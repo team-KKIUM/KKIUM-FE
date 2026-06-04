@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ErrorDialog } from '@/components/common/ErrorDialog';
@@ -20,11 +19,12 @@ import { isJdAnalysisInProgress } from '@/app/api/apply/jdAnalysisStatus';
 import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
 import { useSaveApplyCoverLetter } from '@/hooks/apply/useApplyJobPostings';
+import { useClientSearchParams } from '@/hooks/useClientSearchParams';
 import { cn } from '@/lib/utils';
 
 export function ApplyPageClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useClientSearchParams();
   const jdId = searchParams.get('jdid') ?? searchParams.get('jdId');
   const { analysisStatus, isAnalysisLoading } = useApplyJobAnalysis(jdId);
   const { jobPosting } = useApplyJobPostingSnapshot(jdId);

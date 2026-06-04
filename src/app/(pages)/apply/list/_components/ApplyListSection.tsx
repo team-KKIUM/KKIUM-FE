@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { arrayMove } from '@dnd-kit/helpers';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
@@ -9,6 +9,7 @@ import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 import type { ApplyListItem } from '@/app/(pages)/apply/_constants/applyMockData';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingLottie } from '@/components/common/LoadingLottie';
+import { useClientSearchParams } from '@/hooks/useClientSearchParams';
 import {
   useDeleteApplyJobPosting,
   useInfiniteApplyJobPostings,
@@ -26,7 +27,7 @@ export interface ApplyListSectionProps {
 
 export function ApplyListSection({ keyword, initialSelectedJdId }: ApplyListSectionProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useClientSearchParams();
   const isDragDisabled = Boolean(keyword?.trim());
   const listParams = React.useMemo(
     () => ({

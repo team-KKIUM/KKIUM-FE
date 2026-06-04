@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -12,6 +11,7 @@ import { mapExperienceItemToUpdateRequest } from '@/app/(pages)/experience/_util
 import { EmptyState } from '@/components/common/EmptyState';
 import { ExpandIcon } from '@/components/common/icons/ExpandIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
+import { useClientSearchParams } from '@/hooks/useClientSearchParams';
 import { useExperienceDetail, useUpdateExperience } from '@/hooks/experience/useExperiences';
 
 export interface ExperienceDetailPageContentProps {
@@ -23,7 +23,7 @@ export function ExperienceDetailPageContent({
   experienceId,
   onRouteExit,
 }: ExperienceDetailPageContentProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useClientSearchParams();
   const category = searchParams.get('category');
   const { data, isError, isPending } = useExperienceDetail(experienceId);
   const updateExperienceMutation = useUpdateExperience();
