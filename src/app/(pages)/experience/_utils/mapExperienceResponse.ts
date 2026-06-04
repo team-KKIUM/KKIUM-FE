@@ -1,7 +1,6 @@
 import type {
   ExperienceCardResponse,
   ExperienceDetailResponse,
-  ExperiencePieceType,
   TagResponse,
 } from '@/app/api/experience/types';
 import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
