@@ -1,16 +1,32 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { consumeOAuthState, requestSocialLoginOnce } from '@/app/_utils/authFetch';
 import { TermsAgreementModal } from '@/app/oauth/_components/TermsAgreementModal';
 import { trackEvent } from '@/lib/analytics';
 
 export type OAuthProvider = 'google' | 'kakao';
 
+/**
+ * `output: 'export'` + `useSearchParams` leaves a CSR bailout placeholder and breaks hydration (#418).
+ * Read OAuth query params from `window.location` instead (same approach as LoginErrorBanner).
+ */
+function readOAuthCallbackSearchParams() {
+  if (typeof window === 'undefined') {
+    return { code: null, error: null, state: null };
+  }
+
+  const search = new URLSearchParams(window.location.search);
+  return {
+    code: search.get('code'),
+    error: search.get('error'),
+    state: search.get('state'),
+  };
+}
+
 export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [showTermsAgreement, setShowTermsAgreement] = useState(false);
   /** Ensures OAuth callback logic (incl. consumeOAuthState) runs once per mount; avoids Strict Mode / dependency re-runs wiping state. */
   const requestedRef = useRef(false);
@@ -21,9 +37,7 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
     }
     requestedRef.current = true;
 
-    const code = searchParams.get('code');
-    const error = searchParams.get('error');
-    const incomingState = searchParams.get('state');
+    const { code, error, state: incomingState } = readOAuthCallbackSearchParams();
     const persistedState = consumeOAuthState(provider);
     if (!incomingState || !persistedState || incomingState !== persistedState) {
       router.replace('/login?error=invalid_state');
@@ -53,7 +67,7 @@ export function OAuthCallbackClient({ provider }: { provider: OAuthProvider }) {
         const message = err instanceof Error ? err.message : 'auth_failed';
         router.replace(`/login?error=${encodeURIComponent(message)}`);
       });
-  }, [provider, router, searchParams]);
+  }, [provider, router]);
 
   return (
     <TermsAgreementModal

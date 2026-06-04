@@ -1,54 +1,20 @@
+import dynamic from 'next/dynamic';
 import * as React from 'react';
-import { arrayMove } from '@dnd-kit/helpers';
-import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
-import { isSortable } from '@dnd-kit/react/sortable';
 
 import { ExperienceCard } from '@/app/(pages)/experience/_components/ExperienceCard';
-import { SortableExperienceCard } from '@/app/(pages)/experience/_components/SortableExperienceCard';
-import type { ExperienceCategory } from '@/app/(pages)/experience/_components/ExperienceCategoryTab';
+import {
+  EXPERIENCE_CARD_GRID_CLASS_NAME,
+  type ExperienceCardGridProps,
+  type ExperienceSortableCardGridProps,
+} from '@/app/(pages)/experience/_components/experienceCardGridTypes';
 import { cn } from '@/lib/utils';
 
-export interface ExperienceItem {
-  id: string;
-  type: Exclude<ExperienceCategory, 'all'>;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  period: string;
-  detailInfo: {
-    label: string;
-    value: string;
-  }[];
-  basicDetail: {
-    name?: string;
-    teamNum?: string;
-    role?: string;
-    contributionRate?: string;
-    company?: string;
-    employmentStatus?: string;
-    organizationName?: string;
-  };
-  skillTags: string[];
-  competencyTags: string[];
-  detail: {
-    situation: string;
-    task: string;
-    action: string;
-    result: string;
-    taken: string;
-  };
-}
+export type { ExperienceCardGridProps, ExperienceItem } from './experienceCardGridTypes';
 
-export interface ExperienceCardGridProps extends React.ComponentProps<'div'> {
-  experiences: ExperienceItem[];
-  selectedExperienceId?: string;
-  sortable?: boolean;
-  onExperienceClick?: (experience: ExperienceItem) => void;
-  onExperienceDelete?: (experience: ExperienceItem) => Promise<void> | void;
-  onExperienceReorder?: (experienceIds: string[]) => void;
-  onExperienceTitleSave?: (experience: ExperienceItem, nextTitle: string) => Promise<void> | void;
-}
+const ExperienceSortableCardGrid = dynamic<ExperienceSortableCardGridProps>(
+  () => import('@/app/(pages)/experience/_components/ExperienceSortableCardGrid'),
+  { ssr: false },
+);
 
 export function ExperienceCardGrid({
   experiences,
@@ -61,70 +27,63 @@ export function ExperienceCardGrid({
   className,
   ...props
 }: ExperienceCardGridProps) {
-  const handleDragEnd = React.useCallback(
-    (event: DragEndEvent) => {
-      if (event.canceled) {
-        return;
-      }
+  const [sortableGridReady, setSortableGridReady] = React.useState(false);
 
-      const { source } = event.operation;
+  React.useEffect(() => {
+    if (!sortable) {
+      setSortableGridReady(false);
+    }
+  }, [sortable]);
 
-      if (!isSortable(source)) {
-        return;
-      }
+  const handleSortableGridReady = React.useCallback(() => {
+    setSortableGridReady(true);
+  }, []);
 
-      const { initialIndex, index } = source;
-
-      if (initialIndex === index) {
-        return;
-      }
-
-      const nextExperiences = arrayMove(experiences, initialIndex, index);
-
-      onExperienceReorder?.(nextExperiences.map((experience) => experience.id));
-    },
-    [experiences, onExperienceReorder],
-  );
-
-  const grid = (
+  const renderGrid = (gridProps?: React.ComponentProps<'div'>) => (
     <div
       data-slot="experience-card-grid"
-      className={cn('grid w-full grid-cols-2 gap-x-4 gap-y-5 min-[1720px]:grid-cols-3', className)}
-      {...props}
+      className={cn(EXPERIENCE_CARD_GRID_CLASS_NAME, className)}
+      {...gridProps}
     >
-      {experiences.map((experience, index) =>
-        sortable ? (
-          <SortableExperienceCard
-            key={experience.id}
-            experience={experience}
-            index={index}
-            selected={selectedExperienceId === experience.id}
-            onClick={onExperienceClick}
-            onDelete={onExperienceDelete}
-            onTitleSave={onExperienceTitleSave}
-          />
-        ) : (
-          <ExperienceCard
-            key={experience.id}
-            type={experience.type}
-            title={experience.title}
-            period={experience.period}
-            skillTags={experience.skillTags}
-            competencyTags={experience.competencyTags}
-            selected={selectedExperienceId === experience.id}
-            className="max-w-none"
-            onClick={() => onExperienceClick?.(experience)}
-            onDelete={() => onExperienceDelete?.(experience)}
-            onTitleSave={(nextTitle) => onExperienceTitleSave?.(experience, nextTitle)}
-          />
-        ),
-      )}
+      {experiences.map((experience) => (
+        <ExperienceCard
+          key={experience.id}
+          type={experience.type}
+          title={experience.title}
+          period={experience.period}
+          skillTags={experience.skillTags}
+          competencyTags={experience.competencyTags}
+          selected={selectedExperienceId === experience.id}
+          className="max-w-none"
+          onClick={() => onExperienceClick?.(experience)}
+          onDelete={() => onExperienceDelete?.(experience)}
+          onTitleSave={(nextTitle) => onExperienceTitleSave?.(experience, nextTitle)}
+        />
+      ))}
     </div>
   );
+
+  const grid = renderGrid(props);
+  const fallbackGrid = renderGrid();
 
   if (!sortable) {
     return grid;
   }
 
-  return <DragDropProvider onDragEnd={handleDragEnd}>{grid}</DragDropProvider>;
+  return (
+    <>
+      {!sortableGridReady && fallbackGrid}
+      <ExperienceSortableCardGrid
+        experiences={experiences}
+        selectedExperienceId={selectedExperienceId}
+        onExperienceClick={onExperienceClick}
+        onExperienceDelete={onExperienceDelete}
+        onExperienceReorder={onExperienceReorder}
+        onExperienceTitleSave={onExperienceTitleSave}
+        onReady={handleSortableGridReady}
+        className={cn(className, !sortableGridReady && 'hidden')}
+        {...props}
+      />
+    </>
+  );
 }

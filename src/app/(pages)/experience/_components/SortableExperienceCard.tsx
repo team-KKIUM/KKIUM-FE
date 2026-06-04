@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/react/sortable';
 
 import { ExperienceCard } from '@/app/(pages)/experience/_components/ExperienceCard';
-import type { ExperienceItem } from '@/app/(pages)/experience/_components/ExperienceCardGrid';
+import type { ExperienceItem } from '@/app/(pages)/experience/_components/experienceCardGridTypes';
 import { cn } from '@/lib/utils';
 
 export interface SortableExperienceCardProps {
