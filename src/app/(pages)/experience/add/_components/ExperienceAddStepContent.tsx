@@ -24,7 +24,6 @@ const ExperienceAddAnalyzingStep = dynamic(
     ),
   {
     ssr: false,
-    loading: ExperienceAddStepLoading,
   },
 );
 
