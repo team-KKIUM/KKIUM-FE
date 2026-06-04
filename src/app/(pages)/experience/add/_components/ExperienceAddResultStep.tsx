@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 type EditableTagGroupKey = 'skill' | 'competency';
 
-interface ExperienceAddResultStepProps {
+export interface ExperienceAddResultStepProps {
   basicInfo: ExperienceAddBasicInfoForm;
   coreInfo: ExperienceAddCoreInfoForm;
   resultInfo: ExperienceAddResultInfoForm;

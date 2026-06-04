@@ -1,13 +1,14 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 
-import {
-  ExperienceAddMaterialModal,
-  type PdfMaterial,
-  type ExperienceAddMaterialModalView,
-  type ExperienceMaterial,
+import type {
+  ExperienceAddMaterialModalProps,
+  ExperienceAddMaterialModalView,
+  ExperienceMaterial,
+  PdfMaterial,
 } from '@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal';
 import {
   clearExperienceAddPdfDraft,
@@ -25,6 +26,17 @@ import { Tag } from '@/components/common/Tag';
 import { PlusIcon } from '@/components/common/icons/PlusIcon';
 import { XIcon } from '@/components/common/icons/XIcon';
 import { Button } from '@/components/ui/button';
+
+const ExperienceAddMaterialModal = dynamic<ExperienceAddMaterialModalProps>(
+  () =>
+    import('@/app/(pages)/experience/add/_components/ExperienceAddMaterialModal').then(
+      (mod) => mod.ExperienceAddMaterialModal,
+    ),
+  {
+    ssr: false,
+    loading: ExperienceAddMaterialModalLoading,
+  },
+);
 
 interface ExperienceAddUploadStepProps {
   materials: ExperienceMaterial[];
@@ -156,6 +168,22 @@ export function ExperienceAddUploadStep({
         </div>
       )}
     </section>
+  );
+}
+
+function ExperienceAddMaterialModalLoading() {
+  return (
+    <div className="flex min-h-[360px] w-full animate-pulse flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <div className="h-7 w-32 rounded bg-gray-200" />
+        <div className="h-5 w-56 rounded bg-gray-100" />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-[180px] rounded-xl bg-gray-100" />
+        <div className="h-[180px] rounded-xl bg-gray-100" />
+      </div>
+      <div className="ml-auto h-10 w-24 rounded bg-gray-200" />
+    </div>
   );
 }
 

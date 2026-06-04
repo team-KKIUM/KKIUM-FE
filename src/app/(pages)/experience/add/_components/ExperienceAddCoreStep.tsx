@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 const CORE_FIELD_MAX_LENGTH = 1000;
 
-interface ExperienceAddCoreStepProps {
+export interface ExperienceAddCoreStepProps {
   value: ExperienceAddCoreInfoForm;
   onChange: (value: ExperienceAddCoreInfoForm) => void;
 }

@@ -31,7 +31,7 @@ export interface NotionMaterial {
 export type ExperienceMaterial = PdfMaterial | NotionMaterial;
 export type ExperienceAddMaterialModalView = 'material' | 'notion-connect' | 'notion-pages';
 
-interface ExperienceAddMaterialModalProps {
+export interface ExperienceAddMaterialModalProps {
   materials: ExperienceMaterial[];
   initialView?: ExperienceAddMaterialModalView;
   onSave: (materials: ExperienceMaterial[]) => void;
