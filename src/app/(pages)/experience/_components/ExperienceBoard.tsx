@@ -153,6 +153,20 @@ export function ExperienceBoard({
     experienceOrderMap,
     setExperienceOrderMap,
   });
+  const [shouldRenderDeleteDialog, setShouldRenderDeleteDialog] = React.useState(false);
+  const [shouldRenderErrorDialog, setShouldRenderErrorDialog] = React.useState(false);
+
+  React.useEffect(() => {
+    if (deleteTargetExperience) {
+      setShouldRenderDeleteDialog(true);
+    }
+  }, [deleteTargetExperience]);
+
+  React.useEffect(() => {
+    if (errorMessage.length > 0) {
+      setShouldRenderErrorDialog(true);
+    }
+  }, [errorMessage]);
 
   return (
     <section
@@ -212,20 +226,28 @@ export function ExperienceBoard({
           onClose={handlePanelClose}
         />
       )}
-      {deleteTargetExperience && (
+      {shouldRenderDeleteDialog && (
         <ConfirmDialog
-          open
+          open={Boolean(deleteTargetExperience)}
           title="정말로 삭제하시겠습니까?"
           description="삭제시 모든 기록과 분석 내용이 소멸됩니다."
           confirmLabel="삭제하기"
           confirming={isDeletingExperience}
           destructive
           onOpenChange={handleDeleteDialogOpenChange}
-          onConfirm={() => void handleExperienceDeleteConfirm(deleteTargetExperience)}
+          onConfirm={() => {
+            if (deleteTargetExperience) {
+              void handleExperienceDeleteConfirm(deleteTargetExperience);
+            }
+          }}
         />
       )}
-      {errorMessage.length > 0 && (
-        <ErrorDialog open message={errorMessage} onOpenChange={handleErrorDialogOpenChange} />
+      {shouldRenderErrorDialog && (
+        <ErrorDialog
+          open={errorMessage.length > 0}
+          message={errorMessage}
+          onOpenChange={handleErrorDialogOpenChange}
+        />
       )}
     </section>
   );
