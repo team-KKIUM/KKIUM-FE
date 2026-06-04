@@ -16,9 +16,9 @@ import { useExperienceBoardReorder } from '@/app/(pages)/experience/_hooks/useEx
 import { useExperienceBoardSelection } from '@/app/(pages)/experience/_hooks/useExperienceBoardSelection';
 import { mapExperienceCardToItem } from '@/app/(pages)/experience/_utils/mapExperienceResponse';
 import type { PieceType } from '@/app/api/experience/types';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import type { ConfirmDialogProps } from '@/components/common/ConfirmDialog';
 import { EmptyState } from '@/components/common/EmptyState';
-import { ErrorDialog } from '@/components/common/ErrorDialog';
+import type { ErrorDialogProps } from '@/components/common/ErrorDialog';
 import { useInfiniteExperiences } from '@/hooks/experience/useExperiences';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +37,16 @@ const filterPieceTypeByCategory: Record<
   education: 'EDUCATION',
   etc: 'ETC',
 };
+
+const ConfirmDialog = dynamic<ConfirmDialogProps>(
+  () => import('@/components/common/ConfirmDialog').then((mod) => mod.ConfirmDialog),
+  { ssr: false },
+);
+
+const ErrorDialog = dynamic<ErrorDialogProps>(
+  () => import('@/components/common/ErrorDialog').then((mod) => mod.ErrorDialog),
+  { ssr: false },
+);
 
 const ExperienceDetailPanel = dynamic<ExperienceDetailPanelProps>(
   () =>
@@ -143,6 +153,20 @@ export function ExperienceBoard({
     experienceOrderMap,
     setExperienceOrderMap,
   });
+  const [shouldRenderDeleteDialog, setShouldRenderDeleteDialog] = React.useState(false);
+  const [shouldRenderErrorDialog, setShouldRenderErrorDialog] = React.useState(false);
+
+  React.useEffect(() => {
+    if (deleteTargetExperience) {
+      setShouldRenderDeleteDialog(true);
+    }
+  }, [deleteTargetExperience]);
+
+  React.useEffect(() => {
+    if (errorMessage.length > 0) {
+      setShouldRenderErrorDialog(true);
+    }
+  }, [errorMessage]);
 
   return (
     <section
@@ -156,9 +180,7 @@ export function ExperienceBoard({
       />
       {/* TODO: 로딩/에러 상태 전용 UI가 확정되면 임시 EmptyState를 교체한다. */}
       {showListLoading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <EmptyState title="경험을 불러오는 중이에요" illustrationLabel="경험 목록 로딩 중" />
-        </div>
+        <ExperienceCardGridSkeleton />
       ) : isError ? (
         <div className="flex flex-1 items-center justify-center">
           <EmptyState
@@ -204,26 +226,61 @@ export function ExperienceBoard({
           onClose={handlePanelClose}
         />
       )}
-      <ConfirmDialog
-        open={Boolean(deleteTargetExperience)}
-        title="정말로 삭제하시겠습니까?"
-        description="삭제시 모든 기록과 분석 내용이 소멸됩니다."
-        confirmLabel="삭제하기"
-        confirming={isDeletingExperience}
-        destructive
-        onOpenChange={handleDeleteDialogOpenChange}
-        onConfirm={() => {
-          if (deleteTargetExperience) {
-            void handleExperienceDeleteConfirm(deleteTargetExperience);
-          }
-        }}
-      />
-      <ErrorDialog
-        open={errorMessage.length > 0}
-        message={errorMessage}
-        onOpenChange={handleErrorDialogOpenChange}
-      />
+      {shouldRenderDeleteDialog && (
+        <ConfirmDialog
+          open={Boolean(deleteTargetExperience)}
+          title="정말로 삭제하시겠습니까?"
+          description="삭제시 모든 기록과 분석 내용이 소멸됩니다."
+          confirmLabel="삭제하기"
+          confirming={isDeletingExperience}
+          destructive
+          onOpenChange={handleDeleteDialogOpenChange}
+          onConfirm={() => {
+            if (deleteTargetExperience) {
+              void handleExperienceDeleteConfirm(deleteTargetExperience);
+            }
+          }}
+        />
+      )}
+      {shouldRenderErrorDialog && (
+        <ErrorDialog
+          open={errorMessage.length > 0}
+          message={errorMessage}
+          onOpenChange={handleErrorDialogOpenChange}
+        />
+      )}
     </section>
+  );
+}
+
+function ExperienceCardGridSkeleton() {
+  return (
+    <div
+      aria-label="경험 목록 로딩 중"
+      className="grid w-full grid-cols-2 gap-x-4 gap-y-5 min-[1720px]:grid-cols-3"
+    >
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex min-h-[214px] w-full animate-pulse flex-col justify-between gap-2 rounded-xl border border-border-default bg-background-w px-[18px] py-5"
+        >
+          <div className="flex w-full items-start justify-between">
+            <div className="size-[72px] rounded-full bg-gray-100" />
+            <div className="size-8 rounded bg-gray-100" />
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <div className="h-7 w-3/4 rounded bg-gray-200" />
+              <div className="h-4 w-1/2 rounded bg-gray-100" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <div className="h-6 w-40 rounded-full bg-gray-100" />
+              <div className="h-6 w-28 rounded-full bg-gray-100" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

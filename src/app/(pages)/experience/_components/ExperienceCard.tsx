@@ -1,14 +1,22 @@
+'use client';
+
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { ErrorDialog } from '@/components/common/ErrorDialog';
+import type { ErrorDialogProps } from '@/components/common/ErrorDialog';
 import { Tag } from '@/components/common/Tag';
 import { getExperienceCategoryIconSrc } from '@/app/(pages)/experience/_utils/ExperienceCategory';
 import { EXPERIENCE_FIELD_MAX_LENGTHS } from '@/app/(pages)/experience/_utils/experienceFieldLimits';
 import { cn } from '@/lib/utils';
 import { ExperienceCardDropdownMenu } from './ExperienceCardDropdownMenu';
 import type { ExperienceCategory } from './ExperienceCategoryTab';
+
+const ErrorDialog = dynamic<ErrorDialogProps>(
+  () => import('@/components/common/ErrorDialog').then((mod) => mod.ErrorDialog),
+  { ssr: false },
+);
 
 const experienceCardVariants = cva(
   'flex w-full flex-col justify-between gap-2 overflow-hidden rounded-xl border border-border-default bg-background-w px-[18px] py-5 transition-shadow focus-visible:shadow-focus-ring focus-visible:outline-none',
@@ -76,6 +84,7 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
     const [isEditingTitle, setIsEditingTitle] = React.useState(false);
     const [isTitleSaving, setIsTitleSaving] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState('');
+    const [shouldRenderErrorDialog, setShouldRenderErrorDialog] = React.useState(false);
     const titleInputRef = React.useRef<HTMLInputElement>(null);
     const isCommittingTitleRef = React.useRef(false);
 
@@ -94,6 +103,12 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
       titleInput?.focus();
       titleInput?.setSelectionRange(titleInput.value.length, titleInput.value.length);
     }, [isEditingTitle]);
+
+    React.useEffect(() => {
+      if (errorMessage.length > 0) {
+        setShouldRenderErrorDialog(true);
+      }
+    }, [errorMessage]);
 
     const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
       onKeyDown?.(event);
@@ -225,15 +240,17 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
             </div>
           </div>
         </article>
-        <ErrorDialog
-          open={errorMessage.length > 0}
-          message={errorMessage}
-          onOpenChange={(open) => {
-            if (!open) {
-              setErrorMessage('');
-            }
-          }}
-        />
+        {shouldRenderErrorDialog && (
+          <ErrorDialog
+            open={errorMessage.length > 0}
+            message={errorMessage}
+            onOpenChange={(open) => {
+              if (!open) {
+                setErrorMessage('');
+              }
+            }}
+          />
+        )}
       </>
     );
   },

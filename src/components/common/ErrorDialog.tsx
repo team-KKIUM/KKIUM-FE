@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { WarningTriangleIcon } from '@/components/common/icons/WarningTriangleIcon';
 
-interface ErrorDialogProps {
+export interface ErrorDialogProps {
   open: boolean;
   message: React.ReactNode;
   title?: string;
