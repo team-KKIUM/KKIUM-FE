@@ -8,7 +8,10 @@ import { useApplyJobAnalysis } from '@/hooks/apply/useApplyJobAnalysis';
 import { useApplyJobPostingSnapshot } from '@/hooks/apply/useApplyJobPostingSnapshot';
 import { trackEvent } from '@/lib/analytics';
 
-import { isJdAnalysisFailed } from '@/app/api/apply/jdAnalysisStatus';
+import {
+  isJdAnalysisFailed,
+  isJdAnalysisInProgress,
+} from '@/app/api/apply/jdAnalysisStatus';
 import { useApplyHighlightKeywordStore } from '@/app/(pages)/apply/_stores/useApplyHighlightKeywordStore';
 import { mapJdAnalysisToView } from '../../_utils/mapJdAnalysisToView';
 import { ApplyFitScore } from './ApplyFitScore';
@@ -183,9 +186,17 @@ export function ApplyAnalysis({ jdId }: ApplyAnalysisProps) {
     on: !graySoftSkillKeywordSet.has(normalizeComparableKeyword(item.label)),
   }));
 
+  const isAnalysisInProgress = isJdAnalysisInProgress(analysisStatus);
+
   return (
     <section className="flex w-full flex-col gap-8">
       <ApplySectionHeader title="공고 분석" infoVariant="job-analysis" />
+
+      {isAnalysisInProgress ? (
+        <p className="body-3-regular text-tertiary" aria-live="polite">
+          공고 분석 결과를 불러오는 중이에요. 아래 내용이 순차적으로 채워질 수 있어요.
+        </p>
+      ) : null}
 
       <ApplyFitScore value={fitScore} />
 

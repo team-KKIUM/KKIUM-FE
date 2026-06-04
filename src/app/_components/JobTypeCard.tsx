@@ -7,6 +7,7 @@ export interface JobTypeCardProps extends Omit<React.ComponentProps<'section'>, 
   roleTypeName?: string;
   roleTypeDescription?: string;
   strengths?: readonly string[];
+  priority?: boolean;
 }
 
 const JOB_TYPE_BACKGROUND_IMAGE = '/job-type-background.svg';
@@ -15,6 +16,7 @@ export function JobTypeCard({
   roleTypeName = DEFAULT_HOME_JOB_TYPE_PROFILE.roleTypeName,
   roleTypeDescription = DEFAULT_HOME_JOB_TYPE_PROFILE.description,
   strengths = DEFAULT_HOME_JOB_TYPE_PROFILE.coreKeywords.slice(0, 4),
+  priority = false,
   className,
   ...props
 }: JobTypeCardProps) {
@@ -29,8 +31,9 @@ export function JobTypeCard({
         alt=""
         fill
         className="object-cover object-center"
-        sizes="384px"
-        priority={false}
+        sizes="(max-width: 1280px) 100vw, 384px"
+        priority={priority}
+        fetchPriority={priority ? 'high' : 'auto'}
       />
 
       <div className="absolute left-5 top-[26px] inline-flex w-80 items-start justify-between">
