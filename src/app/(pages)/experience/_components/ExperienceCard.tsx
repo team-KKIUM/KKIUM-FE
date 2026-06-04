@@ -94,6 +94,7 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
     const [isEditingTitle, setIsEditingTitle] = React.useState(false);
     const [isTitleSaving, setIsTitleSaving] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState('');
+    const [shouldRenderErrorDialog, setShouldRenderErrorDialog] = React.useState(false);
     const titleInputRef = React.useRef<HTMLInputElement>(null);
     const isCommittingTitleRef = React.useRef(false);
 
@@ -112,6 +113,12 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
       titleInput?.focus();
       titleInput?.setSelectionRange(titleInput.value.length, titleInput.value.length);
     }, [isEditingTitle]);
+
+    React.useEffect(() => {
+      if (errorMessage.length > 0) {
+        setShouldRenderErrorDialog(true);
+      }
+    }, [errorMessage]);
 
     const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
       onKeyDown?.(event);
@@ -243,9 +250,9 @@ export const ExperienceCard = React.forwardRef<HTMLElement, ExperienceCardProps>
             </div>
           </div>
         </article>
-        {errorMessage.length > 0 && (
+        {shouldRenderErrorDialog && (
           <ErrorDialog
-            open
+            open={errorMessage.length > 0}
             message={errorMessage}
             onOpenChange={(open) => {
               if (!open) {
