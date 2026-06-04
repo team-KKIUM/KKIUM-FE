@@ -17,7 +17,6 @@ KKIUM 은 흩어진 경험을 한곳으로 모아 AI와 함께 공고와의 매�
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/74cf2ac1-f64d-4591-9640-baec3f77eb8f" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/9d1a4d44-438a-41c3-99eb-cd04ca797511" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/ba0bb4c9-8119-49c9-a46b-e166dc3a6215" />
-<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/b39bb2d1-4bb7-4856-ac28-67b865b97a9b" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/a970037b-79df-40e4-bf47-1ff7f3b3f578" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/c8bea3f2-ef36-4972-a18f-c13a1dc4aa13" />
 <img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/8324756e-ba5f-4347-b9de-42011d96eae4" />
