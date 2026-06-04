@@ -31,3 +31,27 @@ export function isJdAnalysisInProgress(status: string | undefined) {
 
   return !isJdAnalysisTerminal(status);
 }
+
+export function hasRenderableJdAnalysisContent(
+  data:
+    | {
+        jdInfo?: {
+          mainResponsibilities?: string | null;
+          requiredQualifications?: string | null;
+          preferredQualifications?: string | null;
+        } | null;
+      }
+    | null
+    | undefined,
+) {
+  const jdInfo = data?.jdInfo;
+  if (!jdInfo) {
+    return false;
+  }
+
+  return [
+    jdInfo.mainResponsibilities,
+    jdInfo.requiredQualifications,
+    jdInfo.preferredQualifications,
+  ].some((value) => typeof value === 'string' && value.trim().length > 0);
+}

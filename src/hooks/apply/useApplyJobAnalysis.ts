@@ -4,6 +4,7 @@ import { skipToken, useQuery } from '@tanstack/react-query';
 
 import { getJdAnalysisWithMatch, getJdExperienceAnalysis } from '@/app/api/apply';
 import {
+  hasRenderableJdAnalysisContent,
   isJdAnalysisTerminal,
   resolveJdAnalysisStatus,
 } from '@/app/api/apply/jdAnalysisStatus';
@@ -33,19 +34,21 @@ export function useApplyJobAnalysis(jdId: JdId | null | undefined) {
   });
 
   const analysisStatus = resolveJdAnalysisStatus(analysisQuery.data);
+  const hasRenderableContent = hasRenderableJdAnalysisContent(analysisQuery.data);
+  const isAnalysisComplete = isJdAnalysisTerminal(analysisStatus);
 
   const isAnalysisLoading =
     jdId != null &&
-    (!hasApiAccess ||
-      analysisQuery.isPending ||
-      analysisQuery.isFetching ||
-      !analysisQuery.data ||
-      !isJdAnalysisTerminal(analysisStatus));
+    !isAnalysisComplete &&
+    !hasRenderableContent &&
+    (!hasApiAccess || analysisQuery.isPending || !analysisQuery.data);
 
   return {
     ...analysisQuery,
     analysisStatus,
     isAnalysisLoading,
+    hasRenderableContent,
+    isAnalysisComplete,
   };
 }
 

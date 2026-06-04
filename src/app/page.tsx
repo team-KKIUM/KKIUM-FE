@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { getJdAnalysisWithMatch } from '@/app/api/apply';
+import { applyJobPostingQueryKeys } from '@/hooks/apply/useApplyJobPostings';
 
 import { BubbleChart } from '@/app/_components/BubbleChart';
 import { ExperienceUpdateCard } from '@/app/_components/ExperienceUpdateCard';
@@ -26,6 +30,7 @@ function formatTodayLabelKo(date: Date) {
 
 export default function Home() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: homeData } = useHomeDashboard(true);
   const [currentPostingIndex, setCurrentPostingIndex] = useState(0);
   const todayLabel = formatTodayLabelKo(new Date());
@@ -41,6 +46,18 @@ export default function Home() {
   const targetApplyHref =
     targetJdId == null ? '/apply/list' : `/apply?jdid=${encodeURIComponent(String(targetJdId))}`;
   const hasAnyExperience = (homeData?.totalExperienceCount ?? 0) > 0;
+
+  useEffect(() => {
+    if (targetJdId == null) {
+      return;
+    }
+
+    const jdId = String(targetJdId);
+    void queryClient.prefetchQuery({
+      queryKey: [...applyJobPostingQueryKeys.detail(jdId), 'analysis'],
+      queryFn: () => getJdAnalysisWithMatch(jdId),
+    });
+  }, [queryClient, targetJdId]);
 
   const handlePrevPosting = () => {
     if (!canGoPrev) return;
