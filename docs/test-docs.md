@@ -1,4 +1,7 @@
-# Jest test 관련 docs 
+# Jest test 관련 docs
+
+> **전체 테스트 구성(Unit + E2E)** 은 [`test-structure.md`](./test-structure.md)를 참고하세요.  
+> 이 파일은 **Unit(Apply API · Apply 유틸 · Home)** 시나리오 상세 표만 유지합니다.
 
 이 프로젝트는 CodeBuild `build` 단계에서 **`pnpm test:unit` → `pnpm build`** 순서로 실행합니다.  
 유닛 테스트가 실패하면 Next.js 빌드와 배포가 진행되지 않습니다.
@@ -35,15 +38,16 @@ pnpm build              # CodeBuild와 동일한 빌드 순서로 확인 시 tes
 |------|----------------|------|
 | Apply (API) | 3 | 분석 상태·Zod 스키마·자소서 문항 PATCH/DELETE |
 | Apply (페이지 유틸) | 10 | 매핑·저장 요청·필드 제한 |
-| Home | 4 | 대시보드 스키마·기간·직무 유형·궁합 |
-| **합계** | **17 suites / 52 tests** | 순수 함수·스키마·API 클라이언트(mock) 위주 |
+| Experience | 9 | 추가/수정 매핑·검증·훅(jsdom) |
+| Home / 공통 | 4 | 대시보드 스키마·기간·직무 유형·궁합 |
+| **합계** | **26 suites / 98 tests** | 순수 함수·스키마·API 클라이언트(mock) 위주 |
 
 브라우저/DOM·API 호출 오케스트레이션(`copyToClipboard`, `saveApplyCoverLetter` 등)은 유닛 테스트 대상에서 제외했습니다.  
 자소서 문항 수정·삭제는 `api.patch` / `api.delete`를 mock하여 **요청 URL·body·사전 검증**만 검증합니다.
 
 ---
 
-## Apply -API 관련 
+## Apply - API 관련
 
 ### `src/app/api/apply/jdAnalysisStatus.test.ts`
 
@@ -82,10 +86,9 @@ pnpm test:unit -- resumeQuestionApi
 
 ---
 
-## Apply - 페이지 관련 
+## Apply - 페이지 관련
 
 ### `buildSaveResumeRequest.test.ts`
-
 
 | 함수 | 기대 동작 |
 |------|-----------|
@@ -95,14 +98,12 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `limitJobPostingFieldText.test.ts`
 
-
 | 함수 | 기대 동작 |
 |------|-----------|
 | `limitJobPostingBodyText` | 공고 본문을 `JOB_POSTING_BODY_MAX_LENGTH`(10,000자)로 자름 |
 | `limitJobPostingCoverQuestionText` | 자소서 문항을 `JOB_POSTING_COVER_QUESTION_MAX_LENGTH`(300자)로 자름 |
 
 ### `mapJdAnalysisToView.test.ts`
-
 
 | 테스트 | 기대 동작 |
 |--------|-----------|
@@ -111,13 +112,11 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `mapJdAnalysisExperienceToApplyMatch.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | API 경험 타입(`CAREER` 등) → UI 카테고리(`career`). TECH/COMPETENCY 태그 분리, `usageFitScore` → `matchScore` |
 
 ### `mapJdExperienceAnalysisToView.test.ts`
-
 
 | 기대 동작 |
 |-----------|
@@ -125,13 +124,11 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `mapJdResumeToCoverLetterQuestions.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | `orderNum` 정렬. 문항 제목·prompt·답변·AI 초안 trim. `resume` null이면 `[]` |
 
 ### `mapJdResumeToJobPostingSnapshot.test.ts`
-
 
 | 기대 동작 |
 |-----------|
@@ -139,20 +136,17 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `mapExperienceCardToApplyMatch.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | 경험 카드 API 응답 → 지원 화면 경험 매칭 카드 모델 (`matchScore` 0, 빈 analysis) |
 
 ### `mapResumeQuestionExperience.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | 자소서 문항별 경험 → 커버레터 선택 UI 모델. 기간·타입·`usageFitScore` 매핑 |
 
 ### `enrichResumeQuestionExperiences.test.ts`
-
 
 | 기대 동작 |
 |-----------|
@@ -164,7 +158,6 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `src/app/api/home/types.test.ts`
 
-
 | 테스트 | 기대 동작 |
 |--------|-----------|
 | 대시보드 parse | `null` 필드 → 빈 문자열, 숫자 문자열 coerce, `targetJds`·분포 배열 정규화 |
@@ -172,20 +165,17 @@ pnpm test:unit -- resumeQuestionApi
 
 ### `src/app/_utils/formatRecruitmentPeriod.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | 시작·종료 모두 없음 → `상시 채용`. 둘 다 있으면 `YYYY.MM.DD ~ YYYY.MM.DD`. 한쪽만 있으면 해당 날짜만 |
 
 ### `src/app/_constants/jobTypeCardMappingData.test.ts`
 
-
 | 기대 동작 |
 |-----------|
 | `typeName` 없음/빈 값/알 수 없는 값 → 기본 프로필(`목표 설계자`). `정밀 분석가` 등 알려진 이름 → 해당 프로필 |
 
 ### `src/app/_utils/calculateNameCompatibility.test.ts`
-
 
 | 함수 | 기대 동작 |
 |------|-----------|
