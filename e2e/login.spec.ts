@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+// dev 서버 병렬 부하에서 로그인 화면 로딩과 보호 라우트 리다이렉트가 불안정해 순차 실행한다.
 test.describe.configure({ mode: 'serial' });
 
 const AUTH_REDIRECT_TIMEOUT = 15_000;
