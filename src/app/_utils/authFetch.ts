@@ -43,6 +43,15 @@ interface SocialLoginResponse {
   data?: SocialLoginData;
 }
 
+type OAuthRedirectType = 'LOCAL' | 'PROD';
+
+const LOCAL_OAUTH_REDIRECT_HOSTNAMES = new Set([
+  'localhost',
+  '127.0.0.1',
+  '::1',
+  '[::1]',
+]);
+
 function buildApiUrl(path: string) {
   if (!API_BASE_URL) {
     throw new Error('NEXT_PUBLIC_API_BASE_URL is not set.');
@@ -117,6 +126,17 @@ export function resolveOAuthRedirectUri(provider: 'google' | 'kakao'): string {
   return `${window.location.origin}/oauth/${provider}/callback`;
 }
 
+function resolveOAuthRedirectType(provider: 'google' | 'kakao'): OAuthRedirectType {
+  try {
+    const redirectUri = resolveOAuthRedirectUri(provider);
+    const hostname = new URL(redirectUri).hostname;
+
+    return LOCAL_OAUTH_REDIRECT_HOSTNAMES.has(hostname) ? 'LOCAL' : 'PROD';
+  } catch {
+    return 'PROD';
+  }
+}
+
 const inflightSocialLogins = new Map<string, Promise<SocialLoginResult>>();
 
 export function requestSocialLoginOnce(provider: 'google' | 'kakao', code: string) {
@@ -142,6 +162,7 @@ export async function requestSocialLogin(provider: 'google' | 'kakao', code: str
   }
 
   loginUrl.searchParams.set('code', normalizedCode);
+  loginUrl.searchParams.set('redirectType', resolveOAuthRedirectType(provider));
 
   const response = await fetch(loginUrl.toString(), {
     method: 'POST',
